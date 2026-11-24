@@ -15,6 +15,7 @@
 #include <hive/chain/detail/state/decline_voting_rights_request_object.hpp>
 #include <hive/chain/detail/state/reward_fund_object.hpp>
 #include <hive/chain/detail/state/recurrent_transfer_object.hpp>
+#include <hive/chain/detail/state/nft_object_multiindex.hpp>
 #include <hive/chain/detail/state/dhf_objects.hpp>
 #include <hive/chain/detail/state/dhf_objects_multiindex.hpp>
 #include <hive/chain/detail/state/transaction_object.hpp>
@@ -163,6 +164,7 @@ api_dynamic_global_property_object::api_dynamic_global_property_object( const dy
   participation_count( o.get_participation_count() ),
   last_irreversible_block_num( db.get_last_irreversible_block_num()),
   vote_power_reserve_rate( o.get_vote_power_reserve_rate() ),
+  voting_mana_regeneration_seconds( o.get_voting_mana_regeneration_seconds() ),
   delegation_return_period( o.get_delegation_return_period() ),
   reverse_auction_seconds( o.get_reverse_auction_seconds() ),
   available_account_subsidies( o.get_available_account_subsidies() ),
@@ -451,5 +453,55 @@ api_recurrent_transfer_object::api_recurrent_transfer_object( const recurrent_tr
   remaining_executions( o.remaining_executions ),
   pair_id( o.pair_id )
 {}
+
+// api_nft_object constructor
+api_nft_object::api_nft_object( const nft_object& o, const database& db ):
+  id( o.get_id() ),
+  author( db.get_account( o.get_creator() ).get_name() ),
+  permlink( to_string( o.get_permlink() ) ),
+  mint_time( o.get_mint_time() ),
+  editions( o.get_editions() ),
+  royalty( o.get_royalty() ),
+  license_size( o.get_license_size() ),
+  license_sha256( o.get_license_sha256() ),
+  reserve( o.get_reserve() ),
+  reserve_next( db.find_nft_reserve_copy( o ) ),
+  reserve_listed( o.is_reserve_listed( db.head_block_time() ) ),
+  reserve_price( o.get_reserve_price() ),
+  reserve_expiration( o.get_reserve_expiration() )
+{
+  nft_id = "@" + std::string( author ) + "/" + permlink + "/0";
+}
+
+// api_nft_edition_object constructor
+api_nft_edition_object::api_nft_edition_object( const nft_edition_object& o, const database& db ):
+  nft( o.get_nft() ),
+  edition( o.get_edition() ),
+  owner( db.get_account( o.get_owner() ).get_name() ),
+  acquired( o.get_acquired() ),
+  listed( o.is_listed( db.head_block_time() ) ),
+  price( o.get_price() ),
+  expiration( o.get_expiration() )
+{
+  const nft_object& minted = db.get< nft_object, by_id >( o.get_nft() );
+  author = db.get_account( minted.get_creator() ).get_name();
+  permlink = to_string( minted.get_permlink() );
+  nft_id = "@" + std::string( author ) + "/" + permlink + "/" + std::to_string( edition );
+  burned = owner == HIVE_NULL_ACCOUNT;
+}
+
+// api_nft_edition_object constructor for a copy without object: its creator's, unoffered, since the mint
+api_nft_edition_object::api_nft_edition_object( const nft_object& o, uint16_t _edition, const database& db ):
+  nft( o.get_id() ),
+  author( db.get_account( o.get_creator() ).get_name() ),
+  permlink( to_string( o.get_permlink() ) ),
+  edition( _edition ),
+  owner( author ),
+  acquired( o.get_mint_time() ),
+  listed( false ),
+  price( asset( 0, HBD_SYMBOL ) )
+{
+  nft_id = "@" + std::string( author ) + "/" + permlink + "/" + std::to_string( edition );
+}
 
 } } } // hive::plugins::database_api

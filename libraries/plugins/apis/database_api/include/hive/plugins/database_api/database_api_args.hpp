@@ -9,6 +9,7 @@
 
 #define DATABASE_API_DEFAULT_QUERY_LIMIT 0
 #define DATABASE_API_SINGLE_QUERY_LIMIT 1000
+#define DATABASE_API_NFT_FIND_LIMIT 100 // NFT ids per find_nfts call
 
 namespace hive { namespace plugins { namespace database_api {
 
@@ -510,6 +511,60 @@ struct find_recurrent_transfers_return
 };
 
 
+/* NFTs (HF32) */
+
+typedef void_type get_nft_params_args;
+
+/// What nft_operation is checked against right now.
+struct get_nft_params_return
+{
+  asset             mint_fee_per_edition; //nft_mint carries this times its number of copies in its fee field
+  uint16_t          max_editions = 0; //copies per NFT
+  uint16_t          max_royalty = 0; //basis points
+  uint32_t          max_license_length = 0; //bytes of license text
+  vector< asset_symbol_type > price_symbols; //the assets an offer can be made in
+};
+
+struct find_nfts_args
+{
+  /**
+    * At most DATABASE_API_NFT_FIND_LIMIT ids. "@author/permlink/0" asks for the NFT, with its reserve,
+    * "@author/permlink/N" for the NFT with its copy N (list_nft_editions pages through all the copies
+    * of an NFT). An id that names nothing is left out of the result, so the call also tells which posts
+    * are minted.
+    */
+  vector< string > nfts;
+};
+
+struct find_nfts_return
+{
+  vector< api_nft_object >         nfts; //each NFT once, in the order first asked
+  vector< api_nft_edition_object > editions; //each copy asked for once, in the order asked
+};
+
+/// order by_creator, start [author, permlink]
+typedef list_object_args_type list_nfts_args;
+
+struct list_nfts_return
+{
+  vector< api_nft_object > nfts;
+};
+
+/**
+  * order by_permlink: the copies of one NFT in number order, from start "@author/permlink/N" (N >= 1),
+  * each copy once whether or not it was ever offered or moved.
+  * order by_account: copies by owner, start [owner, "@author/permlink/N"], that copy included (the last
+  * copy of the previous page), or [owner, ""] for the first page. Only copies with an object are
+  * listed: the others are in the reserve of their creator (api_nft_object::reserve, see list_nfts).
+  */
+typedef list_object_args_type list_nft_editions_args;
+
+struct list_nft_editions_return
+{
+  vector< api_nft_edition_object > editions;
+};
+
+
 /* Transactions */
 
 struct get_transaction_hex_args
@@ -812,6 +867,21 @@ FC_REFLECT( hive::plugins::database_api::find_recurrent_transfers_return,
 
 FC_REFLECT( hive::plugins::database_api::find_recurrent_transfers_args,
   (from) )
+
+FC_REFLECT( hive::plugins::database_api::get_nft_params_return,
+  (mint_fee_per_edition)(max_editions)(max_royalty)(max_license_length)(price_symbols) )
+
+FC_REFLECT( hive::plugins::database_api::find_nfts_args,
+  (nfts) )
+
+FC_REFLECT( hive::plugins::database_api::find_nfts_return,
+  (nfts)(editions) )
+
+FC_REFLECT( hive::plugins::database_api::list_nfts_return,
+  (nfts) )
+
+FC_REFLECT( hive::plugins::database_api::list_nft_editions_return,
+  (editions) )
 
 FC_REFLECT( hive::plugins::database_api::get_transaction_hex_args,
   (trx) )

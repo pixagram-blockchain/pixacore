@@ -318,6 +318,31 @@ namespace chain {
       const savings_withdraw_object& get_savings_withdraw(  const account_name_type& owner, uint32_t request_id )const;
       const savings_withdraw_object* find_savings_withdraw( const account_name_type& owner, uint32_t request_id )const;
 
+      /// @name Native NFTs (HF32), defined in database_nft.cpp
+      /// @{
+      /// An NFT is the minted root post (creator, permlink). Null when the post was not minted.
+      const nft_object*         find_nft( const account_id_type& creator, const std::string& permlink )const;
+      const nft_object*         find_nft( const account_name_type& creator, const std::string& permlink )const;
+      /// Editions are numbered from 1. Null when the edition has no object: either it does not exist
+      /// (above nft.get_editions()) or it was never offered and never left the creator, who owns it.
+      const nft_edition_object* find_nft_edition( const nft_object& nft, uint16_t edition )const;
+      /// The copy a sale from the reserve gives: the lowest-numbered copy without an object. 0 when the
+      /// reserve is empty.
+      uint16_t                  find_nft_reserve_copy( const nft_object& nft )const;
+
+      /// The limits consensus applies to nft_operation at the current hardfork. They are answered
+      /// here, in one place, so that a later hardfork can change one without touching the evaluator.
+      /// Most copies one minted post can have.
+      uint16_t                  get_nft_max_editions()const;
+      /// Highest royalty that can be set at mint, in basis points.
+      uint16_t                  get_nft_max_royalty()const;
+      /// Tells if an NFT can be priced in given asset (PXS only).
+      bool                      is_nft_price_symbol( const asset_symbol_type& symbol )const;
+      /// The fee, in PXS, that minting given number of editions costs: PIXA_NFT_MINT_FEE_PER_EDITION
+      /// (1.000 PXS) per edition.
+      HBD_asset                 get_nft_mint_fee( uint16_t editions )const;
+      /// @}
+
       const dynamic_global_property_object&  get_dynamic_global_properties()const;
       uint32_t                               get_node_skip_flags()const;
       void                                   set_node_skip_flags( uint32_t skip_flags );

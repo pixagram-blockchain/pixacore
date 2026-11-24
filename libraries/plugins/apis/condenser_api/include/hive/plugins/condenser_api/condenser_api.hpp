@@ -94,7 +94,9 @@ struct api_operation_object
 
 struct api_account_object
 {
-  api_account_object( const database_api::api_account_object& a ) :
+  /// voting_mana_regeneration_seconds: the refill time of the voting bar in force (a global property
+  /// since hardfork 32), which the legacy voting_power field is computed with
+  api_account_object( const database_api::api_account_object& a, uint32_t voting_mana_regeneration_seconds ) :
     id( a.id ),
     name( a.name ),
     owner( a.owner ),
@@ -152,7 +154,7 @@ struct api_account_object
     open_recurrent_transfers( a.open_recurrent_transfers ),
     governance_vote_expiration_ts( a.governance_vote_expiration_ts )
   {
-    voting_power = _compute_voting_power(a);
+    voting_power = _compute_voting_power( a, voting_mana_regeneration_seconds );
     proxied_vsf_votes.insert( proxied_vsf_votes.end(), a.proxied_vsf_votes.begin(), a.proxied_vsf_votes.end() );
 
     if( a.delayed_votes.valid() )
@@ -161,7 +163,7 @@ struct api_account_object
 
   api_account_object(){}
 
-  uint16_t _compute_voting_power( const database_api::api_account_object& a );
+  uint16_t _compute_voting_power( const database_api::api_account_object& a, uint32_t voting_mana_regeneration_seconds );
 
   account_id_type   id;
 
@@ -248,8 +250,8 @@ struct api_account_object
 struct extended_account : public api_account_object
 {
   extended_account(){}
-  extended_account( const database_api::api_account_object& a ) :
-    api_account_object( a ) {}
+  extended_account( const database_api::api_account_object& a, uint32_t voting_mana_regeneration_seconds ) :
+    api_account_object( a, voting_mana_regeneration_seconds ) {}
 
   legacy_asset                            vesting_balance;  /// convert vesting_shares to vesting hive
   share_type                              reputation = 0;
@@ -296,6 +298,7 @@ struct extended_dynamic_global_properties
     participation_count( o.participation_count ),
     last_irreversible_block_num( o.last_irreversible_block_num ),
     vote_power_reserve_rate( o.vote_power_reserve_rate ),
+    voting_mana_regeneration_seconds( o.voting_mana_regeneration_seconds ),
     delegation_return_period( o.delegation_return_period ),
     reverse_auction_seconds( o.reverse_auction_seconds ),
     available_account_subsidies( o.available_account_subsidies ),
@@ -347,6 +350,7 @@ struct extended_dynamic_global_properties
   uint32_t          last_irreversible_block_num = 0;
 
   uint32_t          vote_power_reserve_rate = HIVE_INITIAL_VOTE_POWER_RATE;
+  uint32_t          voting_mana_regeneration_seconds = HIVE_VOTING_MANA_REGENERATION_SECONDS; //refill time of the voting bar (HF32)
   uint32_t          delegation_return_period = HIVE_DELEGATION_RETURN_PERIOD_HF0;
 
   uint64_t          reverse_auction_seconds = 0;
@@ -1067,7 +1071,7 @@ FC_REFLECT( hive::plugins::condenser_api::extended_dynamic_global_properties,
         (pending_rewarded_vesting_shares)(pending_rewarded_vesting_hive)
         (hbd_interest_rate)(hbd_print_rate)
         (maximum_block_size)(current_aslot)(recent_slots_filled)(participation_count)(last_irreversible_block_num)
-        (vote_power_reserve_rate)(delegation_return_period)(reverse_auction_seconds)(available_account_subsidies)(hbd_stop_percent)(hbd_start_percent)
+        (vote_power_reserve_rate)(voting_mana_regeneration_seconds)(delegation_return_period)(reverse_auction_seconds)(available_account_subsidies)(hbd_stop_percent)(hbd_start_percent)
         (next_maintenance_time)(last_budget_time)(next_daily_maintenance_time)(content_reward_percent)(vesting_reward_percent)(proposal_fund_percent)(dhf_interval_ledger)
         (downvote_pool_percent)(current_remove_threshold)(early_voting_seconds)(mid_voting_seconds)
         (max_consecutive_recurrent_transfer_failures)(max_recurrent_transfer_end_date)(min_recurrent_transfers_recurrence)

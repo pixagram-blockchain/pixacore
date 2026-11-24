@@ -4125,7 +4125,8 @@
                                     "total_vesting_shares": "313853921114.393221 VESTS",
                                     "vesting_reward_percent": 1500,
                                     "virtual_supply": "660717201.972 HIVE",
-                                    "vote_power_reserve_rate": 10
+                                    "vote_power_reserve_rate": 10,
+                                    "voting_mana_regeneration_seconds": 432000
                                 }
                             }
                         }
@@ -7981,7 +7982,8 @@
                                         "nai": "@@000000021",
                                         "precision": 3
                                     },
-                                    "vote_power_reserve_rate": 10
+                                    "vote_power_reserve_rate": 10,
+                                    "voting_mana_regeneration_seconds": 432000
                                 }
                             }
                         }
@@ -16707,6 +16709,10 @@
                     "vote_power_reserve_rate": {
                         "type": "integer",
                         "description": "The rate at which vote power reserves are maintained or replenished."
+                    },
+                    "voting_mana_regeneration_seconds": {
+                        "type": "integer",
+                        "description": "Seconds an empty voting bar takes to refill: 432000 (5 days) until hardfork 32, 576000 (6 days 16 hours, 15% a day) after. A full vote costs 86400 / (vote_power_reserve_rate * voting_mana_regeneration_seconds) of the bar."
                     }
                 },
                 "required": [
@@ -16742,7 +16748,8 @@
                     "time",
                     "total_pow",
                     "vesting_reward_percent",
-                    "vote_power_reserve_rate"
+                    "vote_power_reserve_rate",
+                    "voting_mana_regeneration_seconds"
                 ]
             },
             "dynamic_global_properties_default": {

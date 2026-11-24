@@ -1,0 +1,32 @@
+syntax = "proto2";
+
+import "asset.proto";
+
+package hive.protocol.buffers;
+
+/* Related to nft_operation (nft_buy action).
+ * Generated when a listed NFT edition is bought: the buyer paid the price and became the owner,
+ * the author received the royalty and the seller received the rest.
+ */
+message nft_sold {
+  // @param {string} seller - Previous owner of the edition (receiver of price minus royalty).
+  required string seller = 1;
+
+  // @param {string} buyer - New owner of the edition (payer of price).
+  required string buyer = 2;
+
+  // @param {string} author - Creator of the NFT (author of the minted post).
+  required string author = 3;
+
+  // @param {string} permlink - Permlink of the minted post.
+  required string permlink = 4;
+
+  // @param {number} edition - Number of the edition that changed owner.
+  required uint32 edition = 5;
+
+  // @param {asset} price - (PXS) Amount paid by the buyer.
+  required asset  price = 6;
+
+  // @param {asset} royalty - (same asset as price) Part of the price that went to the author (can be zero).
+  required asset  royalty = 7;
+}

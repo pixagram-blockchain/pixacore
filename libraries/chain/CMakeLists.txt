@@ -28,6 +28,7 @@ set( SOURCES
              database_market.cpp
              database_delegation.cpp
              database_dhf.cpp
+             database_nft.cpp
              database_rc_core.cpp
              database_rc_delegation.cpp
 
@@ -42,6 +43,7 @@ set( SOURCES
              hive_evaluator_transfer.cpp
              hive_evaluator_account.cpp
              hive_evaluator_social.cpp
+             nft_evaluator.cpp
              hive_objects.cpp
 
              witness_schedule.cpp

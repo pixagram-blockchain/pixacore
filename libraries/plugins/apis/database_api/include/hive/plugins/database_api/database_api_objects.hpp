@@ -50,6 +50,8 @@ namespace hive { namespace chain {
   class proposal_object;
   class proposal_vote_object;
   class recurrent_transfer_object;
+  class nft_object;
+  class nft_edition_object;
   class full_block_type;
   class full_transaction_type;
 
@@ -215,6 +217,7 @@ struct api_dynamic_global_property_object
   uint8_t                         participation_count                 = 0;
   uint32_t                        last_irreversible_block_num         = 0;
   uint32_t                        vote_power_reserve_rate             = 0;
+  uint32_t                        voting_mana_regeneration_seconds    = 0; //refill time of the voting bar (HF32)
   uint32_t                        delegation_return_period            = 0;
   uint64_t                        reverse_auction_seconds             = 0;
   int64_t                         available_account_subsidies         = 0;
@@ -602,6 +605,50 @@ struct api_recurrent_transfer_object
 };
 
 
+/// A minted post: the terms fixed at mint, which never change, and the reserve of its creator.
+struct api_nft_object
+{
+  api_nft_object() = default;
+  api_nft_object( const nft_object& o, const database& db );
+
+  nft_id_type       id;
+  string            nft_id; //"@author/permlink/0"
+  account_name_type author; //creator of the NFT (author of the minted post)
+  string            permlink;
+  time_point_sec    mint_time;
+  uint16_t          editions = 0; //number of copies, numbered from 1
+  uint16_t          royalty = 0; //basis points of a sale price paid to the author
+  uint32_t          license_size = 0; //bytes of the license text, which the mint operation carries
+  fc::sha256        license_sha256; //SHA-256 of that text
+  uint16_t          reserve = 0; //copies still with the author since the mint, without an offer of their own
+  uint16_t          reserve_next = 0; //the copy a buyer of copy 0 gets now; 0 when the reserve is empty
+  bool              reserve_listed = false; //true when copy 0 can be bought at head block time
+  asset             reserve_price; //the author's price for one copy of the reserve; meaningful only when listed
+  time_point_sec    reserve_expiration; //the reserve offer ends at this time; meaningful only when listed
+};
+
+/// One copy of a minted post: who owns it now and whether it can be bought.
+struct api_nft_edition_object
+{
+  api_nft_edition_object() = default;
+  api_nft_edition_object( const nft_edition_object& o, const database& db );
+  /// a copy that has no object: never offered nor moved, so still its creator's since the mint
+  api_nft_edition_object( const nft_object& nft, uint16_t edition, const database& db );
+
+  string            nft_id; //"@author/permlink/N"
+  nft_id_type       nft;
+  account_name_type author;
+  string            permlink;
+  uint16_t          edition = 0;
+  account_name_type owner; //"null" once the copy is burned
+  bool              burned = false; //the copy was given to the null account
+  time_point_sec    acquired; //when the owner got the edition
+  bool              listed = false; //true when it can be bought at head block time
+  asset             price; //asking price; meaningful only when listed
+  time_point_sec    expiration; //the offer ends at this time; meaningful only when listed
+};
+
+
 struct order
 {
   price                order_price;
@@ -694,7 +741,7 @@ FC_REFLECT( hive::plugins::database_api::api_dynamic_global_property_object,
           (total_vesting_fund_hive)(total_vesting_shares)(pending_rewarded_vesting_shares)(pending_rewarded_vesting_hive)
           (hbd_interest_rate)(hbd_print_rate)(maximum_block_size)
           (current_aslot)(recent_slots_filled)(participation_count)(last_irreversible_block_num)
-          (vote_power_reserve_rate)(delegation_return_period)(reverse_auction_seconds)
+          (vote_power_reserve_rate)(voting_mana_regeneration_seconds)(delegation_return_period)(reverse_auction_seconds)
           (available_account_subsidies)(hbd_stop_percent)(hbd_start_percent)(next_maintenance_time)
           (last_budget_time)(next_daily_maintenance_time)(content_reward_percent)(vesting_reward_percent)(proposal_fund_percent)
           (dhf_interval_ledger)(downvote_pool_percent)(current_remove_threshold)(early_voting_seconds)(mid_voting_seconds)
@@ -869,3 +916,10 @@ FC_REFLECT( hive::plugins::database_api::order, (order_price)(real_price)(hive)(
 
 FC_REFLECT( hive::plugins::database_api::order_book, (asks)(bids) );
 FC_REFLECT(hive::plugins::database_api::api_recurrent_transfer_object, (id)(trigger_date)(from)(to)(amount)(memo)(recurrence)(consecutive_failures)(remaining_executions)(pair_id))
+
+FC_REFLECT( hive::plugins::database_api::api_nft_object,
+          (id)(nft_id)(author)(permlink)(mint_time)(editions)(royalty)(license_size)(license_sha256)
+          (reserve)(reserve_next)(reserve_listed)(reserve_price)(reserve_expiration) )
+
+FC_REFLECT( hive::plugins::database_api::api_nft_edition_object,
+          (nft_id)(nft)(author)(permlink)(edition)(owner)(burned)(acquired)(listed)(price)(expiration) )

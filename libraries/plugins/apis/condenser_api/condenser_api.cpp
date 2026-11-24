@@ -374,7 +374,8 @@ namespace detail
       auto itr = idx.find( name );
       if ( itr != idx.end() )
       {
-        results.emplace_back( extended_account( database_api::api_account_object( *itr, _db, _metadata_plugin, delayed_votes_active ) ) );
+        results.emplace_back( extended_account( database_api::api_account_object( *itr, _db, _metadata_plugin, delayed_votes_active ),
+          _db.get_dynamic_global_properties().get_voting_mana_regeneration_seconds() ) );
 
         if(_reputation_api)
         {
@@ -415,7 +416,8 @@ namespace detail
 
       if( itr )
       {
-        result.push_back( api_account_object( database_api::api_account_object( *itr, _db, _metadata_plugin, delayed_votes_active ) ) );
+        result.push_back( api_account_object( database_api::api_account_object( *itr, _db, _metadata_plugin, delayed_votes_active ),
+          _db.get_dynamic_global_properties().get_voting_mana_regeneration_seconds() ) );
       }
       else
       {
@@ -1164,7 +1166,8 @@ namespace detail
 
 } // detail
 
-uint16_t api_account_object::_compute_voting_power( const database_api::api_account_object& a )
+uint16_t api_account_object::_compute_voting_power( const database_api::api_account_object& a,
+  uint32_t voting_mana_regeneration_seconds )
 {
   if( a.voting_manabar.last_update_time < HIVE_HARDFORK_0_20_TIME )
     return (uint16_t) a.voting_manabar.current_mana;
@@ -1179,13 +1182,16 @@ uint16_t api_account_object::_compute_voting_power( const database_api::api_acco
   //
   // Let t1 = last_vote_time, t2 = last_update_time
   // vp_t2 = HIVE_100_PERCENT * current_mana / vests
-  // vp_t1 = vp_t2 - HIVE_100_PERCENT * (t2 - t1) / HIVE_VOTING_MANA_REGENERATION_SECONDS
+  // vp_t1 = vp_t2 - HIVE_100_PERCENT * (t2 - t1) / voting_mana_regeneration_seconds
+  //
+  // The refill time is the one in force now: for an account whose last update came before hardfork 32
+  // and whose last vote is older still, the value is an approximation, as this legacy field always was.
   //
 
   uint32_t t1 = a.last_vote_time.sec_since_epoch();
   uint32_t t2 = a.voting_manabar.last_update_time;
   uint64_t dt = (t2 > t1) ? (t2 - t1) : 0;
-  uint64_t vp_dt = HIVE_100_PERCENT * dt / HIVE_VOTING_MANA_REGENERATION_SECONDS;
+  uint64_t vp_dt = HIVE_100_PERCENT * dt / voting_mana_regeneration_seconds;
 
   uint128_t vp_t2 = HIVE_100_PERCENT;
   vp_t2 *= a.voting_manabar.current_mana;

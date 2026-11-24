@@ -820,6 +820,52 @@ struct declined_voting_rights_operation : public virtual_operation
   account_name_type account;//user who decided to decline his voting rights
 };
 
+/**
+  * Related to nft_operation (nft_buy action).
+  * Generated when a listed copy of an NFT is bought: the buyer paid the price and became the owner,
+  * the creator of the NFT received the royalty and the seller received the rest.
+  * The royalty is zero when the seller is the creator or when the NFT was minted without royalty.
+  * @see nft_royalty_operation
+  */
+struct nft_sold_operation : public virtual_operation
+{
+  nft_sold_operation() = default;
+  nft_sold_operation( const account_name_type& _seller, const account_name_type& _buyer, const account_name_type& _author,
+    const string& _permlink, uint16_t _edition, const asset& _price, const asset& _royalty )
+    : seller( _seller ), buyer( _buyer ), author( _author ), permlink( _permlink ), edition( _edition ),
+      price( _price ), royalty( _royalty )
+  {}
+
+  account_name_type seller; //previous owner of the edition (receiver of price minus royalty)
+  account_name_type buyer; //new owner of the edition (payer of price)
+  account_name_type author; //creator of the NFT (author of minted post)
+  string            permlink; //permlink of minted post
+  uint16_t          edition = 1; //number of the edition that changed owner
+  asset             price; //(PXS) amount paid by buyer
+  asset             royalty; //(same asset as price) part of price that went to author instead of seller (can be zero)
+};
+
+/**
+  * Related to nft_operation (nft_buy action).
+  * Generated next to nft_sold_operation when the sale paid a nonzero royalty to the creator of the NFT.
+  * @see nft_sold_operation
+  */
+struct nft_royalty_operation : public virtual_operation
+{
+  nft_royalty_operation() = default;
+  nft_royalty_operation( const account_name_type& _creator, const account_name_type& _seller, const account_name_type& _buyer,
+    const string& _permlink, uint16_t _edition, const asset& _royalty )
+    : creator( _creator ), seller( _seller ), buyer( _buyer ), permlink( _permlink ), edition( _edition ), royalty( _royalty )
+  {}
+
+  account_name_type creator; //creator of the NFT (receiver of royalty)
+  account_name_type seller; //previous owner of the edition (the royalty was taken from the price paid to him)
+  account_name_type buyer; //new owner of the edition
+  string            permlink; //permlink of minted post
+  uint16_t          edition = 1; //number of the edition that changed owner
+  asset             royalty; //(PXS) amount received by creator
+};
+
 } } //hive::protocol
 
 FC_REFLECT( hive::protocol::fill_convert_request_operation, (owner)(requestid)(amount_in)(amount_out) )
@@ -865,3 +911,5 @@ FC_REFLECT( hive::protocol::escrow_approved_operation, (from)(to)(agent)(escrow_
 FC_REFLECT( hive::protocol::escrow_rejected_operation, (from)(to)(agent)(escrow_id)(hbd_amount)(hive_amount)(fee) )
 FC_REFLECT( hive::protocol::proxy_cleared_operation, (account)(proxy) )
 FC_REFLECT( hive::protocol::declined_voting_rights_operation, (account) )
+FC_REFLECT( hive::protocol::nft_sold_operation, (seller)(buyer)(author)(permlink)(edition)(price)(royalty) )
+FC_REFLECT( hive::protocol::nft_royalty_operation, (creator)(seller)(buyer)(permlink)(edition)(royalty) )

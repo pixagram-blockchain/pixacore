@@ -9,6 +9,7 @@
 #include <hive/chain/detail/state/account_object_multiindex.hpp>
 #include <hive/chain/database.hpp>
 #include <hive/chain/detail/state/witness_objects_multiindex.hpp>
+#include <hive/chain/detail/state/nft_object_multiindex.hpp>
 
 namespace hive { namespace chain {
 
@@ -127,6 +128,37 @@ struct count_differential_operation_visitor
     return usage != 0;
   }
 
+  bool operator()( const nft_operation& op ) const
+  {
+    // nft_list and nft_transfer are charged for creating the object of the copy; a copy that has
+    // one already (it was offered or moved before) adds no state. The reserve, copy 0, never has one,
+    // and its offer is not charged for one.
+    const account_name_type* author = nullptr;
+    const std::string* permlink = nullptr;
+    uint16_t edition = 0;
+    if( op.action.which() == nft_action::tag< nft_list >::value )
+    {
+      const auto& a = op.action.get< nft_list >();
+      author = &a.author; permlink = &a.permlink; edition = a.edition;
+    }
+    else if( op.action.which() == nft_action::tag< nft_transfer >::value )
+    {
+      const auto& a = op.action.get< nft_transfer >();
+      author = &a.author; permlink = &a.permlink; edition = a.edition;
+    }
+    else
+    {
+      return false;
+    }
+
+    const nft_object* nft = _db.find_nft( *author, *permlink );
+    if( nft == nullptr || _db.find_nft_edition( *nft, edition ) == nullptr )
+      return false;
+
+    state_bytes_count += _w.nft_edition_size;
+    return true;
+  }
+
   // All other operations that don't need differential usage calculation
   bool operator()( const base_operation& ) const { return false; }
 };
@@ -182,10 +214,12 @@ struct count_operation_visitor
   const operation_exec_info& _e;
   const fc::time_point_sec _now;
   const bool _price_custom_data_by_length;
+  const int64_t _delegation_return_hours;
 
   count_operation_visitor( const state_object_size_info& w, const operation_exec_info& e, const fc::time_point_sec now,
-    bool price_custom_data_by_length = false )
-    : _w(w), _e(e), _now(now), _price_custom_data_by_length(price_custom_data_by_length) {}
+    bool price_custom_data_by_length = false, uint32_t delegation_return_period = HIVE_DELEGATION_RETURN_PERIOD_HF20 )
+    : _w(w), _e(e), _now(now), _price_custom_data_by_length(price_custom_data_by_length),
+      _delegation_return_hours( ( int64_t( delegation_return_period ) + 3600 - 1 ) / 3600 ) {} //rounded up to full hours
 
   int64_t get_authority_dynamic_size( const authority& auth )const
   {
@@ -289,8 +323,8 @@ struct count_operation_visitor
   {
     if( op.vesting_shares.amount > 0 )
       state_bytes_count += _w.delegate_vesting_shares_size;
-    else
-      state_bytes_count += _w.vesting_delegation_expiration_object_size;
+    else //the removed delegation is held for the return period: 5 days until HF32, 7 days after
+      state_bytes_count += _w.vesting_delegation_expiration_hourly_size * _delegation_return_hours;
     execution_time_count += _e.delegate_vesting_shares_time;
   }
 
@@ -538,6 +572,56 @@ struct count_operation_visitor
   {
   }
 
+  struct nft_action_count_visitor
+  {
+    typedef void result_type;
+
+    const count_operation_visitor& _op;
+
+    void operator()( const nft_mint& a )const
+    {
+      // the NFT stays forever; its copies get no object here, and the license is kept as a hash,
+      // so the state does not depend on the number of copies or on the length of the license
+      _op.state_bytes_count += _op._w.nft_mint_base_size
+        + _op._w.nft_mint_char_size * int64_t( a.permlink.size() );
+      _op.execution_time_count += _op._e.nft_mint_time
+        + _op._e.nft_mint_license_byte_time * int64_t( a.license.size() );
+    }
+    void operator()( const nft_list& a )const
+    {
+      // the first offer of a copy creates its object; when it exists already, the differential
+      // usage (count_differential_operation_visitor) takes that state back. The offer of the
+      // reserve (copy 0) only changes fields of the NFT.
+      if( a.edition != 0 )
+        _op.state_bytes_count += _op._w.nft_edition_size;
+      _op.execution_time_count += _op._e.nft_list_time;
+    }
+    void operator()( const nft_unlist& )const
+    {
+      _op.execution_time_count += _op._e.nft_unlist_time;
+    }
+    void operator()( const nft_buy& a )const
+    {
+      // moves liquid funds between accounts like a transfer does; a sale from the reserve (copy 0)
+      // also creates the object of the copy it gives
+      if( a.edition == 0 )
+        _op.state_bytes_count += _op._w.nft_edition_size;
+      _op.execution_time_count += _op._e.nft_buy_time;
+      _op.market_op_count++;
+    }
+    void operator()( const nft_transfer& )const
+    {
+      // like nft_list: the first move of a copy creates its object
+      _op.state_bytes_count += _op._w.nft_edition_size;
+      _op.execution_time_count += _op._e.nft_transfer_time;
+    }
+  };
+
+  void operator()( const nft_operation& op )const
+  {
+    op.action.visit( nft_action_count_visitor{ *this } );
+  }
+
   // Time critical or simply operations that were outdated when RC was started in HF20 - no extra cost
   void operator()( const recover_account_operation& op) const
   {
@@ -563,7 +647,6 @@ struct count_operation_visitor
   // Time critical or simply operations that were outdated when RC was started in HF20 - no extra cost
   void operator()( const pow_operation& ) const {}
   void operator()( const pow2_operation& ) const {}
-  void operator()( const reset_account_operation& ) const {}
   void operator()( const set_reset_account_operation& ) const {}
 
   // Virtual Ops (their costs, be it hived or HM, should be added to operations that spawn them)
@@ -582,10 +665,11 @@ void count_resources(
   const size_t size,
   count_resources_result& result,
   const fc::time_point_sec now,
-  bool price_custom_data_by_length
+  bool price_custom_data_by_length,
+  uint32_t delegation_return_period
 )
 {
-  resource_credits::count_resources( tx, size, result, now, price_custom_data_by_length );
+  resource_credits::count_resources( tx, size, result, now, price_custom_data_by_length, delegation_return_period );
 }
 
 void resource_credits::count_resources(
@@ -593,13 +677,14 @@ void resource_credits::count_resources(
   const size_t size,
   count_resources_result& result,
   const fc::time_point_sec now,
-  bool price_custom_data_by_length
+  bool price_custom_data_by_length,
+  uint32_t delegation_return_period
   )
 {
   static const state_object_size_info size_info;
   static const operation_exec_info exec_info;
   const int64_t tx_size = int64_t( size );
-  count_operation_visitor vtor( size_info, exec_info, now, price_custom_data_by_length );
+  count_operation_visitor vtor( size_info, exec_info, now, price_custom_data_by_length, delegation_return_period );
 
   for( const operation& op : tx.operations )
   {

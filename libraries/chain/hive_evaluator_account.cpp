@@ -29,7 +29,6 @@ HIVE_DEFINE_EVALUATOR( request_account_recovery )
 HIVE_DEFINE_EVALUATOR( recover_account )
 HIVE_DEFINE_EVALUATOR( change_recovery_account )
 HIVE_DEFINE_EVALUATOR( decline_voting_rights )
-HIVE_DEFINE_EVALUATOR( reset_account )
 HIVE_DEFINE_EVALUATOR( set_reset_account )
 
 void register_account_evaluators( evaluator_registry<operation>& registry )
@@ -44,7 +43,6 @@ void register_account_evaluators( evaluator_registry<operation>& registry )
   registry.register_evaluator< recover_account_evaluator                >();
   registry.register_evaluator< change_recovery_account_evaluator        >();
   registry.register_evaluator< decline_voting_rights_evaluator          >();
-  registry.register_evaluator< reset_account_evaluator                  >();
   registry.register_evaluator< set_reset_account_evaluator              >();
 }
 
@@ -628,18 +626,11 @@ void decline_voting_rights_evaluator::do_apply( const decline_voting_rights_oper
   }
 }
 
-void reset_account_evaluator::do_apply( const reset_account_operation& op )
-{
-  HIVE_CHAIN_UNREACHABLE_CODE_ASSERT( false && "Reset Account Operation is currently disabled.", "Operation disabled." );
-  //ABW: see discussion in https://github.com/steemit/steem/issues/240
-  //apparently the idea was never put in active use and it does not seem it ever will
-  //related member of account_object was removed as it was taking space with no purpose
-}
-
 void set_reset_account_evaluator::do_apply( const set_reset_account_operation& op )
 {
   HIVE_CHAIN_UNREACHABLE_CODE_ASSERT( false && "Set Reset Account Operation is currently disabled.", "Operation disabled." );
-  //related to reset_account_operation
+  //related to reset_account_operation (see discussion in https://github.com/steemit/steem/issues/240), a placeholder
+  //that was never put in active use; its operation number was given to nft_operation in HF32
 }
 
 } } // hive::chain

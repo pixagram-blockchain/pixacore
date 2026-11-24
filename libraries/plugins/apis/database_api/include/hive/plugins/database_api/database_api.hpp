@@ -111,6 +111,30 @@ class database_api
       ////////////////////////
       (find_recurrent_transfers)
 
+      //////////
+      // NFTs //
+      //////////
+
+      /**
+      * @brief The limits and the mint fee per copy nft_operation is checked against at head block
+      */
+      (get_nft_params)
+      /**
+      * @brief Look up to 100 NFTs or copies by id: "@author/permlink/0" for an NFT, "@author/permlink/N"
+      * for the NFT with its copy N. Ids that name nothing are left out.
+      */
+      (find_nfts)
+      /**
+      * @brief NFTs minted by an account, order by_creator, start [author, permlink]
+      */
+      (list_nfts)
+      /**
+      * @brief Copies of one NFT in number order (order by_permlink, start "@author/permlink/N"), or
+      * copies by owner (order by_account, start [owner, "@author/permlink/N"]); by owner lists only the
+      * copies that were offered or moved at least once, the others being their creator's
+      */
+      (list_nft_editions)
+
       ////////////////////////////
       // Authority / validation //
       ////////////////////////////

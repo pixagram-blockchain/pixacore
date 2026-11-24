@@ -1,0 +1,114 @@
+syntax = "proto2";
+
+import "asset.proto";
+import "future_extensions.proto";
+
+package hive.protocol.buffers;
+
+/* Mints the root post of the account signing the operation as an NFT.
+ * All editions start owned by the author. Royalty and license are fixed for the life of the NFT
+ * and the post can no longer be edited or deleted.
+ */
+message nft_mint {
+  // @param {string} permlink - Permlink of the root post of {account} to mint.
+  required string            permlink = 1;
+
+  // @param {number} editions - Number of copies, 1 to 10000.
+  required uint32            editions = 2;
+
+  // @param {number} royalty - Share of each later sale price paid to the author, in basis points (500 = 5%).
+  required uint32            royalty = 3;
+
+  // @param {string} license - Full text of the license terms. UTF-8, at most 73728 bytes (72 KiB).
+  required string            license = 4;
+
+  // @param {asset} fee - Mint fee in PXS: 1.000 PXS per copy, exactly (database_api.get_nft_params). It is burned.
+  required asset             fee = 5;
+
+  // @param {future_extensions} extensions - Not currently used.
+  repeated future_extensions extensions = 6;
+}
+
+/* Offers an edition for sale at a fixed price, or replaces its current offer. Only the owner can do it.
+ */
+message nft_list {
+  // @param {string} author - Author of the minted post.
+  required string            author = 1;
+
+  // @param {string} permlink - Permlink of the minted post.
+  required string            permlink = 2;
+
+  // @param {number} edition - Number of the copy, starting from 1.
+  required uint32            edition = 3;
+
+  // @param {asset} price - Asking price, in PXS.
+  required asset             price = 4;
+
+  // @param {string} expiration - The offer cannot be taken at or after this time.
+  required string            expiration = 5;
+
+  // @param {future_extensions} extensions - Not currently used.
+  repeated future_extensions extensions = 6;
+}
+
+/* Withdraws the offer made with nft_list. Only the owner can do it.
+ */
+message nft_unlist {
+  required string            author = 1;
+  required string            permlink = 2;
+  required uint32            edition = 3;
+  repeated future_extensions extensions = 4;
+}
+
+/* Buys a listed edition. The buyer pays {price}, the author receives the royalty unless the author
+ * is the seller, the seller receives the rest and the buyer becomes the owner.
+ */
+message nft_buy {
+  required string            author = 1;
+  required string            permlink = 2;
+  required uint32            edition = 3;
+
+  // @param {asset} price - Has to equal the asking price.
+  required asset             price = 4;
+
+  repeated future_extensions extensions = 5;
+}
+
+/* Gives an edition to another account without payment. Only the owner can do it. Ends any offer.
+ * Giving it to the null account burns it.
+ */
+message nft_transfer {
+  required string            author = 1;
+  required string            permlink = 2;
+  required uint32            edition = 3;
+
+  // @param {string} to_account - Account that becomes the owner.
+  required string            to_account = 4 [json_name = "to"];
+
+  repeated future_extensions extensions = 5;
+}
+
+message nft_action {
+  oneof value {
+    nft_mint     nft_mint = 1 [json_name = "nft_mint"];
+    nft_list     nft_list = 2 [json_name = "nft_list"];
+    nft_unlist   nft_unlist = 3 [json_name = "nft_unlist"];
+    nft_buy      nft_buy = 4 [json_name = "nft_buy"];
+    nft_transfer nft_transfer = 5 [json_name = "nft_transfer"];
+  }
+}
+
+/* The operation of the native NFT feature (hardfork 32). It carries one action: mint a post,
+ * list an edition for sale, withdraw the offer, buy it or transfer it.
+ * {account} is the actor of the action and signs with the active authority.
+ */
+message nft {
+  // @param {string} account - The minter, the owner listing, unlisting or transferring, or the buyer.
+  required string            account = 1;
+
+  // @param {nft_action} action - What the account does.
+  required nft_action        action = 2;
+
+  // @param {future_extensions} extensions - Not currently used.
+  repeated future_extensions extensions = 3;
+}

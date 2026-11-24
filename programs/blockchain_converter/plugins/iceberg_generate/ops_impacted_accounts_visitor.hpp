@@ -103,13 +103,6 @@ namespace hive { namespace converter { namespace plugins { namespace iceberg_gen
       for(const auto& acc : op.recent_owner_authority.account_auths)
         accounts_new.insert( acc.first );
     }
-    result_type operator()( const hive::protocol::reset_account_operation& op )const
-    {
-      accounts_new.insert( op.account_to_reset );
-      accounts_new.insert( op.reset_account );
-      for(const auto& acc : op.new_owner_authority.account_auths)
-        accounts_new.insert( acc.first );
-    }
     result_type operator()( const hive::protocol::set_reset_account_operation& op )const
     {
       accounts_new.insert( op.account );

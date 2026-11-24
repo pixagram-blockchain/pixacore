@@ -65,13 +65,14 @@ class resource_credits
     // sets parameters that can temporarily increase RC cost for new transactions during flood
     static void set_flood_limiters( uint16_t flood_level, uint16_t flood_surcharge_factor );
 
-    // scans transaction for used resources
+    // scans transaction for used resources; delegation_return_period is the global property in force
     static void count_resources(
       const hive::protocol::signed_transaction& tx,
       const size_t size,
       count_resources_result& result,
       const fc::time_point_sec now,
-      bool price_custom_data_by_length = false );
+      bool price_custom_data_by_length = false,
+      uint32_t delegation_return_period = HIVE_DELEGATION_RETURN_PERIOD_HF20 );
 
     // scans single nonstandard operation for used extra resources (implemented for rc_custom_operation)
     template< typename OpType >

@@ -5609,6 +5609,11 @@
             "example": 40,
             "description": "Vote power reserve rate"
           },
+          "voting_mana_regeneration_seconds": {
+            "type": "integer",
+            "example": 576000,
+            "description": "Seconds an empty voting bar takes to refill (432000 until hardfork 32, 576000 after)"
+          },
           "delegation_return_period": {
             "type": "integer",
             "example": 604800,

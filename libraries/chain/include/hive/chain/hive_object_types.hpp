@@ -87,6 +87,9 @@ enum object_type
   rc_usage_bucket_object_type,
   rc_stats_object_type,
   rc_expired_delegation_object_type,
+  // HF32 (native NFTs) - appended so that no existing type id moves
+  nft_object_type,
+  nft_edition_object_type,
 };
 
 class dynamic_global_property_object;
@@ -128,6 +131,8 @@ class rc_direct_delegation_object;
 class rc_usage_bucket_object;
 class rc_stats_object;
 class rc_expired_delegation_object;
+class nft_object;
+class nft_edition_object;
 
 typedef oid_ref< dynamic_global_property_object         > dynamic_global_property_id_type;
 typedef oid_ref< account_object                         > account_id_type;
@@ -169,6 +174,8 @@ typedef oid_ref< rc_direct_delegation_object            > rc_direct_delegtion_id
 typedef oid_ref< rc_usage_bucket_object                 > rc_cost_bucket_id_type;
 typedef oid_ref< rc_stats_object                        > rc_stats_id_type;
 typedef oid_ref< rc_expired_delegation_object           > rc_expired_delegtion_id_type;
+typedef oid_ref< nft_object                             > nft_id_type;
+typedef oid_ref< nft_edition_object                     > nft_edition_id_type;
 
 } } //hive::chain
 
@@ -312,6 +319,8 @@ FC_REFLECT_ENUM( hive::chain::object_type,
             (rc_usage_bucket_object_type)
             (rc_stats_object_type)
             (rc_expired_delegation_object_type)
+            (nft_object_type)
+            (nft_edition_object_type)
           )
 
 FC_REFLECT_TYPENAME( hive::chain::shared_string )

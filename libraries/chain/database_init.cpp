@@ -49,6 +49,7 @@ void database::initialize_evaluators()
   register_account_evaluators( _my->_evaluator_registry );
   register_witness_evaluators( _my->_evaluator_registry );
   register_dhf_evaluators( _my->_evaluator_registry );
+  register_nft_evaluators( _my->_evaluator_registry );
 
   rc().initialize_evaluators();
 }

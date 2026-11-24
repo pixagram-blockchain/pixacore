@@ -857,18 +857,8 @@ namespace hive { namespace protocol {
   };
 
 
-  /**
-    * Never used, placeholder in case we need to add new operation.
-    */
-  struct reset_account_operation : public base_operation
-  {
-    account_name_type reset_account;
-    account_name_type account_to_reset;
-    authority         new_owner_authority;
-
-    void get_required_active_authorities( flat_set<account_name_type>& a )const { a.insert( reset_account ); }
-    void validate()const;
-  };
+  // reset_account_operation, the never used placeholder that held operation number 37, was replaced
+  // by nft_operation in hardfork 32 (see nft_operations.hpp).
 
   /**
     * Never used, placeholder in case we need to add new operation.
@@ -1118,7 +1108,6 @@ FC_REFLECT( hive::protocol::transfer_to_savings_operation, (from)(to)(amount)(me
 FC_REFLECT( hive::protocol::transfer_from_savings_operation, (from)(request_id)(to)(amount)(memo) )
 FC_REFLECT( hive::protocol::cancel_transfer_from_savings_operation, (from)(request_id) )
 
-FC_REFLECT( hive::protocol::reset_account_operation, (reset_account)(account_to_reset)(new_owner_authority) )
 FC_REFLECT( hive::protocol::set_reset_account_operation, (account)(current_reset_account)(reset_account) )
 
 

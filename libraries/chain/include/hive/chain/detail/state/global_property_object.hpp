@@ -163,6 +163,7 @@ public:
 // various settings only changed during hardforks
 
   uint32_t get_vote_power_reserve_rate() const { return vote_power_reserve_rate; }
+  uint32_t get_voting_mana_regeneration_seconds() const { return voting_mana_regeneration_seconds; }
   uint32_t get_delegation_return_period() const { return delegation_return_period; }
   uint64_t get_reverse_auction_seconds() const { return reverse_auction_seconds; }
   uint64_t get_early_voting_seconds() const { return early_voting_seconds; }
@@ -181,6 +182,7 @@ public:
   uint16_t get_max_open_recurrent_transfers() const { return max_open_recurrent_transfers; }
 
   void set_vote_power_reserve_rate( uint32_t value ) { vote_power_reserve_rate = value; }
+  void set_voting_mana_regeneration_seconds( uint32_t value ) { voting_mana_regeneration_seconds = value; }
   void set_delegation_return_period( uint32_t value ) { delegation_return_period = value; }
   void set_reverse_auction_seconds( uint64_t value ) { reverse_auction_seconds = value; }
   void set_early_voting_seconds( uint64_t value ) { early_voting_seconds = value; }
@@ -257,6 +259,12 @@ private:
     * eventually exhaust their voting mana (since HF28, previously their vote was reduced).
     */
   uint32_t vote_power_reserve_rate = HIVE_INITIAL_VOTE_POWER_RATE;
+
+  /**
+    * Time an empty voting bar (and the downvote bar) takes to refill. HIVE_VOTING_MANA_REGENERATION_SECONDS
+    * (5 days) until hardfork 32, PIXA_HF32_VOTING_MANA_REGENERATION_SECONDS after.
+    */
+  uint32_t voting_mana_regeneration_seconds = HIVE_VOTING_MANA_REGENERATION_SECONDS;
 
   uint32_t delegation_return_period = HIVE_DELEGATION_RETURN_PERIOD_HF0;
 
@@ -434,6 +442,7 @@ FC_REFLECT( hive::chain::dynamic_global_property_object,
           (recent_slots_filled)
           (participation_count)
           (vote_power_reserve_rate)
+          (voting_mana_regeneration_seconds)
           (delegation_return_period)
           (reverse_auction_seconds)
           (early_voting_seconds)

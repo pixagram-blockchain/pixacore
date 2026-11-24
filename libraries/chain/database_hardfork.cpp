@@ -11,6 +11,7 @@
 #include <hive/chain/detail/state/reward_fund_object_multiindex.hpp>
 #include <hive/chain/detail/state/witness_objects_multiindex.hpp>
 #include <hive/chain/witness_schedule.hpp>
+#include <hive/chain/util/manabar.hpp>
 
 #include <hive/chain/rc/rc_objects_multiindex.hpp>
 
@@ -115,12 +116,16 @@ void database::init_hardforks()
   FC_ASSERT( HIVE_HARDFORK_1_30 == 30, "Invalid hardfork configuration" );
   _hardfork_versions.times[ HIVE_HARDFORK_1_30 ] = fc::time_point_sec( HIVE_HARDFORK_1_30_TIME );
   _hardfork_versions.versions[ HIVE_HARDFORK_1_30 ] = HIVE_HARDFORK_1_30_VERSION;
-#ifdef USE_ALTERNATE_CHAIN_ID
-  // Mainnet does not support HF31 yet (HIVE_NUM_HARDFORKS is 30 there), so the arrays have no slot for it.
   FC_ASSERT( HIVE_HARDFORK_1_31 == 31, "Invalid hardfork configuration" );
   _hardfork_versions.times[ HIVE_HARDFORK_1_31 ] = fc::time_point_sec( HIVE_HARDFORK_1_31_TIME );
   _hardfork_versions.versions[ HIVE_HARDFORK_1_31 ] = HIVE_HARDFORK_1_31_VERSION;
-#endif
+  FC_ASSERT( HIVE_HARDFORK_1_32 == 32, "Invalid hardfork configuration" );
+  _hardfork_versions.times[ HIVE_HARDFORK_1_32 ] = fc::time_point_sec( HIVE_HARDFORK_1_32_TIME );
+  _hardfork_versions.versions[ HIVE_HARDFORK_1_32 ] = HIVE_HARDFORK_1_32_VERSION;
+  // Hardforks are applied one after another, so hardfork 32 scheduled before hardfork 31 would not
+  // activate at its own time but only once hardfork 31 did. Refuse to start with such a schedule.
+  FC_ASSERT( _hardfork_versions.times[ HIVE_HARDFORK_1_31 ] <= _hardfork_versions.times[ HIVE_HARDFORK_1_32 ],
+    "Hardfork 32 cannot be scheduled before hardfork 31" );
 }
 
 void database::process_hardforks()
@@ -566,6 +571,38 @@ void database::apply_hardfork( uint32_t hardfork )
     case HIVE_HARDFORK_1_30:
       // Eligibility and owner-history behavior are gated where they are applied.
       break;
+    case HIVE_HARDFORK_1_32:
+    {
+      // Native NFTs: nothing to migrate. The NFT indexes start empty and nft_operation is gated in
+      // its evaluator; the edit and delete rules for minted posts are gated in the comment evaluators.
+
+      // The voting bar: a full vote costs 3% of the bar and the bar refills 15% a day (see config.hpp).
+      static_assert( PIXA_HF32_DELEGATION_RETURN_PERIOD >= PIXA_HF32_VOTING_MANA_REGENERATION_SECONDS,
+        "Returned delegations arrive with a full bar, so they cannot come back faster than a bar refills" );
+      static_assert( PIXA_HF32_VOTE_POWER_RATE > 0 && PIXA_HF32_VOTING_MANA_REGENERATION_SECONDS > 0,
+        "The cost of a vote divides by both" );
+      const auto& dgpo = get_dynamic_global_properties();
+      // First every bar is brought up to date at the refill rate it accrued at, so the change applies
+      // from this block on: without it, an account would be credited at the new, slower rate for the
+      // time since its last action, and one that emptied its bar 5 days ago would come back at 75%.
+      const auto& accounts = get_index< account_index, by_id >();
+      for( const auto& account : accounts )
+      {
+        modify( account, [&]( account_object& a )
+        {
+          util::update_manabar( dgpo, a );
+        } );
+      }
+      // Delegations removed before this block keep the return date they got; removals from now on
+      // take the new period. Resource credits keep their 5-day refill (HIVE_RC_REGEN_TIME).
+      modify( dgpo, [&]( dynamic_global_property_object& gpo )
+      {
+        gpo.set_voting_mana_regeneration_seconds( PIXA_HF32_VOTING_MANA_REGENERATION_SECONDS );
+        gpo.set_vote_power_reserve_rate( PIXA_HF32_VOTE_POWER_RATE );
+        gpo.set_delegation_return_period( PIXA_HF32_DELEGATION_RETURN_PERIOD );
+      } );
+    }
+    break;
     default:
       break;
   }

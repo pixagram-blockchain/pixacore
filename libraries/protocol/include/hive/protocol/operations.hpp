@@ -6,6 +6,7 @@
 #include <hive/protocol/hive_operations.hpp>
 #include <hive/protocol/hive_virtual_operations.hpp>
 #include <hive/protocol/dhf_operations.hpp>
+#include <hive/protocol/nft_operations.hpp>
 
 namespace hive { namespace protocol {
 
@@ -59,7 +60,7 @@ namespace hive { namespace protocol {
         cancel_transfer_from_savings_operation, // 34
         custom_binary_operation, // 35
         decline_voting_rights_operation, // 36
-        reset_account_operation, // 37
+        nft_operation, // 37 (HF32; the number of the never used reset_account_operation placeholder)
         set_reset_account_operation, // 38
         claim_reward_balance_operation, // 39
         delegate_vesting_shares_operation, // 40
@@ -119,7 +120,9 @@ namespace hive { namespace protocol {
         escrow_approved_operation, //last_regular + 40
         escrow_rejected_operation, //last_regular + 41
         proxy_cleared_operation, //last_regular + 42
-        declined_voting_rights_operation //last_regular + 43
+        declined_voting_rights_operation, //last_regular + 43
+        nft_sold_operation, //last_regular + 44
+        nft_royalty_operation //last_regular + 45
 
 #endif // HIVE_PROTOCOL_SKIP_VOPS
       > operation;

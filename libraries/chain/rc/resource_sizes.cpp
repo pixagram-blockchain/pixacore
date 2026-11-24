@@ -15,6 +15,7 @@
 #include <hive/chain/detail/state/recurrent_transfer_object.hpp>
 #include <hive/chain/detail/state/dhf_objects.hpp>
 #include <hive/chain/detail/state/transaction_object.hpp>
+#include <hive/chain/detail/state/nft_object_multiindex.hpp>
 #include <hive/chain/rc/rc_objects_multiindex.hpp>
 
 namespace hive { namespace chain {
@@ -126,6 +127,8 @@ state_object_size_info::state_object_size_info()
     SIZE( vesting_delegation_index::MULTIINDEX_NODE_TYPE, 88 ) * LASTING_STATE_BYTE ),
   vesting_delegation_expiration_object_size(
     SIZE( vesting_delegation_expiration_index::MULTIINDEX_NODE_TYPE, 120 ) * TEMPORARY_STATE_BYTE * 5 * 24 ), //HIVE_DELEGATION_RETURN_PERIOD_HF20
+  vesting_delegation_expiration_hourly_size(
+    SIZE( vesting_delegation_expiration_index::MULTIINDEX_NODE_TYPE, 120 ) * TEMPORARY_STATE_BYTE ), //the period in force is 7 days from HF32
   delegate_vesting_shares_size(
     std::max( vesting_delegation_object_size, vesting_delegation_expiration_object_size ) ),
 
@@ -161,7 +164,15 @@ state_object_size_info::state_object_size_info()
 
   // direct rc delegation
   delegate_rc_base_size(
-    SIZE( rc_direct_delegation_index::MULTIINDEX_NODE_TYPE, 88 ) * LASTING_STATE_BYTE ) //multiply by number of delegatees
+    SIZE( rc_direct_delegation_index::MULTIINDEX_NODE_TYPE, 88 ) * LASTING_STATE_BYTE ), //multiply by number of delegatees
+
+  // nft (HF32): the NFT and the objects of its copies are never removed
+  nft_mint_base_size(
+    SIZE( nft_index::MULTIINDEX_NODE_TYPE, 176 ) * PERSISTENT_STATE_BYTE ), //with its reserve fields
+  nft_mint_char_size(
+    PERSISTENT_STATE_BYTE ), //multiply by length of permlink
+  nft_edition_size(
+    SIZE( nft_edition_index::MULTIINDEX_NODE_TYPE, 144 ) * PERSISTENT_STATE_BYTE ) //one copy out of the reserve
 {}
 
 operation_exec_info::operation_exec_info()
@@ -237,8 +248,18 @@ operation_exec_info::operation_exec_info()
   recover_account_time( 727 + 17934 + 149 + 145 ),
   //not used but included since we have measurements
   pow_time( 177321 + 23458 + 165 + 57 ),
-  pow2_time( 86349 + 17226 + 160 + 92 )
+  pow2_time( 86349 + 17226 + 160 + 92 ),
 
+  //nft operation (HF32)
+  //NOTE: ESTIMATES, not measurements - set from operations doing comparable work (object lookups,
+  //object creation, balance changes). They have to be replaced with benchmark results before the
+  //hardfork is scheduled: once resource credits are part of consensus (HF31) these values are too.
+  nft_mint_time( 22000 ), //post lookup, NFT creation, fee moved from minter to null
+  nft_mint_license_byte_time( 3 ), //UTF-8 check and SHA-256 of the license text, per byte
+  nft_list_time( 10000 ), //two lookups, the copy's object created the first time, one object change (or the NFT's)
+  nft_unlist_time( 8000 ), //the copy's object changed, or removed when it returns to the reserve
+  nft_buy_time( 22000 ), //two lookups, up to three balance changes, one object change, two vops; from the reserve: a walk to the next copy, which is amortized over the sales
+  nft_transfer_time( 11000 ) //two lookups, the copy's object created the first time or changed
 {}
 
 } } // hive::chain

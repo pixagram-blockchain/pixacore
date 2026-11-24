@@ -286,6 +286,30 @@ struct get_impacted_account_visitor
       _owner_impacted->insert( op.from );
   }
 
+  struct nft_action_impacted_visitor
+  {
+    nft_action_impacted_visitor( flat_set<account_name_type>& impact ) : _impacted( impact ) {}
+    typedef void result_type;
+
+    flat_set<account_name_type>& _impacted;
+
+    // the account that signs is added by the caller; the previous owner and the creator of a sold
+    // edition are named by nft_sold_operation / nft_royalty_operation
+    void operator()( const nft_mint& ) const {}
+    void operator()( const nft_list& ) const {}
+    void operator()( const nft_unlist& ) const {}
+    void operator()( const nft_buy& ) const {}
+    void operator()( const nft_transfer& action ) const { _impacted.insert( action.to ); }
+  };
+
+  void operator()( const nft_operation& op )
+  {
+    _impacted.insert( op.account );
+    op.action.visit( nft_action_impacted_visitor( _impacted ) );
+    if( _owner_impacted )
+      _owner_impacted->insert( op.account );
+  }
+
   // vops
 
   /**
@@ -644,6 +668,23 @@ struct get_impacted_account_visitor
     _impacted.insert( op.account );
     if( _owner_impacted )
       _owner_impacted->insert( op.account );
+  }
+
+  void operator()( const nft_sold_operation& op )
+  {
+    _impacted.insert( op.seller );
+    _impacted.insert( op.buyer );
+    _impacted.insert( op.author );
+    if( _owner_impacted )
+      _owner_impacted->insert( op.buyer );
+  }
+
+  void operator()( const nft_royalty_operation& op )
+  {
+    _impacted.insert( op.creator );
+    _impacted.insert( op.seller );
+    if( _owner_impacted )
+      _owner_impacted->insert( op.creator );
   }
 
   //void operator()( const operation& op ){}
@@ -1057,6 +1098,30 @@ struct impacted_balance_collector
     emplace_back( op.from, op.hbd_amount.to_asset() );
     emplace_back( op.from, op.hive_amount.to_asset() );
     emplace_back( op.from, op.fee );
+  }
+
+  void operator()( const nft_operation& op )
+  {
+    // Only minting moves funds that the operation itself fully describes: the fee (PXS) goes from
+    // the minter to null, where it is burned. A sale is reported by nft_sold_operation and
+    // nft_royalty_operation, because who receives what depends on the state (owner, creator, royalty).
+    if( op.action.which() == nft_action::tag< nft_mint >::value )
+    {
+      const asset& fee = op.action.get< nft_mint >().fee;
+      emplace_back( op.account, -fee );
+      emplace_back( account_name_type( HIVE_NULL_ACCOUNT ), fee );
+    }
+  }
+
+  void operator()( const nft_sold_operation& op )
+  {
+    emplace_back( op.buyer, -op.price );
+    emplace_back( op.seller, op.price - op.royalty );
+  }
+
+  void operator()( const nft_royalty_operation& op )
+  {
+    emplace_back( op.creator, op.royalty );
   }
 
   template <typename T>

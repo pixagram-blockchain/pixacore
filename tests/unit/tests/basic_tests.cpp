@@ -64,6 +64,7 @@
 #include <hive/chain/detail/state/decline_voting_rights_request_object_multiindex.hpp>
 #include <hive/chain/detail/state/reward_fund_object_multiindex.hpp>
 #include <hive/chain/detail/state/recurrent_transfer_object_multiindex.hpp>
+#include <hive/chain/detail/state/nft_object_multiindex.hpp>
 #include <hive/chain/detail/state/convert_request_object_multiindex.hpp>
 #include <hive/chain/detail/state/collateralized_convert_request_object_multiindex.hpp>
 #include <hive/chain/detail/state/escrow_object_multiindex.hpp>
@@ -793,6 +794,10 @@ BOOST_AUTO_TEST_CASE( chain_object_size )
   BOOST_CHECK_EQUAL( sizeof( proposal_vote_index::MULTIINDEX_NODE_TYPE ), 128u );
   BOOST_CHECK_EQUAL( sizeof( recurrent_transfer_object ), 72u ); //small but potentially long lived, limited to 255*account_object
   BOOST_CHECK_EQUAL( sizeof( recurrent_transfer_index::MULTIINDEX_NODE_TYPE ), 200u );
+  BOOST_CHECK_EQUAL( sizeof( nft_object ), 112u ); //permanent, one per minted post (plus permlink; the license is a hash)
+  BOOST_CHECK_EQUAL( sizeof( nft_index::MULTIINDEX_NODE_TYPE ), 176u );
+  BOOST_CHECK_EQUAL( sizeof( nft_edition_object ), 48u ); //permanent, one per copy that was offered or moved
+  BOOST_CHECK_EQUAL( sizeof( nft_edition_index::MULTIINDEX_NODE_TYPE ), 144u );
   BOOST_CHECK_EQUAL( sizeof( rc_expired_delegation_object ), 16u ); //none most of the time (only used in very specific case)
   BOOST_CHECK_EQUAL( sizeof( rc_expired_delegation_index::MULTIINDEX_NODE_TYPE ), 80u );
 
@@ -1556,8 +1561,12 @@ BOOST_AUTO_TEST_CASE( chain_object_checksum )
   BOOST_CHECK_EQUAL( get_decoded_type_checksum<hive::chain::rc_usage_bucket_object>(dtds), "64fed99b3018ca29394f48592aec3a0a2a04ff28" );
 
   BOOST_CHECK_EQUAL( get_decoded_type_checksum<hive::chain::comment_cashout_object>(dtds), "38b356fdf295b2a709ac9d77b94fbe0fcd3c9267" );
-  BOOST_CHECK_EQUAL( get_decoded_type_checksum<hive::chain::dynamic_global_property_object>(dtds), "4f0a890f53fd55b8ae173cfa9e23fea4e54b2453" );
+  //HF32: voting_mana_regeneration_seconds
+  BOOST_CHECK_EQUAL( get_decoded_type_checksum<hive::chain::dynamic_global_property_object>(dtds), "77a1295365c09e4e79fd0908c4398e55faf19fe2" );
   BOOST_CHECK_EQUAL( get_decoded_type_checksum<hive::chain::rc_stats_object>(dtds), "5ecebd9e709ff9f511dc2600e72c071e022223ca" );
+  //HF32: native NFTs
+  BOOST_CHECK_EQUAL( get_decoded_type_checksum<hive::chain::nft_object>(dtds), "12c274e137b9694f2094f7203f4fe8af2f870686" );
+  BOOST_CHECK_EQUAL( get_decoded_type_checksum<hive::chain::nft_edition_object>(dtds), "a185481eb9963ab41fc8d07982af2f2e14bf1ac3" );
 
 }
 

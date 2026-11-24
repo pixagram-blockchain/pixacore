@@ -771,11 +771,6 @@ namespace hive { namespace protocol {
     validate_account_name( account );
   }
 
-  void reset_account_operation::validate()const
-  {
-    FC_ASSERT( false && "placeholder1", "Placeholder for potential new operation" );
-  }
-
   void set_reset_account_operation::validate()const
   {
     FC_ASSERT( false && "placeholder2", "Placeholder for potential new operation" );

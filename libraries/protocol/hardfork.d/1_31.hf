@@ -9,10 +9,12 @@
 // retroactively from block 402205 and break replay, so they are renumbered to 31. Upstream
 // code that referred to HIVE_HARDFORK_1_29_<feature> refers to HIVE_HARDFORK_1_31_<feature>.
 //
-// Mainnet keeps HIVE_NUM_HARDFORKS at 30 until this hardfork is scheduled, so none of these
-// features can activate there. Testnet and mirrornet builds include it for testing.
+// Since release 1.32 every build, mainnet included, has room for this hardfork
+// (HIVE_NUM_HARDFORKS is 32). It stays unscheduled through the far-future default below: replace
+// HIVE_HARDFORK_1_31_TIME for mainnet with the agreed rollout time, no later than
+// HIVE_HARDFORK_1_32_TIME, because hardfork 32 (native NFTs) can only be applied after this one.
 //
-// Far-future default so HF31 never auto-activates on testnets that don't explicitly
+// Far-future default so HF31 never auto-activates on a chain that does not explicitly
 // schedule it. 4102444800 = 2100-01-01T00:00:00Z
 #define HIVE_HARDFORK_1_31_DEFAULT_TIME 4102444800L
 

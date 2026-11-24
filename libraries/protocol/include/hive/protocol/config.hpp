@@ -69,7 +69,7 @@ using namespace hive::protocol::testnet_blockchain_configuration;
 
 #ifdef IS_TEST_NET
 
-#define HIVE_BLOCKCHAIN_VERSION             ( version(1, 31, 0) )
+#define HIVE_BLOCKCHAIN_VERSION             ( version(1, 32, 0) )
 
 #define OLD_CHAIN_ID                          (fc::sha256::hash("testnet"))
 #define HIVE_CHAIN_ID                         (fc::sha256::hash("testnet"))
@@ -134,12 +134,12 @@ using namespace hive::protocol::testnet_blockchain_configuration;
 
 #ifdef USE_ALTERNATE_CHAIN_ID
   /// Mirrornet
-  #define HIVE_BLOCKCHAIN_VERSION               ( version(1, 31, 0) )
+  #define HIVE_BLOCKCHAIN_VERSION               ( version(1, 32, 0) )
   #define OLD_CHAIN_ID                          fc::sha256()
   #define HIVE_CHAIN_ID                         fc::sha256("4200000000000000000000000000000000000000000000000000000000000000")
 #else
   /// Hive mainnet
-  #define HIVE_BLOCKCHAIN_VERSION               ( version(1, 30, 1) )
+  #define HIVE_BLOCKCHAIN_VERSION               ( version(1, 32, 0) )
   #define OLD_CHAIN_ID                          fc::sha256()
   #define HIVE_CHAIN_ID                         fc::sha256("706978616772616d000000000000000000000000000000000000000000000000")
 #endif
@@ -256,6 +256,22 @@ using namespace hive::protocol::testnet_blockchain_configuration;
 #define PIXA_HF30_VOTE_DUST_THRESHOLD         (50000)
 
 /**
+ * Pixagram HF32: the voting bar. A full vote costs 3% of the bar (2% before) and the bar refills
+ * 15% a day (20% before); the smallest vote, the dust deduction and the downvote pool do not change.
+ * Hardfork 32 writes these three values into the global properties; the regeneration time of the
+ * voting bar becomes a global property there (voting_mana_regeneration_seconds), while
+ * HIVE_VOTING_MANA_REGENERATION_SECONDS keeps the 5 days that replayed blocks and resource credits use.
+ *
+ * The cost of a vote is bar * weight * 86400 / ( 10000 * rate * refill seconds ). The rate is a whole
+ * number, so 3% sets the refill to 86400 / ( 5 * 3% ) = 576,000 s, 6 days 16 hours. Returned delegations
+ * arrive with a full bar, so the return period has to be at least the refill time, or lending,
+ * draining and recalling stake would refill a bar faster than the bar refills itself.
+ */
+#define PIXA_HF32_VOTING_MANA_REGENERATION_SECONDS (576000)       // 6 days 16 hours = 15% a day
+#define PIXA_HF32_VOTE_POWER_RATE                  (5)            // 86400 / ( 5 * 576000 ) = 3% per full vote
+#define PIXA_HF32_DELEGATION_RETURN_PERIOD         (7*24*60*60)   // 7 days, never shorter than the refill time
+
+/**
  * Pixagram HF30: the payload length the flat custom_json / custom resource-credit cost was
  * calibrated for upstream (Hive's HIVE_CUSTOM_OP_DATA_MAX_LENGTH). Pixagram raised the cap to
  * 64 KiB but kept charging the same flat cost, so a maximum-size payload cost no more than a tiny
@@ -276,6 +292,37 @@ using namespace hive::protocol::testnet_blockchain_configuration;
  * needs on the order of ten.
  */
 #define PIXA_MAX_TRANSACTION_SIGNATURES       (1000)
+
+/**
+ * Pixagram HF32: native NFTs (nft_operation).
+ *
+ * A minted post has 1 to 10,000 copies (editions), numbered from 1. "@author/permlink/0" names the NFT
+ * itself and "@author/permlink/N" its copy N. A copy gets a state object only when it is first offered
+ * or first leaves its creator; until then it is the creator's, unoffered. So a mint stores the same few
+ * bytes whatever the number of copies, and the read APIs page through the copies of an NFT.
+ *
+ * PIXA_NFT_EDITIONS_LIMIT, PIXA_NFT_MAX_LICENSE_LENGTH and 100% as the royalty ceiling are limits of
+ * the operation format: nft_operation::validate() enforces them at every hardfork. What consensus
+ * accepts is answered by the database (see database_nft.cpp): at most PIXA_NFT_MAX_EDITIONS copies,
+ * a royalty of at most PIXA_NFT_MAX_ROYALTY, a price in PXS, and a mint fee of
+ * PIXA_NFT_MINT_FEE_PER_EDITION per copy. Narrowing one of them in a later hardfork changes that file
+ * only. Allowing more than PIXA_NFT_EDITIONS_LIMIT copies also raises that limit (a looser format check
+ * replays safely); copy numbers are 16 bits in the operation, so 65,535 is the most it can carry.
+ *
+ * The license is the full text of the terms, UTF-8, at most 72 KiB, which fits a transaction
+ * (HIVE_MAX_TRANSACTION_SIZE is 128 KiB). The text is kept by the mint operation in the block log;
+ * the state keeps its SHA-256 and its length, so every node holds the same 36 bytes whatever the text.
+ */
+#define PIXA_NFT_EDITIONS_LIMIT               (10000)
+#define PIXA_NFT_MAX_EDITIONS                 (10000)
+#define PIXA_NFT_MAX_ROYALTY                  (25 * HIVE_1_PERCENT)
+#define PIXA_NFT_MAX_LICENSE_LENGTH           (72 * 1024)
+/**
+ * Pixagram HF32: the mint fee per copy, in the smallest unit of PXS: 1.000 PXS. A mint of N copies
+ * pays N times this amount, and the fee is burned: it goes to null, which is cleared at the end of
+ * the block, so the PXS supply shrinks by the fee.
+ */
+#define PIXA_NFT_MINT_FEE_PER_EDITION         (1000)
 #define HIVE_DOWNVOTE_POOL_PERCENT_HF21       (25*HIVE_1_PERCENT)
 
 #define HIVE_POST_AVERAGE_WINDOW              (60*60*24u) // 1 day

@@ -52,5 +52,6 @@
   "vesting_reward_percent": 1500,
   "virtual_supply": "161253662.237 HIVE",
   "vote_power_reserve_rate": 40,
+  "voting_mana_regeneration_seconds": 432000,
   "witness_majority_version": "0.13.0"
 }

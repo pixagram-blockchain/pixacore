@@ -8,7 +8,7 @@ A user has a voting power. The max voting power depends on HP.
 
 There are two manabars related to voting: Voting manabar and Downvoting manabar. Voting and downvoting manabars are defined as a percentage of total vote weight. Downvote manabar has 25% of the vote power weight and vote manabar has 100% of the vote power weight, but a user downvote with the total vote weight (not 25 %, but 100%).
 
-When a user casts a vote, 1/50th of the remaining mana is used for a 100% vote. The voting powers regenerate from 0 to 100% in 5 days (20% per day).
+Since HF28 a 100% vote costs a fixed share of the full bar, whatever is left in it: 2% (1/50) until HF32, 3% from HF32; a smaller weight costs proportionally less, and a vote the bar cannot pay for is rejected. The bars regenerate in a straight line: from 0 to 100% in 5 days (20% per day) until HF32, in 6 days 16 hours (15% per day) from HF32. The refill time is the global property `voting_mana_regeneration_seconds` and the vote rate `vote_power_reserve_rate`; a full vote costs 86400 / (rate × refill seconds) of the bar.
 
 If a voter casts another vote for the same post or comment before rewards are paid, it counts as vote edit. Vote edit cancels all effects of previous vote and acts as completely new vote, except mana used for previous vote is not returned.
 
@@ -30,6 +30,10 @@ A downvoting user doesn’t receive the curation reward. Downvoting may affect t
 
 Global parameters:     
 \- HIVE\_CASHOUT\_WINDOW\_SECONDS, default mainnet value: 7 days
+
+\- voting\_mana\_regeneration\_seconds (global property): 432,000 (5 days) until HF32, 576,000 (6 days 16 hours) from HF32
+
+\- vote\_power\_reserve\_rate (global property): 10 until HF32, 5 from HF32
 
 
 ## 2. Parameters
