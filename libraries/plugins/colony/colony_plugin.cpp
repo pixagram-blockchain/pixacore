@@ -44,7 +44,7 @@ enum kind_of_operation
   ARTICLE, // articles are root comments with associated comment_options with beneficiaries
   REPLY, // replies are non-root comments linking to articles or other replies
   VOTE, // random upvote/downvote for any comment
-  TRANSFER, // transfer of 0.001 HBD between two users with memo
+  TRANSFER, // transfer of 0.001 PXS between two users with memo
   CUSTOM_JSON, // unique id json with single string element
   NUMBER_OF_OPERATIONS
 };
@@ -577,16 +577,16 @@ void transaction_builder::build_vote( const account_object& actor, uint64_t nonc
 
 void transaction_builder::build_transfer( const account_object& actor, uint64_t nonce )
 {
-  bool use_hive = false;
-  if( actor.get_hbd_balance().amount.value == 0 )
+  bool use_pixa = false;
+  if( actor.get_pxs_balance().amount.value == 0 )
   {
-    if( actor.get_hive_balance().amount.value == 0 )
+    if( actor.get_pixa_balance().amount.value == 0 )
     {
       ++_transfer_substitutions;
       build_custom( actor, nonce );
       return;
     }
-    use_hive = true;
+    use_pixa = true;
   }
 
   ++_stats[ TRANSFER ].count;
@@ -594,10 +594,10 @@ void transaction_builder::build_transfer( const account_object& actor, uint64_t 
   transfer_operation transfer;
   transfer.from = actor.get_name();
   transfer.to = (*_current_account)->get_name();
-  if( use_hive )
-    transfer.amount = asset( 1, HIVE_SYMBOL );
+  if( use_pixa )
+    transfer.amount = asset( 1, PIXA_SYMBOL );
   else
-    transfer.amount = asset( 1, HBD_SYMBOL );
+    transfer.amount = asset( 1, PXS_SYMBOL );
   transfer.memo = std::to_string( nonce );
   auto extra_size = _common._params[ TRANSFER ].randomize();
   _stats[ TRANSFER ].extra_size += extra_size;

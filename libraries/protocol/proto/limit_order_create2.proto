@@ -7,8 +7,8 @@ package hive.protocol.buffers;
 
 /* This operation creates a limit order and matches it against existing open orders.
  * It is similar to limit_order_create except it serializes the price rather than calculating it from other fields.
- * It allows to sell Hive and buy HBD or sell HBD and buy Hive.
- * It is a way for a user to declare they wants to sell {amount_to_sell} Hive/HBD for at least {exchange_rate}  per HBD/Hive.
+ * It allows to sell Hive and buy PXS or sell PXS and buy Hive.
+ * It is a way for a user to declare they wants to sell {amount_to_sell} Hive/PXS for at least {exchange_rate}  per PXS/Hive.
  *
  * Description https://gitlab.syncad.com/hive/hive/-/blob/develop/doc/devs/operations/21_limit_order_create2.md?ref_type=heads
  */

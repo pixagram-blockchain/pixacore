@@ -20,8 +20,8 @@ namespace hive { namespace chain {
 using chainbase::t_vector;
 using hive::protocol::authority;
 using hive::protocol::asset;
-using hive::protocol::HBD_asset;
-using hive::protocol::HIVE_asset;
+using hive::protocol::PXS_asset;
+using hive::protocol::PIXA_asset;
 using hive::protocol::VEST_asset;
 
 class account_object : public object< account_object_type, account_object, std::true_type >
@@ -67,27 +67,27 @@ public:
     : id( _id ), name( _name ), created( _creation_time ), block_created( _creation_time ), memo_key( _memo_key ), delayed_votes( a )
   {}
 
-  //liquid HIVE balance
-  const HIVE_asset& get_hive_balance() const { return hive_balance; }
-  //HIVE balance in savings
-  const HIVE_asset& get_hive_savings() const { return savings_hive_balance; }
-  //unclaimed HIVE rewards
-  const HIVE_asset& get_hive_rewards() const { return reward_hive_balance; }
+  //liquid PIXA balance
+  const PIXA_asset& get_pixa_balance() const { return pixa_balance; }
+  //PIXA balance in savings
+  const PIXA_asset& get_pixa_savings() const { return savings_pixa_balance; }
+  //unclaimed PIXA rewards
+  const PIXA_asset& get_pixa_rewards() const { return reward_pixa_balance; }
 
-  HIVE_balance& access_hive_balance() { return hive_balance; }
-  HIVE_balance& access_hive_savings() { return savings_hive_balance; }
-  HIVE_balance& access_hive_rewards() { return reward_hive_balance; }
+  HIVE_balance& access_pixa_balance() { return pixa_balance; }
+  HIVE_balance& access_pixa_savings() { return savings_pixa_balance; }
+  HIVE_balance& access_pixa_rewards() { return reward_pixa_balance; }
 
-  //liquid HBD balance
-  const HBD_asset& get_hbd_balance() const { return hbd_balance; }
-  //HBD balance in savings
-  const HBD_asset& get_hbd_savings() const { return savings_hbd_balance; }
-  //unclaimed HBD rewards
-  const HBD_asset& get_hbd_rewards() const { return reward_hbd_balance; }
+  //liquid PXS balance
+  const PXS_asset& get_pxs_balance() const { return pxs_balance; }
+  //PXS balance in savings
+  const PXS_asset& get_pxs_savings() const { return savings_pxs_balance; }
+  //unclaimed PXS rewards
+  const PXS_asset& get_pxs_rewards() const { return reward_pxs_balance; }
 
-  HBD_balance& access_hbd_balance() { return hbd_balance; }
-  HBD_balance& access_hbd_savings() { return savings_hbd_balance; }
-  HBD_balance& access_hbd_rewards() { return reward_hbd_balance; }
+  PXS_balance& access_pxs_balance() { return pxs_balance; }
+  PXS_balance& access_pxs_savings() { return savings_pxs_balance; }
+  PXS_balance& access_pxs_rewards() { return reward_pxs_balance; }
 
   //all VESTS held by the account - use other routines to get active VESTS for specific uses
   const VEST_asset& get_vesting() const { return vesting_shares; }
@@ -117,14 +117,14 @@ public:
   }
   //unclaimed VESTS rewards
   const VEST_asset& get_vest_rewards() const { return reward_vesting_balance; }
-  //value of unclaimed VESTS rewards in HIVE (HIVE held on global balance)
-  const HIVE_asset& get_vest_rewards_as_hive() const { return reward_vesting_hive; }
+  //value of unclaimed VESTS rewards in PIXA (PIXA held on global balance)
+  const PIXA_asset& get_vest_rewards_as_pixa() const { return reward_vesting_pixa; }
 
   VEST_balance& access_vesting() { return vesting_shares; }
   VEST_asset&   access_delegated_vesting() { return delegated_vesting_shares; }
   VEST_asset&   access_received_vesting() { return received_vesting_shares; }
-  VEST_balance& access_vest_rewards() { return reward_vesting_balance; } //TODO: combine this with access_vest_rewards_as_hive into single setter
-  HIVE_balance& access_vest_rewards_as_hive() { return reward_vesting_hive; }
+  VEST_balance& access_vest_rewards() { return reward_vesting_balance; } //TODO: combine this with access_vest_rewards_as_pixa into single setter
+  HIVE_balance& access_vest_rewards_as_pixa() { return reward_vesting_pixa; }
 
   //effective balance of VESTS for RC calculation optionally excluding part that cannot be delegated
   share_type get_maximum_rc( bool only_delegable = false ) const
@@ -190,9 +190,9 @@ public:
   // accounts are never removed so this routine should never be called
   void check_on_remove() const
   {
-    FC_ASSERT( hbd_balance.is_empty() && savings_hbd_balance.is_empty() && reward_hbd_balance.is_empty() &&
-      hive_balance.is_empty() && savings_hive_balance.is_empty() && reward_hive_balance.is_empty() &&
-      vesting_shares.is_empty() && reward_vesting_balance.is_empty() && reward_vesting_hive.is_empty(),
+    FC_ASSERT( pxs_balance.is_empty() && savings_pxs_balance.is_empty() && reward_pxs_balance.is_empty() &&
+      pixa_balance.is_empty() && savings_pixa_balance.is_empty() && reward_pixa_balance.is_empty() &&
+      vesting_shares.is_empty() && reward_vesting_balance.is_empty() && reward_vesting_pixa.is_empty(),
       "Removing account_object with non-empty balance fields" );
   }
 
@@ -208,21 +208,21 @@ private:
   account_name_type name;
 
 public:
-  uint128_t         hbd_seconds = 0; ///< liquid HBD * how long it has been held
-  uint128_t         savings_hbd_seconds = 0; ///< savings HBD * how long it has been held
+  uint128_t         pxs_seconds = 0; ///< liquid PXS * how long it has been held
+  uint128_t         savings_pxs_seconds = 0; ///< savings PXS * how long it has been held
 
   util::manabar     voting_manabar;
   util::manabar     downvote_manabar;
   util::manabar     rc_manabar;
 private:
-  HBD_balance       hbd_balance; ///< HBD liquid balance
-  HBD_balance       savings_hbd_balance; ///< HBD balance guarded by 3 day withdrawal (also earns interest)
-  HBD_balance       reward_hbd_balance; ///< HBD balance author rewards that can be claimed
+  PXS_balance       pxs_balance; ///< PXS liquid balance
+  PXS_balance       savings_pxs_balance; ///< PXS balance guarded by 3 day withdrawal (also earns interest)
+  PXS_balance       reward_pxs_balance; ///< PXS balance author rewards that can be claimed
 
-  HIVE_balance      reward_hive_balance; ///< HIVE balance author rewards that can be claimed
-  HIVE_balance      reward_vesting_hive; ///< HIVE counterweight to reward_vesting_balance
-  HIVE_balance      hive_balance;  ///< HIVE liquid balance
-  HIVE_balance      savings_hive_balance;  ///< HIVE balance guarded by 3 day withdrawal
+  HIVE_balance      reward_pixa_balance; ///< PIXA balance author rewards that can be claimed
+  HIVE_balance      reward_vesting_pixa; ///< PIXA counterweight to reward_vesting_balance
+  HIVE_balance      pixa_balance;  ///< PIXA liquid balance
+  HIVE_balance      savings_pixa_balance;  ///< PIXA balance guarded by 3 day withdrawal
 
   VEST_balance      reward_vesting_balance; ///< VESTS balance author/curation rewards that can be claimed
   VEST_balance      vesting_shares; ///< VESTS balance, controls governance voting power
@@ -231,8 +231,8 @@ private:
 public:
   VEST_asset        vesting_withdraw_rate; ///< weekly power down rate
 
-  HIVE_asset        curation_rewards; ///< not used by consensus - sum of all curations (value before conversion to VESTS)
-  HIVE_asset        posting_rewards; ///< not used by consensus - sum of all author rewards (value before conversion to VESTS/HBD)
+  PIXA_asset        curation_rewards; ///< not used by consensus - sum of all curations (value before conversion to VESTS)
+  PIXA_asset        posting_rewards; ///< not used by consensus - sum of all author rewards (value before conversion to VESTS/PXS)
 
   VEST_asset        withdrawn; ///< VESTS already withdrawn in currently active power down (why do we even need this?)
   VEST_asset        to_withdraw; ///< VESTS yet to be withdrawn in currently active power down (withdown should just be subtracted from this)
@@ -246,10 +246,10 @@ public:
 
   ushare_type       sum_delayed_votes = 0; ///< sum of delayed_votes (should be changed to VEST_asset)
 
-  time_point_sec    hbd_seconds_last_update; ///< the last time the hbd_seconds was updated
-  time_point_sec    hbd_last_interest_payment; ///< used to pay interest at most once per month
-  time_point_sec    savings_hbd_seconds_last_update; ///< the last time the hbd_seconds was updated
-  time_point_sec    savings_hbd_last_interest_payment; ///< used to pay interest at most once per month
+  time_point_sec    pxs_seconds_last_update; ///< the last time the pxs_seconds was updated
+  time_point_sec    pxs_last_interest_payment; ///< used to pay interest at most once per month
+  time_point_sec    savings_pxs_seconds_last_update; ///< the last time the pxs_seconds was updated
+  time_point_sec    savings_pxs_last_interest_payment; ///< used to pay interest at most once per month
 private:
   time_point_sec    created; // REMOVE - not used by consensus checks (only unit tests)
   time_point_sec    block_created; // REMOVE - not used by consensus checks (only API and colony)
@@ -602,15 +602,15 @@ private:
 FC_REFLECT( hive::chain::account_object,
           (id)(proxy)(recovery_account)(last_account_recovery)(block_last_account_recovery)
           (name)
-          (hbd_seconds)
-          (savings_hbd_seconds)
+          (pxs_seconds)
+          (savings_pxs_seconds)
           (voting_manabar)
           (downvote_manabar)
           (rc_manabar)
-          (hbd_balance)(savings_hbd_balance)
-          (reward_hbd_balance)(reward_hive_balance)
-          (reward_vesting_hive)(hive_balance)
-          (savings_hive_balance)(reward_vesting_balance)
+          (pxs_balance)(savings_pxs_balance)
+          (reward_pxs_balance)(reward_pixa_balance)
+          (reward_vesting_pixa)(pixa_balance)
+          (savings_pixa_balance)(reward_vesting_balance)
           (vesting_shares)(delegated_vesting_shares)
           (received_vesting_shares)(vesting_withdraw_rate)
           (curation_rewards)(posting_rewards)
@@ -618,7 +618,7 @@ FC_REFLECT( hive::chain::account_object,
           (rc_adjustment)(delegated_rc)
           (received_rc)(last_max_rc)
           (pending_claimed_accounts)(sum_delayed_votes)
-          (hbd_seconds_last_update)(hbd_last_interest_payment)(savings_hbd_seconds_last_update)(savings_hbd_last_interest_payment)
+          (pxs_seconds_last_update)(pxs_last_interest_payment)(savings_pxs_seconds_last_update)(savings_pxs_last_interest_payment)
           (created)(block_created)(last_account_update)(last_post)(last_root_post)
           (last_post_edit)(last_vote_time)(next_vesting_withdrawal)(governance_vote_expiration_ts)
           (post_count)(post_bandwidth)(withdraw_routes)(pending_escrow_transfers)(open_recurrent_transfers)(witnesses_voted_for)

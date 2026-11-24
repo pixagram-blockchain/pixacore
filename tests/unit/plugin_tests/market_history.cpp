@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( mh_test )
   {
     market_history_api_plugin* mh_plug = nullptr;
 
-    configuration_data.set_initial_asset_supply( HIVE_INITIAL_TEST_SUPPLY, HBD_INITIAL_TEST_SUPPLY, HP_INITIAL_TEST_SUPPLY );
+    configuration_data.set_initial_asset_supply( HIVE_INITIAL_TEST_SUPPLY, PXS_INITIAL_TEST_SUPPLY, HP_INITIAL_TEST_SUPPLY );
     {
       std::vector< std::string > init_witnesses;
       for( int i = HIVE_NUM_INIT_MINERS; i < HIVE_MAX_WITNESSES; ++i )
@@ -64,20 +64,20 @@ BOOST_AUTO_TEST_CASE( mh_test )
     generate_block();
     db->_log_hardforks = true;
 
-    set_account_creation_fee( HIVE_asset( 3000 ) ); //3.000 HIVE, same as mainnet
+    set_account_creation_fee( PIXA_asset( 3000 ) ); //3.000 PIXA, same as mainnet
 
-    vest( HIVE_INIT_MINER_NAME, HIVE_asset( 10'000 ) );
+    vest( HIVE_INIT_MINER_NAME, PIXA_asset( 10'000 ) );
     validate_database();
 
     ACTORS( DEFAULT_VESTING, (alice)(bob)(sam) );
     generate_block();
 
-    issue_funds( "alice", HIVE_asset( 1'000'000 ) );
-    issue_funds( "alice", HBD_asset( 1'000'000 ) );
-    issue_funds( "bob", HIVE_asset( 1'000'000 ) );
-    issue_funds( "bob", HBD_asset( 1'000'000 ) );
-    issue_funds( "sam", HIVE_asset( 1'000'000 ) );
-    issue_funds( "sam", HBD_asset( 1'000'000 ) );
+    issue_funds( "alice", PIXA_asset( 1'000'000 ) );
+    issue_funds( "alice", PXS_asset( 1'000'000 ) );
+    issue_funds( "bob", PIXA_asset( 1'000'000 ) );
+    issue_funds( "bob", PXS_asset( 1'000'000 ) );
+    issue_funds( "sam", PIXA_asset( 1'000'000 ) );
+    issue_funds( "sam", PXS_asset( 1'000'000 ) );
 
     const auto& bucket_idx = db->get_index< bucket_index >().indices().get< by_bucket >();
     const auto& order_hist_idx = db->get_index< order_history_index >().indices().get< by_id >();
@@ -155,16 +155,16 @@ BOOST_AUTO_TEST_CASE( mh_test )
     {
       BOOST_REQUIRE_EQUAL( b.seconds, s );
       BOOST_REQUIRE_EQUAL( b.open, o );
-      BOOST_REQUIRE_EQUAL( b.hive.high.value, h_h );
-      BOOST_REQUIRE_EQUAL( b.hive.low.value, h_l );
-      BOOST_REQUIRE_EQUAL( b.hive.open.value, h_o );
-      BOOST_REQUIRE_EQUAL( b.hive.close.value, h_c );
-      BOOST_REQUIRE_EQUAL( b.hive.volume.value, h_v );
-      BOOST_REQUIRE_EQUAL( b.non_hive.high.value, d_h );
-      BOOST_REQUIRE_EQUAL( b.non_hive.low.value, d_l );
-      BOOST_REQUIRE_EQUAL( b.non_hive.open.value, d_o );
-      BOOST_REQUIRE_EQUAL( b.non_hive.close.value, d_c );
-      BOOST_REQUIRE_EQUAL( b.non_hive.volume.value, d_v );
+      BOOST_REQUIRE_EQUAL( b.pixa.high.value, h_h );
+      BOOST_REQUIRE_EQUAL( b.pixa.low.value, h_l );
+      BOOST_REQUIRE_EQUAL( b.pixa.open.value, h_o );
+      BOOST_REQUIRE_EQUAL( b.pixa.close.value, h_c );
+      BOOST_REQUIRE_EQUAL( b.pixa.volume.value, h_v );
+      BOOST_REQUIRE_EQUAL( b.non_pixa.high.value, d_h );
+      BOOST_REQUIRE_EQUAL( b.non_pixa.low.value, d_l );
+      BOOST_REQUIRE_EQUAL( b.non_pixa.open.value, d_o );
+      BOOST_REQUIRE_EQUAL( b.non_pixa.close.value, d_c );
+      BOOST_REQUIRE_EQUAL( b.non_pixa.volume.value, d_v );
     };
 
     check_bucket( *bucket, 15, time_a, 1500, 1500, 1500, 1500, 1500, 750, 750, 750, 750, 750 );
@@ -324,23 +324,23 @@ BOOST_AUTO_TEST_CASE( mh_test )
     BOOST_REQUIRE_EQUAL( ticker.percent_change, ( ( 25.0 / 75.0 ) - ( 2.5 / 5.0 ) ) / ( 2.5 / 5.0 ) * 100.0 );
     BOOST_REQUIRE_EQUAL( ticker.lowest_ask, 10.0 / 20.0 );
     BOOST_REQUIRE_EQUAL( ticker.highest_bid, 25.0 / 75.0 );
-    BOOST_REQUIRE_EQUAL( ticker.hive_volume.amount.value, 68000 + 75000 + 75000 );
-    BOOST_REQUIRE_EQUAL( ticker.hbd_volume.amount.value, 31764 + 30069 + 25000 );
+    BOOST_REQUIRE_EQUAL( ticker.pixa_volume.amount.value, 68000 + 75000 + 75000 );
+    BOOST_REQUIRE_EQUAL( ticker.pxs_volume.amount.value, 31764 + 30069 + 25000 );
 
     auto volume = mh_api->get_volume( {} );
-    BOOST_REQUIRE_EQUAL( volume.hive_volume, ticker.hive_volume );
-    BOOST_REQUIRE_EQUAL( volume.hbd_volume, ticker.hbd_volume );
+    BOOST_REQUIRE_EQUAL( volume.pixa_volume, ticker.pixa_volume );
+    BOOST_REQUIRE_EQUAL( volume.pxs_volume, ticker.pxs_volume );
 
     auto orders = mh_api->get_order_book( { 10 } );
     // just last orders from sam and bob
     BOOST_REQUIRE_EQUAL( orders.asks.size(), 1 );
     BOOST_REQUIRE_EQUAL( orders.asks.front().real_price, ticker.lowest_ask );
-    BOOST_REQUIRE_EQUAL( orders.asks.front().hive.value, 20000 );
-    BOOST_REQUIRE_EQUAL( orders.asks.front().hbd.value, 10000 );
+    BOOST_REQUIRE_EQUAL( orders.asks.front().pixa.value, 20000 );
+    BOOST_REQUIRE_EQUAL( orders.asks.front().pxs.value, 10000 );
     BOOST_REQUIRE_EQUAL( orders.bids.size(), 1 );
     BOOST_REQUIRE_EQUAL( orders.bids.front().real_price, ticker.highest_bid );
-    BOOST_REQUIRE_EQUAL( orders.bids.front().hive.value, 47001 );
-    BOOST_REQUIRE_EQUAL( orders.bids.front().hbd.value, 15667 );
+    BOOST_REQUIRE_EQUAL( orders.bids.front().pixa.value, 47001 );
+    BOOST_REQUIRE_EQUAL( orders.bids.front().pxs.value, 15667 );
 
     //get_trade_history/get_recent_trades should be moved to HAF/AH, so not testing them here
 

@@ -199,7 +199,7 @@ json_rpc_database_fixture::json_rpc_database_fixture()
 {
   try {
 
-  configuration_data.set_initial_asset_supply( HIVE_INITIAL_TEST_SUPPLY, HBD_INITIAL_TEST_SUPPLY, HP_INITIAL_TEST_SUPPLY );
+  configuration_data.set_initial_asset_supply( HIVE_INITIAL_TEST_SUPPLY, PXS_INITIAL_TEST_SUPPLY, HP_INITIAL_TEST_SUPPLY );
   {
     std::vector< std::string > init_witnesses;
     for( int i = HIVE_NUM_INIT_MINERS; i < HIVE_MAX_WITNESSES; ++i )
@@ -233,9 +233,9 @@ json_rpc_database_fixture::json_rpc_database_fixture()
   generate_block();
   db->_log_hardforks = true;
 
-  set_account_creation_fee( HIVE_asset( 3000 ) ); //3.000 HIVE, same as mainnet
+  set_account_creation_fee( PIXA_asset( 3000 ) ); //3.000 PIXA, same as mainnet
 
-  vest( HIVE_INIT_MINER_NAME, HIVE_asset( 10'000 ) );
+  vest( HIVE_INIT_MINER_NAME, PIXA_asset( 10'000 ) );
   validate_database();
 
   }

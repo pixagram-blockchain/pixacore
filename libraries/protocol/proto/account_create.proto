@@ -12,7 +12,7 @@ package hive.protocol.buffers;
  * Description https://gitlab.syncad.com/hive/hive/-/blob/develop/doc/devs/operations/09_account_create.md?ref_type=heads&plain=0&blame=1#2-parameters
  */
 message account_create {
-  // @param {asset} fee - Paid by creator. The witnesses decide the amount of the fee. Now, it is 3 HIVE.
+  // @param {asset} fee - Paid by creator. The witnesses decide the amount of the fee. Now, it is 3 PIXA.
   required asset     fee = 1;
 
   // @param {string} creator - An account that creates a new account.

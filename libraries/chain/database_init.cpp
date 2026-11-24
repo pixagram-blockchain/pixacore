@@ -49,6 +49,7 @@ void database::initialize_evaluators()
   register_account_evaluators( _my->_evaluator_registry );
   register_witness_evaluators( _my->_evaluator_registry );
   register_dhf_evaluators( _my->_evaluator_registry );
+  register_nft_evaluators( _my->_evaluator_registry );
 
   rc().initialize_evaluators();
 }
@@ -313,7 +314,7 @@ void database::init_genesis()
         // HIVE_MIN_ACCOUNT_CREATION_FEE validation; once witnesses come
         // online and call witness_set_properties_operation any new fee they
         // publish must satisfy that minimum.
-        w.props.account_creation_fee = HIVE_asset( 0 );
+        w.props.account_creation_fee = PIXA_asset( 0 );
       } );
     };
 
@@ -336,7 +337,7 @@ void database::init_genesis()
     }
 
     const auto& dgpo = create< dynamic_global_property_object >( HIVE_INIT_MINER_NAME );
-    temp_HIVE_balance initial_reward_balance;
+    temp_PIXA_balance initial_reward_balance;
     const auto& rf = create< reward_fund_object >( HIVE_POST_REWARD_FUND_NAME, std::move( initial_reward_balance ), HIVE_GENESIS_TIME );
     // As a shortcut in payout processing, we use the id as an array index.
     // The IDs must be assigned this way. The assertion is a dummy check to ensure this happens.
@@ -347,7 +348,7 @@ void database::init_genesis()
 #if defined(IS_TEST_NET) || defined(HIVE_CONVERTER_ICEBERG_PLUGIN_ENABLED)
     const auto& feed_history = create< feed_history_object >( [&]( feed_history_object& o )
     {
-      o.current_median_history = HBD_price( 1, 1 );
+      o.current_median_history = PXS_price( 1, 1 );
       o.market_median_history = o.current_median_history;
       o.current_min_history = o.current_median_history;
       o.current_max_history = o.current_median_history;
@@ -357,7 +358,7 @@ void database::init_genesis()
     // PIXA-equivalent for conversions before witnesses publish their feeds.
     const auto& feed_history = create< feed_history_object >( [&]( feed_history_object& o )
     {
-      o.current_median_history = HBD_price( 1000, 102000 );
+      o.current_median_history = PXS_price( 1000, 102000 );
       o.market_median_history = o.current_median_history;
       o.current_min_history = o.current_median_history;
       o.current_max_history = o.current_median_history;
@@ -373,9 +374,9 @@ void database::init_genesis()
     // amounts cannot shift by a rounding unit.
     const VEST_asset ico_vests( asset( 75000000000000ll, VESTS_SYMBOL ) );    // 75 M PP for pixa.rex (sales)
     const VEST_asset team_vests( asset( 25000000000000ll, VESTS_SYMBOL ) );   // 25 M PP for pixa.team
-    const HBD_asset  omnibus_hbd( asset( 245098039ll, HBD_SYMBOL ) );         // ~245 098 PXS = 25 M PIXA-equivalent of 25 M VESTS (1:1 vesting price) at genesis median 1 PXS = 102 PIXA
-    const HIVE_asset ico_fund = ico_vests * HIVE_INITIAL_VESTING_PRICE;
-    const HIVE_asset team_fund = team_vests * HIVE_INITIAL_VESTING_PRICE;
+    const PXS_asset  omnibus_pxs( asset( 245098039ll, PXS_SYMBOL ) );         // ~245 098 PXS = 25 M PIXA-equivalent of 25 M VESTS (1:1 vesting price) at genesis median 1 PXS = 102 PIXA
+    const PIXA_asset ico_fund = ico_vests * HIVE_INITIAL_VESTING_PRICE;
+    const PIXA_asset team_fund = team_vests * HIVE_INITIAL_VESTING_PRICE;
 
 #ifdef IS_TEST_NET
     // Unit-test builds skip the funding unless a test asks for it: 100M VESTS would dwarf the stake
@@ -389,15 +390,15 @@ void database::init_genesis()
     {
       temp_VEST_balance ico_vest_balance;
       temp_VEST_balance team_vest_balance;
-      temp_HBD_balance omnibus_hbd_balance;
+      temp_PXS_balance omnibus_pxs_balance;
       modify( dgpo, [&]( dynamic_global_property_object& gpo )
       {
         ico_vest_balance = gpo.issue_VESTS( ico_vests );
         team_vest_balance = gpo.issue_VESTS( team_vests );
-        temp_HIVE_balance vesting_fund = gpo.issue_HIVE( ico_fund + team_fund );
-        gpo.access_total_vesting_fund_hive().transfer_from( vesting_fund );
+        temp_PIXA_balance vesting_fund = gpo.issue_PIXA( ico_fund + team_fund );
+        gpo.access_total_vesting_fund_pixa().transfer_from( vesting_fund );
         // virtual_supply is recomputed by update_virtual_supply() below
-        omnibus_hbd_balance = gpo.issue_HBD( omnibus_hbd, feed_history.current_median_history );
+        omnibus_pxs_balance = gpo.issue_PXS( omnibus_pxs, feed_history.current_median_history );
       } );
 
       modify( ico_account, [&]( account_object& a )
@@ -409,8 +410,8 @@ void database::init_genesis()
       {
         // Treasury holds liquid PXS only - VESTS would be locked unspendable
         // by HF21's lock_account, and the proposal payout pipeline draws
-        // exclusively from hbd_balance.
-        a.access_hbd_balance().transfer_from( omnibus_hbd_balance );
+        // exclusively from pxs_balance.
+        a.access_pxs_balance().transfer_from( omnibus_pxs_balance );
       } );
 
       modify( team_account, [&]( account_object& a )
@@ -420,37 +421,37 @@ void database::init_genesis()
     }
 
     // Recompute virtual_supply now that current_supply (PIXA) and
-    // current_hbd_supply (PXS) have been seeded; uses the genesis median feed.
+    // current_pxs_supply (PXS) have been seeded; uses the genesis median feed.
     update_virtual_supply();
 
 #if defined(IS_TEST_NET) || defined(HIVE_CONVERTER_ICEBERG_PLUGIN_ENABLED)
     // issue initial token supply to balance of first miner
-    if( HIVE_INIT_SUPPLY != 0 || HIVE_HBD_INIT_SUPPLY != 0 )
+    if( HIVE_INIT_SUPPLY != 0 || HIVE_PXS_INIT_SUPPLY != 0 )
     {
-      HIVE_asset to_vest( HIVE_INITIAL_VESTING );
+      PIXA_asset to_vest( HIVE_INITIAL_VESTING );
 
-      temp_HIVE_balance init_hive_balance;
-      temp_HBD_balance init_hbd_balance;
+      temp_PIXA_balance init_pixa_balance;
+      temp_PXS_balance init_pxs_balance;
       temp_VEST_balance init_vest_balance;
       modify( dgpo, [&]( dynamic_global_property_object& gpo )
       {
-        init_hive_balance = gpo.issue_HIVE( HIVE_asset( HIVE_INIT_SUPPLY ) );
-        init_hbd_balance = gpo.issue_HBD( HBD_asset( HIVE_HBD_INIT_SUPPLY ), feed_history.current_median_history );
-        gpo.access_initial_hbd_supply() = HBD_asset( HIVE_HBD_INIT_SUPPLY );
-        temp_HIVE_balance to_be_vested;
-        to_be_vested.transfer_from( init_hive_balance, to_vest );
-        init_vest_balance = gpo.convert_HIVE_to_VESTS( to_be_vested, HIVE_INITIAL_VESTING_PRICE );
+        init_pixa_balance = gpo.issue_PIXA( PIXA_asset( HIVE_INIT_SUPPLY ) );
+        init_pxs_balance = gpo.issue_PXS( PXS_asset( HIVE_PXS_INIT_SUPPLY ), feed_history.current_median_history );
+        gpo.access_initial_pxs_supply() = PXS_asset( HIVE_PXS_INIT_SUPPLY );
+        temp_PIXA_balance to_be_vested;
+        to_be_vested.transfer_from( init_pixa_balance, to_vest );
+        init_vest_balance = gpo.convert_PIXA_to_VESTS( to_be_vested, HIVE_INITIAL_VESTING_PRICE );
       } );
       modify( get_account( HIVE_INIT_MINER_NAME ), [&]( account_object& a )
       {
-        a.access_hive_balance().transfer_from( init_hive_balance );
-        a.access_hbd_balance().transfer_from( init_hbd_balance );
+        a.access_pixa_balance().transfer_from( init_pixa_balance );
+        a.access_pxs_balance().transfer_from( init_pxs_balance );
         a.access_vesting().transfer_from( init_vest_balance );
       } );
       update_virtual_supply();
     }
 #else
-    FC_ASSERT( HIVE_INIT_SUPPLY == 0 && HIVE_HBD_INIT_SUPPLY == 0, "Wrong configuration" );
+    FC_ASSERT( HIVE_INIT_SUPPLY == 0 && HIVE_PXS_INIT_SUPPLY == 0, "Wrong configuration" );
       // for mainnet these values must be 0, mirrornet should be compatible
 #endif
 
@@ -464,7 +465,7 @@ void database::init_genesis()
       wso.current_shuffled_witnesses[0] = HIVE_INIT_MINER_NAME;
       // Seed median to match initminer's genesis override so account creation
       // is free from block 1, before the first witness-schedule recomputation.
-      wso.median_props.account_creation_fee = HIVE_asset( 0 );
+      wso.median_props.account_creation_fee = PIXA_asset( 0 );
       util::rd_system_params account_subsidy_system_params;
       account_subsidy_system_params.resource_unit = HIVE_ACCOUNT_SUBSIDY_PRECISION;
       account_subsidy_system_params.decay_per_time_unit_denom_shift = HIVE_RD_DECAY_DENOM_SHIFT;

@@ -2,7 +2,7 @@
 
 ## 1. Description
 
-This operation instructs the blockchain to start a conversion of HBD to Hive. The funds are deposited after 3.5 days.   
+This operation instructs the blockchain to start a conversion of PXS to PIXA. The funds are deposited after 3.5 days.   
 
 The global parameters:
 
@@ -15,7 +15,7 @@ The global parameters:
 | -------------- | ----------------------------------------------------------- | ------- |
 | owner          | account\_name\_type                                         |         |
 | requestid = 0; | The number is given by a user. Should be unique for a user. |         |
-| amount         | Amount > 0, have to be in HBD                               |         |
+| amount         | Amount > 0, have to be in PXS                               |         |
 
 
 ## 3. Authority
@@ -27,7 +27,7 @@ Active
 
 You need:
 
-\- your balance in Hive Dollars is equal or higher than the operation amount.
+\- your balance in PXS is equal or higher than the operation amount.
 
 \- enough Resource Credit (RC)  to make an operation.
 
@@ -36,9 +36,9 @@ You need:
 
 After the operation:
 
-\- immediately after the operation, {owner} account balance in HBD is reduced by the operation amount.
+\- immediately after the operation, {owner} account balance in PXS is reduced by the operation amount.
 
-\- 3.5 days after the operation, the  {owner} account balance in Hive is increased by the operation amount exchanged on the median feed price from that moment. Median feed price is the median of the median prices provided by the witnesses during those 3.5 days.
+\- 3.5 days after the operation, the  {owner} account balance in PIXA is increased by the operation amount exchanged on the median feed price from that moment. Median feed price is the median of the median prices provided by the witnesses during those 3.5 days.
 
 \- when the balance is increased, the virtual operation: fill\_convert\_request\_operation is generated. 
 

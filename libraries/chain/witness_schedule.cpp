@@ -51,7 +51,7 @@ void update_global_witness_properties( database& db, const witness_schedule_obje
   db.modify( dgpo, [&]( dynamic_global_property_object& _dgpo )
   {
     _dgpo.set_maximum_block_size( wso.median_props.maximum_block_size );
-    _dgpo.set_hbd_interest_rate( 0 );
+    _dgpo.set_pxs_interest_rate( 0 );
   } );
 } FC_CAPTURE_AND_RETHROW() }
 
@@ -69,7 +69,7 @@ void update_median_witness_props(database& db, const witness_schedule_object& ws
   {
     return a->props.account_creation_fee.amount < b->props.account_creation_fee.amount;
   } );
-  HIVE_asset median_account_creation_fee = active[active.size()/2]->props.account_creation_fee;
+  PIXA_asset median_account_creation_fee = active[active.size()/2]->props.account_creation_fee;
 
   /// sort them by maximum_block_size
   std::sort( active.begin(), active.end(), [&]( const witness_object* a, const witness_object* b )
@@ -124,7 +124,7 @@ void update_median_witness_props(database& db, const witness_schedule_object& ws
   {
     _wso.median_props.account_creation_fee       = median_account_creation_fee;
     _wso.median_props.maximum_block_size         = median_maximum_block_size;
-    _wso.median_props.hbd_interest_rate          = 0;
+    _wso.median_props.pxs_interest_rate          = 0;
     _wso.median_props.account_subsidy_budget     = median_account_subsidy_budget;
     _wso.median_props.account_subsidy_decay      = median_account_subsidy_decay;
 
@@ -540,7 +540,7 @@ void update_witness_schedule(database& db)
 
     fc::uint128 new_virtual_time = 0;
 
-    /// only use vote based scheduling after the first 1M HIVE is created or if there is no POW queued
+    /// only use vote based scheduling after the first 1M PIXA is created or if there is no POW queued
     if( props.get_current_pow_witnesses() == 0 || db.head_block_num() > HIVE_START_MINER_VOTING_BLOCK )
     {
       const auto& widx = db.get_index<witness_index>().indices().get<by_vote_name>();

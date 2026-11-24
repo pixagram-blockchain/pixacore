@@ -37,6 +37,7 @@
 #include <hive/chain/detail/state/decline_voting_rights_request_object_multiindex.hpp>
 #include <hive/chain/detail/state/reward_fund_object_multiindex.hpp>
 #include <hive/chain/detail/state/recurrent_transfer_object_multiindex.hpp>
+#include <hive/chain/detail/state/nft_object_multiindex.hpp>
 #include <hive/chain/detail/state/transaction_object.hpp>
 #include <hive/chain/detail/state/transaction_object_multiindex.hpp>
 #include <hive/chain/detail/state/witness_objects.hpp>
@@ -389,6 +390,8 @@ namespace shared_memory_file_util
     save_index_name(add_index_to_db<hive::chain::decline_voting_rights_request_index>());
     save_index_name(add_index_to_db<hive::chain::reward_fund_index>());
     save_index_name(add_index_to_db<hive::chain::recurrent_transfer_index>());
+    save_index_name(add_index_to_db<hive::chain::nft_index>());
+    save_index_name(add_index_to_db<hive::chain::nft_edition_index>());
     save_index_name(add_index_to_db<hive::chain::transaction_index>());
     save_index_name(add_index_to_db<hive::chain::witness_index>());
     save_index_name(add_index_to_db<hive::chain::witness_vote_index>());

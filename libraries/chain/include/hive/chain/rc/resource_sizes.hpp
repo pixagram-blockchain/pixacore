@@ -63,7 +63,8 @@ struct state_object_size_info
 
   // delegate vesting shares
   const int64_t vesting_delegation_object_size;
-  const int64_t vesting_delegation_expiration_object_size;
+  const int64_t vesting_delegation_expiration_object_size; //held for HIVE_DELEGATION_RETURN_PERIOD_HF20
+  const int64_t vesting_delegation_expiration_hourly_size; //multiply by the hours of the return period in force
   const int64_t delegate_vesting_shares_size;
 
   // set withdraw vesting route
@@ -89,6 +90,11 @@ struct state_object_size_info
 
   // direct rc delegation
   const int64_t delegate_rc_base_size; //multiply by number of delegatees
+
+  // nft (HF32)
+  const int64_t nft_mint_base_size; //the NFT; its license is kept as a hash, whatever the length of the text
+  const int64_t nft_mint_char_size; //multiply by length of permlink
+  const int64_t nft_edition_size; //one copy, created when first offered, given or sold from the reserve
 };
 
 struct operation_exec_info
@@ -150,6 +156,13 @@ struct operation_exec_info
   const int64_t pow_time;
   const int64_t pow2_time;
 
+  // nft operation (HF32), one per action
+  const int64_t nft_mint_time;
+  const int64_t nft_mint_license_byte_time; //multiply by length of license (UTF-8 check and SHA-256)
+  const int64_t nft_list_time;
+  const int64_t nft_unlist_time;
+  const int64_t nft_buy_time;
+  const int64_t nft_transfer_time;
 };
 
 } }
@@ -179,6 +192,7 @@ FC_REFLECT( hive::chain::state_object_size_info,
   ( transaction_base_size )
   ( vesting_delegation_object_size )
   ( vesting_delegation_expiration_object_size )
+  ( vesting_delegation_expiration_hourly_size )
   ( delegate_vesting_shares_size )
   ( set_withdraw_vesting_route_size )
   ( witness_update_base_size )
@@ -190,6 +204,9 @@ FC_REFLECT( hive::chain::state_object_size_info,
   ( recurrent_transfer_base_size )
   ( recurrent_transfer_memo_char_size )
   ( delegate_rc_base_size )
+  ( nft_mint_base_size )
+  ( nft_mint_char_size )
+  ( nft_edition_size )
   )
 
 FC_REFLECT( hive::chain::operation_exec_info,
@@ -244,4 +261,10 @@ FC_REFLECT( hive::chain::operation_exec_info,
   ( recover_account_time )
   ( pow_time )
   ( pow2_time )
+  ( nft_mint_time )
+  ( nft_mint_license_byte_time )
+  ( nft_list_time )
+  ( nft_unlist_time )
+  ( nft_buy_time )
+  ( nft_transfer_time )
   )

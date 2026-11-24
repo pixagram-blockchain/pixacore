@@ -76,8 +76,8 @@ namespace detail {
       fc::time_point_sec head_block_time
     );
     hp::transfer_to_vesting_operation generate_vesting_for_account( const hp::account_name_type& acc )const;
-    hp::transfer_operation generate_hbd_transfer_for_account( const hp::account_name_type& acc )const;
-    hp::transfer_operation generate_hive_transfer_for_account( const hp::account_name_type& acc )const;
+    hp::transfer_operation generate_pxs_transfer_for_account( const hp::account_name_type& acc )const;
+    hp::transfer_operation generate_pixa_transfer_for_account( const hp::account_name_type& acc )const;
     hp::account_create_operation on_new_account_collected( const hp::account_name_type& acc, const hp::asset& account_creation_fee )const;
     hp::comment_operation on_comment_collected( const hp::account_name_type& acc, const std::string& link )const;
   };
@@ -118,11 +118,11 @@ namespace detail {
     op.block_signing_key = converter.get_witness_key().get_public_key();
 
     hp::legacy_chain_properties props{};
-    props.account_creation_fee = hp::legacy_hive_asset::from_amount( account_creation_fee );
+    props.account_creation_fee = hp::legacy_pixa_asset::from_amount( account_creation_fee );
     props.maximum_block_size = requested_max_block_size;
 
     op.props = props;
-    op.fee = hp::asset( 1, HIVE_SYMBOL );
+    op.fee = hp::asset( 1, PIXA_SYMBOL );
 
     tx.operations.push_back(op);
     tx.signatures.emplace_back();
@@ -141,36 +141,36 @@ namespace detail {
 
   hp::transfer_to_vesting_operation iceberg_generate_plugin_impl::generate_vesting_for_account( const hp::account_name_type& acc )const
   {
-    static const uint64_t hive_precision = std::pow(10, HIVE_PRECISION_HIVE);
+    static const uint64_t pixa_precision = std::pow(10, HIVE_PRECISION_PIXA);
 
     hp::transfer_to_vesting_operation op;
     op.from = HIVE_INIT_MINER_NAME;
     op.to = acc;
-    op.amount = hp::asset{ 100 * hive_precision, HIVE_SYMBOL };
+    op.amount = hp::asset{ 100 * pixa_precision, PIXA_SYMBOL };
 
     return op;
   }
 
-  hp::transfer_operation iceberg_generate_plugin_impl::generate_hbd_transfer_for_account( const hp::account_name_type& acc )const
+  hp::transfer_operation iceberg_generate_plugin_impl::generate_pxs_transfer_for_account( const hp::account_name_type& acc )const
   {
-    static const uint64_t hbd_precision = std::pow(10, HIVE_PRECISION_HBD);
+    static const uint64_t pxs_precision = std::pow(10, HIVE_PRECISION_PXS);
 
     hp::transfer_operation op;
     op.from = HIVE_INIT_MINER_NAME;
     op.to = acc;
-    op.amount = hp::asset{ 100 * hbd_precision, HBD_SYMBOL };
+    op.amount = hp::asset{ 100 * pxs_precision, PXS_SYMBOL };
 
     return op;
   }
 
-  hp::transfer_operation iceberg_generate_plugin_impl::generate_hive_transfer_for_account( const hp::account_name_type& acc )const
+  hp::transfer_operation iceberg_generate_plugin_impl::generate_pixa_transfer_for_account( const hp::account_name_type& acc )const
   {
-    static const uint64_t hive_precision = std::pow(10, HIVE_PRECISION_HIVE);
+    static const uint64_t pixa_precision = std::pow(10, HIVE_PRECISION_PIXA);
 
     hp::transfer_operation op;
     op.from = HIVE_INIT_MINER_NAME;
     op.to = acc;
-    op.amount = hp::asset{ 100 * hive_precision, HIVE_SYMBOL };
+    op.amount = hp::asset{ 100 * pixa_precision, PIXA_SYMBOL };
 
     return op;
   }
@@ -354,8 +354,8 @@ namespace detail {
             {
               dependents_tx.operations.emplace_back(on_new_account_collected(acc, account_creation_fee));
               dependents_tx.operations.emplace_back(generate_vesting_for_account(acc));
-              dependents_tx.operations.emplace_back(generate_hbd_transfer_for_account(acc));
-              dependents_tx.operations.emplace_back(generate_hive_transfer_for_account(acc));
+              dependents_tx.operations.emplace_back(generate_pxs_transfer_for_account(acc));
+              dependents_tx.operations.emplace_back(generate_pixa_transfer_for_account(acc));
             }
 
           for( const auto& dependent_permlink_data : permlinks )
@@ -414,20 +414,20 @@ namespace detail {
     }
 
     int64_t virtual_supply = gpo["virtual_supply"].as< hp::asset >().amount.value;
-    int64_t current_hbd_supply = gpo["current_hbd_supply"].as< hp::asset >().amount.value;
-    int64_t init_hbd_supply = gpo["init_hbd_supply"].as< hp::asset >().amount.value;
+    int64_t current_pxs_supply = gpo["current_pxs_supply"].as< hp::asset >().amount.value;
+    int64_t init_pxs_supply = gpo["init_pxs_supply"].as< hp::asset >().amount.value;
 
-    // Use current hbd supply if there is any, otherwise use init hbd supply (can be either 0 or the value from the alternate chain properties file)
-    int64_t real_hbd_supply = current_hbd_supply == 0 ? init_hbd_supply : current_hbd_supply;
+    // Use current pxs supply if there is any, otherwise use init pxs supply (can be either 0 or the value from the alternate chain properties file)
+    int64_t real_pxs_supply = current_pxs_supply == 0 ? init_pxs_supply : current_pxs_supply;
 
-    ilog("Init supply: [${is} HIVE required, available: ${vs} HIVE], HBD Init supply: [${his} HBD required, available: ${hvs} HBD]",
-      ("is", init_assets[HIVE_NAI_HIVE])("vs", virtual_supply)
-      ("his", init_assets[HIVE_NAI_HBD])("hvs", real_hbd_supply)
+    ilog("Init supply: [${is} PIXA required, available: ${vs} PIXA], PXS Init supply: [${his} PXS required, available: ${hvs} PXS]",
+      ("is", init_assets[HIVE_NAI_PIXA])("vs", virtual_supply)
+      ("his", init_assets[HIVE_NAI_PXS])("hvs", real_pxs_supply)
     );
 
     // XXX: Should we also handle HIVE_NAI_VESTS?
-    FC_ASSERT( virtual_supply >= init_assets[HIVE_NAI_HIVE], "Insufficient initial supply in the output node blockchain" );
-    FC_ASSERT( real_hbd_supply >= init_assets[HIVE_NAI_HBD], "Insufficient HBD initial supply in the output node blockchain" );
+    FC_ASSERT( virtual_supply >= init_assets[HIVE_NAI_PIXA], "Insufficient initial supply in the output node blockchain" );
+    FC_ASSERT( real_pxs_supply >= init_assets[HIVE_NAI_PXS], "Insufficient PXS initial supply in the output node blockchain" );
 
     ilog("Blockchain ready for the conversion.");
   }

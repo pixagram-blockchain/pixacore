@@ -47,10 +47,10 @@ DEFINE_API_IMPL( market_history_api_impl, get_ticker )
 
     if( itr != bucket_idx.end() )
     {
-      auto open = ASSET_TO_REAL( asset( itr->non_hive.open, HBD_SYMBOL ) ) / ASSET_TO_REAL( asset( itr->hive.open, HIVE_SYMBOL ) );
+      auto open = ASSET_TO_REAL( asset( itr->non_pixa.open, PXS_SYMBOL ) ) / ASSET_TO_REAL( asset( itr->pixa.open, PIXA_SYMBOL ) );
       // actually we can get closing price from bucket of any size (they have it all set to the same value)
       auto ritr = bucket_idx.rbegin();
-      result.latest = ASSET_TO_REAL( asset( ritr->non_hive.close, HBD_SYMBOL ) ) / ASSET_TO_REAL( asset( ritr->hive.close, HIVE_SYMBOL ) );
+      result.latest = ASSET_TO_REAL( asset( ritr->non_pixa.close, PXS_SYMBOL ) ) / ASSET_TO_REAL( asset( ritr->pixa.close, PIXA_SYMBOL ) );
       result.percent_change = ( ( result.latest - open ) / open ) * 100;
     }
   }
@@ -62,8 +62,8 @@ DEFINE_API_IMPL( market_history_api_impl, get_ticker )
     result.lowest_ask = orders.asks[0].real_price;
 
   auto volume = get_volume( get_volume_args() );
-  result.hive_volume = volume.hive_volume;
-  result.hbd_volume = volume.hbd_volume;
+  result.pixa_volume = volume.pixa_volume;
+  result.pxs_volume = volume.pxs_volume;
 
   return result;
 }
@@ -81,8 +81,8 @@ DEFINE_API_IMPL( market_history_api_impl, get_volume )
     for( auto itr = bucket_idx.lower_bound( boost::make_tuple( smallest, _db.head_block_time() - 86400 ) );
          itr != bucket_idx.end() && itr->seconds == smallest; ++itr )
     {
-      result.hive_volume.amount += itr->hive.volume;
-      result.hbd_volume.amount += itr->non_hive.volume;
+      result.pixa_volume.amount += itr->pixa.volume;
+      result.pxs_volume.amount += itr->non_pixa.volume;
     }
   }
 
@@ -94,31 +94,31 @@ DEFINE_API_IMPL( market_history_api_impl, get_order_book )
   FC_ASSERT( 0 < args.limit && args.limit <= 500 );
 
   const auto& order_idx = _db.get_index< chain::limit_order_index, chain::by_price >();
-  auto itr = order_idx.lower_bound( price::max( HBD_SYMBOL, HIVE_SYMBOL ) );
+  auto itr = order_idx.lower_bound( price::max( PXS_SYMBOL, PIXA_SYMBOL ) );
 
   get_order_book_return result;
 
-  while( itr != order_idx.end() && itr->get_sell_price().base.symbol == HBD_SYMBOL && result.bids.size() < args.limit )
+  while( itr != order_idx.end() && itr->get_sell_price().base.symbol == PXS_SYMBOL && result.bids.size() < args.limit )
   {
     order cur;
     cur.order_price = itr->get_sell_price();
     cur.real_price = ASSET_TO_REAL( itr->get_sell_price().base ) / ASSET_TO_REAL( itr->get_sell_price().quote );
-    cur.hive = ( itr->amount_for_sale() * itr->get_sell_price() ).amount;
-    cur.hbd = itr->amount_for_sale().amount;
+    cur.pixa = ( itr->amount_for_sale() * itr->get_sell_price() ).amount;
+    cur.pxs = itr->amount_for_sale().amount;
     cur.created = itr->get_created();
     result.bids.push_back( cur );
     ++itr;
   }
 
-  itr = order_idx.lower_bound( price::max( HIVE_SYMBOL, HBD_SYMBOL ) );
+  itr = order_idx.lower_bound( price::max( PIXA_SYMBOL, PXS_SYMBOL ) );
 
-  while( itr != order_idx.end() && itr->get_sell_price().base.symbol == HIVE_SYMBOL && result.asks.size() < args.limit )
+  while( itr != order_idx.end() && itr->get_sell_price().base.symbol == PIXA_SYMBOL && result.asks.size() < args.limit )
   {
     order cur;
     cur.order_price = itr->get_sell_price();
     cur.real_price = ASSET_TO_REAL( itr->get_sell_price().quote ) / ASSET_TO_REAL( itr->get_sell_price().base );
-    cur.hive = itr->amount_for_sale().amount;
-    cur.hbd = ( itr->amount_for_sale() * itr->get_sell_price() ).amount;
+    cur.pixa = itr->amount_for_sale().amount;
+    cur.pxs = ( itr->amount_for_sale() * itr->get_sell_price() ).amount;
     cur.created = itr->get_created();
     result.asks.push_back( cur );
     ++itr;

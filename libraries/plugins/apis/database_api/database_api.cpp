@@ -14,8 +14,8 @@ api_commment_cashout_info::api_commment_cashout_info(const comment_cashout_objec
 {
   total_vote_weight = cc.get_total_vote_weight();
   reward_weight = HIVE_100_PERCENT; // since HF17 reward is not limited if posts are too frequent
-  total_payout_value = asset( 0, HBD_SYMBOL ); // since HF19 it was either default 0 or cc did not exist
-  curator_payout_value = asset( 0, HBD_SYMBOL ); // since HF19 it was either default 0 or cc did not exist
+  total_payout_value = asset( 0, PXS_SYMBOL ); // since HF19 it was either default 0 or cc did not exist
+  curator_payout_value = asset( 0, PXS_SYMBOL ); // since HF19 it was either default 0 or cc did not exist
   author_rewards = 0; // since HF19 author_rewards was either default 0 or cc did not exist
   net_votes = cc.get_net_votes();
   last_payout = time_point_sec::min(); // since HF17 there is only one payout and cc does not exist after HF19
@@ -26,7 +26,7 @@ api_commment_cashout_info::api_commment_cashout_info(const comment_cashout_objec
   cashout_time = cc.get_cashout_time();
   max_cashout_time = time_point_sec::maximum(); // since HF17 it is the only possible value
   max_accepted_payout = cc.get_max_accepted_payout().to_asset();
-  percent_hbd = cc.get_percent_hbd();
+  percent_pxs = cc.get_percent_pxs();
   allow_votes = cc.allows_votes();
   allow_curation_rewards = cc.allows_curation_rewards();
   was_voted_on = cc.has_votes();
@@ -98,7 +98,7 @@ bool future_chain_properties::fill( const chain_properties& active, const chain_
   bool filled = false;
   FILL_FIELD( account_creation_fee );
   FILL_FIELD( maximum_block_size );
-  FILL_FIELD( hbd_interest_rate );
+  FILL_FIELD( pxs_interest_rate );
   FILL_FIELD( account_subsidy_budget );
   FILL_FIELD( account_subsidy_decay );
   return filled;
@@ -162,7 +162,7 @@ DEFINE_API_IMPL( database_api_impl, get_reward_funds )
 
 DEFINE_API_IMPL( database_api_impl, get_current_price_feed )
 {
-  return _db.get_hbd_price().to_price();
+  return _db.get_pxs_price().to_price();
 }
 
 DEFINE_API_IMPL( database_api_impl, get_feed_history )
@@ -208,6 +208,8 @@ DEFINE_READ_APIS( database_api,
   (find_vesting_delegations)
   (list_vesting_delegation_expirations)
   (find_vesting_delegation_expirations)
+  (list_pxs_conversion_requests)
+  (find_pxs_conversion_requests)
   (list_hbd_conversion_requests)
   (find_hbd_conversion_requests)
   (list_collateralized_conversion_requests)
@@ -222,6 +224,10 @@ DEFINE_READ_APIS( database_api,
   (list_proposal_votes)
   (get_order_book)
   (find_recurrent_transfers)
+  (get_nft_params)
+  (find_nfts)
+  (list_nfts)
+  (list_nft_editions)
   (get_transaction_hex)
   (get_required_signatures)
   (get_potential_signatures)

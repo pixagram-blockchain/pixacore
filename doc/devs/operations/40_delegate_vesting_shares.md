@@ -36,7 +36,7 @@ Active
 
 You need:
 
-\- your balance in HP is equal or higher than { vesting\_shares }.
+\- your balance in PXP is equal or higher than { vesting\_shares }.
 
 \- enough Resource Credit (RC)  to make an operation.
 
@@ -45,11 +45,11 @@ You need:
 
 After the operation:
 
-\- the delegatee’s vesting shares (HP balance) is increased by { vesting\_shares }.
+\- the delegatee’s vesting shares (PXP balance) is increased by { vesting\_shares }.
 
 \- the delegatee’s RC is increased by { vesting\_shares }.
 
-\- the delegator’s vesting shares (HP balance) is decreased by { vesting\_shares }.
+\- the delegator’s vesting shares (PXP balance) is decreased by { vesting\_shares }.
 
 \- the delegator’s RC is decreased by { vesting\_shares }.
 

@@ -44,12 +44,12 @@ void database::pay_liquidity_reward()
     auto itr = ridx.begin();
     if( itr != ridx.end() && itr->volume_weight() > 0 )
     {
-      temp_HIVE_balance reward = issue_mining_reward( reward_amount );
+      temp_PIXA_balance reward = issue_mining_reward( reward_amount );
       adjust_balance( get(itr->owner), reward, reward.as_asset() );
       modify( *itr, [&]( liquidity_reward_balance_object& obj )
       {
-        obj.hive_volume = 0;
-        obj.hbd_volume  = 0;
+        obj.pixa_volume = 0;
+        obj.pxs_volume  = 0;
         obj.last_update = head_block_time();
         obj.weight      = 0;
       } );
@@ -59,7 +59,7 @@ void database::pay_liquidity_reward()
   }
 }
 
-void database::adjust_liquidity_reward( const account_object& owner, const asset& volume, bool is_hbd )
+void database::adjust_liquidity_reward( const account_object& owner, const asset& volume, bool is_pxs )
 {
   const auto& ridx = get_index< liquidity_reward_balance_index >().indices().get< by_owner >();
   auto itr = ridx.find( owner.get_id() );
@@ -69,15 +69,15 @@ void database::adjust_liquidity_reward( const account_object& owner, const asset
     {
       if( head_block_time() - r.last_update >= HIVE_LIQUIDITY_TIMEOUT_SEC )
       {
-        r.hbd_volume = 0;
-        r.hive_volume = 0;
+        r.pxs_volume = 0;
+        r.pixa_volume = 0;
         r.weight = 0;
       }
 
-      if( is_hbd )
-        r.hbd_volume += volume.amount.value;
+      if( is_pxs )
+        r.pxs_volume += volume.amount.value;
       else
-        r.hive_volume += volume.amount.value;
+        r.pixa_volume += volume.amount.value;
 
       r.update_weight( has_hardfork( HIVE_HARDFORK_0_10__141 ) );
       r.last_update = head_block_time();
@@ -88,10 +88,10 @@ void database::adjust_liquidity_reward( const account_object& owner, const asset
     create<liquidity_reward_balance_object>( [&](liquidity_reward_balance_object& r )
     {
       r.owner = owner.get_id();
-      if( is_hbd )
-        r.hbd_volume = volume.amount.value;
+      if( is_pxs )
+        r.pxs_volume = volume.amount.value;
       else
-        r.hive_volume = volume.amount.value;
+        r.pixa_volume = volume.amount.value;
 
       r.update_weight( has_hardfork( HIVE_HARDFORK_0_9__141 ) );
       r.last_update = head_block_time();
@@ -179,20 +179,20 @@ void database::process_vesting_withdrawals()
             bool to_self = to_account.get_id() == from_account.get_id();
 
             temp_VEST_balance routed_vest_balance;
-            temp_HIVE_balance routed_hive_balance;
+            temp_PIXA_balance routed_pixa_balance;
             routed_vest_balance.transfer_from( power_down_balance, to_deposit );
             if( not auto_vest_mode )
             {
               modify( cprops, [&]( dynamic_global_property_object& dgpo )
               {
-                routed_hive_balance = dgpo.convert_VESTS_to_HIVE( routed_vest_balance );
+                routed_pixa_balance = dgpo.convert_VESTS_to_PIXA( routed_vest_balance );
               } );
             }
             VEST_asset routed_vests = routed_vest_balance.as_asset();
-            HIVE_asset routed_hive = routed_hive_balance.as_asset();
+            PIXA_asset routed_pixa = routed_pixa_balance.as_asset();
 
             auto vop = fill_vesting_withdraw_operation( from_account.get_name(), to_account.get_name(),
-              to_deposit, auto_vest_mode ? routed_vests.to_asset() : routed_hive.to_asset() );
+              to_deposit, auto_vest_mode ? routed_vests.to_asset() : routed_pixa.to_asset() );
 
             pre_push_virtual_operation( *this, vop );
 
@@ -203,7 +203,7 @@ void database::process_vesting_withdrawals()
               if( auto_vest_mode )
                 a.access_vesting().transfer_from( routed_vest_balance );
               else
-                a.access_hive_balance().transfer_from( routed_hive_balance );
+                a.access_pixa_balance().transfer_from( routed_pixa_balance );
             } );
             if( auto_vest_mode )
             {
@@ -227,24 +227,24 @@ void database::process_vesting_withdrawals()
       }
     };
 
-    // Do two passes, the first for VESTS, the second for HIVE. Try to maintain as much accuracy for VESTS as possible.
+    // Do two passes, the first for VESTS, the second for PIXA. Try to maintain as much accuracy for VESTS as possible.
     process_routing( true/*auto_vest_mode*/ );
     process_routing( false/*auto_vest_mode*/ );
 
     // all vests remaining on power_down_balance are to be handled like implicit vesting route
     // with auto_vest == false and from_account == to_account
     VEST_asset to_convert = power_down_balance.as_asset();
-    temp_HIVE_balance converted_hive_balance;
+    temp_PIXA_balance converted_pixa_balance;
     if( not power_down_balance.is_empty() )
     {
       modify( cprops, [&]( dynamic_global_property_object& dgpo )
       {
-        converted_hive_balance = dgpo.convert_VESTS_to_HIVE( power_down_balance );
+        converted_pixa_balance = dgpo.convert_VESTS_to_PIXA( power_down_balance );
       } );
     }
-    HIVE_asset converted_hive = converted_hive_balance.as_asset();
+    PIXA_asset converted_pixa = converted_pixa_balance.as_asset();
 
-    auto vop = fill_vesting_withdraw_operation( from_account.get_name(), from_account.get_name(), to_convert, converted_hive.to_asset() );
+    auto vop = fill_vesting_withdraw_operation( from_account.get_name(), from_account.get_name(), to_convert, converted_pixa.to_asset() );
     //note: it has to be generated even if to_convert is zero because we've accumulated change on from_account
     //and only now we are going to update that account's VESTS (see issue #337)
     pre_push_virtual_operation( *this, vop );
@@ -260,7 +260,7 @@ void database::process_vesting_withdrawals()
     modify( from_account, [&]( account_object& a )
     {
       a.access_vesting().transfer_to( power_down_balance, to_withdraw ); // return distributed vests to temporary balance
-      a.access_hive_balance().transfer_from( converted_hive_balance );
+      a.access_pixa_balance().transfer_from( converted_pixa_balance );
       a.withdrawn += to_withdraw;
 
       if( a.get_total_vesting_withdrawal().amount <= 0 || a.get_vesting().amount == 0 )

@@ -15,7 +15,7 @@ struct create_proposal_operation : public base_operation
   time_point_sec start_date;
   time_point_sec end_date;
 
-  /// Amount of HBD to be daily paid to the `receiver` account.
+  /// Amount of PXS to be daily paid to the `receiver` account.
   asset daily_pay;
 
   string subject;
@@ -25,7 +25,7 @@ struct create_proposal_operation : public base_operation
 
   extensions_type extensions;
 
-  HBD_asset get_daily_pay() const { return HBD_asset( daily_pay ); }
+  PXS_asset get_daily_pay() const { return PXS_asset( daily_pay ); }
 
   void validate()const;
 
@@ -48,14 +48,14 @@ struct update_proposal_operation : public base_operation
 {
   int64_t proposal_id;
   account_name_type creator;
-  /// Amount of HBDs to be daily paid to the `receiver` account, if updated, has to be lower or equal to the current amount
+  /// Amount of PXS to be daily paid to the `receiver` account, if updated, has to be lower or equal to the current amount
   asset daily_pay;
   string subject;
   /// Given link shall be a valid permlink. Must be posted by creator or the receiver.
   string permlink;
   update_proposal_extensions_type extensions;
 
-  HBD_asset get_daily_pay() const { return HBD_asset( daily_pay ); }
+  PXS_asset get_daily_pay() const { return PXS_asset( daily_pay ); }
 
   void validate()const;
 

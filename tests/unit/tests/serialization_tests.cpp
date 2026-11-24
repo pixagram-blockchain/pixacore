@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( serialization_raw_test )
     transfer_operation op;
     op.from = "alice";
     op.to = "bob";
-    op.amount = asset(100,HIVE_SYMBOL);
+    op.amount = asset(100,PIXA_SYMBOL);
 
     signed_transaction trx;
     trx.operations.push_back( op );
@@ -114,7 +114,7 @@ BOOST_AUTO_TEST_CASE( serialization_json_test )
     transfer_operation op;
     op.from = "alice";
     op.to = "bob";
-    op.amount = asset(100,HIVE_SYMBOL);
+    op.amount = asset(100,PIXA_SYMBOL);
 
     fc::variant test(op.amount);
     auto tmp = test.as<asset>();
@@ -145,26 +145,26 @@ BOOST_AUTO_TEST_CASE( legacy_asset_test )
     BOOST_CHECK_EQUAL( legacy_asset().to_string(), "0.000 TESTS" );
 
     BOOST_TEST_MESSAGE( "Asset Test" );
-    legacy_asset hive = legacy_asset::from_string( "123.456 TESTS" );
-    legacy_asset hbd = legacy_asset::from_string( "654.321 TBD" );
+    legacy_asset pixa = legacy_asset::from_string( "123.456 TESTS" );
+    legacy_asset pxs = legacy_asset::from_string( "654.321 TBD" );
     legacy_asset tmp = legacy_asset::from_string( "0.456 TESTS" );
     BOOST_CHECK_EQUAL( tmp.amount.value, 456 );
     tmp = legacy_asset::from_string( "0.056 TESTS" );
     BOOST_CHECK_EQUAL( tmp.amount.value, 56 );
 
-    BOOST_CHECK_EQUAL( hive.amount.value, 123456 );
-    BOOST_CHECK_EQUAL( hive.symbol.decimals(), 3 );
-    BOOST_CHECK_EQUAL( hive.to_string(), "123.456 TESTS" );
-    BOOST_CHECK( hive.symbol == HIVE_SYMBOL );
-    BOOST_CHECK_EQUAL( legacy_asset::from_asset( asset( 50, HIVE_SYMBOL ) ).to_string(), "0.050 TESTS" );
-    BOOST_CHECK_EQUAL( legacy_asset::from_asset( asset(50000, HIVE_SYMBOL ) ) .to_string(), "50.000 TESTS" );
+    BOOST_CHECK_EQUAL( pixa.amount.value, 123456 );
+    BOOST_CHECK_EQUAL( pixa.symbol.decimals(), 3 );
+    BOOST_CHECK_EQUAL( pixa.to_string(), "123.456 TESTS" );
+    BOOST_CHECK( pixa.symbol == PIXA_SYMBOL );
+    BOOST_CHECK_EQUAL( legacy_asset::from_asset( asset( 50, PIXA_SYMBOL ) ).to_string(), "0.050 TESTS" );
+    BOOST_CHECK_EQUAL( legacy_asset::from_asset( asset(50000, PIXA_SYMBOL ) ) .to_string(), "50.000 TESTS" );
 
-    BOOST_CHECK_EQUAL( hbd.amount.value, 654321 );
-    BOOST_CHECK_EQUAL( hbd.symbol.decimals(), 3 );
-    BOOST_CHECK_EQUAL( hbd.to_string(), "654.321 TBD" );
-    BOOST_CHECK( hbd.symbol == HBD_SYMBOL );
-    BOOST_CHECK_EQUAL( legacy_asset::from_asset( asset(50, HBD_SYMBOL ) ).to_string(), "0.050 TBD" );
-    BOOST_CHECK_EQUAL( legacy_asset::from_asset( asset(50000, HBD_SYMBOL ) ).to_string(), "50.000 TBD" );
+    BOOST_CHECK_EQUAL( pxs.amount.value, 654321 );
+    BOOST_CHECK_EQUAL( pxs.symbol.decimals(), 3 );
+    BOOST_CHECK_EQUAL( pxs.to_string(), "654.321 TBD" );
+    BOOST_CHECK( pxs.symbol == PXS_SYMBOL );
+    BOOST_CHECK_EQUAL( legacy_asset::from_asset( asset(50, PXS_SYMBOL ) ).to_string(), "0.050 TBD" );
+    BOOST_CHECK_EQUAL( legacy_asset::from_asset( asset(50000, PXS_SYMBOL ) ).to_string(), "50.000 TBD" );
 
     BOOST_CHECK_THROW( legacy_asset::from_string( "1.00000000000000000000 TESTS" ), fc::exception );
     BOOST_CHECK_THROW( legacy_asset::from_string( "1.000TESTS" ), fc::exception );
@@ -198,27 +198,27 @@ BOOST_AUTO_TEST_CASE( asset_test )
     BOOST_CHECK_EQUAL( asset().symbol.decimals(), 3 );
     BOOST_CHECK_EQUAL( fc::json::to_string( asset() ), "{\"amount\":\"0\",\"precision\":3,\"nai\":\"@@000000021\"}" );
 
-    asset hive =  fc::json::from_string( "{\"amount\":\"123456\",    \"precision\":3, \"nai\":\"@@000000021\"}", fc::json::format_validation_mode::full ).as< asset >();
-    asset hbd =   fc::json::from_string( "{\"amount\":\"654321\",    \"precision\":3, \"nai\":\"@@000000013\"}", fc::json::format_validation_mode::full ).as< asset >();
+    asset pixa =  fc::json::from_string( "{\"amount\":\"123456\",    \"precision\":3, \"nai\":\"@@000000021\"}", fc::json::format_validation_mode::full ).as< asset >();
+    asset pxs =   fc::json::from_string( "{\"amount\":\"654321\",    \"precision\":3, \"nai\":\"@@000000013\"}", fc::json::format_validation_mode::full ).as< asset >();
     asset vests = fc::json::from_string( "{\"amount\":\"123456789\", \"precision\":6, \"nai\":\"@@000000037\"}", fc::json::format_validation_mode::full ).as< asset >();
     asset tmp =   fc::json::from_string( "{\"amount\":\"456\",       \"precision\":3, \"nai\":\"@@000000021\"}", fc::json::format_validation_mode::full ).as< asset >();
     BOOST_CHECK_EQUAL( tmp.amount.value, 456 );
     tmp = fc::json::from_string( "{\"amount\":\"56\", \"precision\":3, \"nai\":\"@@000000021\"}", fc::json::format_validation_mode::full ).as< asset >();
     BOOST_CHECK_EQUAL( tmp.amount.value, 56 );
 
-    BOOST_CHECK_EQUAL( hive.amount.value, 123456 );
-    BOOST_CHECK_EQUAL( hive.symbol.decimals(), 3 );
-    BOOST_CHECK_EQUAL( fc::json::to_string( hive ), "{\"amount\":\"123456\",\"precision\":3,\"nai\":\"@@000000021\"}" );
-    BOOST_CHECK_EQUAL( hive.symbol.asset_num, HIVE_ASSET_NUM_HIVE );
-    BOOST_CHECK_EQUAL( fc::json::to_string( asset( 50, HIVE_SYMBOL ) ), "{\"amount\":\"50\",\"precision\":3,\"nai\":\"@@000000021\"}" );
-    BOOST_CHECK_EQUAL( fc::json::to_string( asset( 50000, HIVE_SYMBOL ) ), "{\"amount\":\"50000\",\"precision\":3,\"nai\":\"@@000000021\"}" );
+    BOOST_CHECK_EQUAL( pixa.amount.value, 123456 );
+    BOOST_CHECK_EQUAL( pixa.symbol.decimals(), 3 );
+    BOOST_CHECK_EQUAL( fc::json::to_string( pixa ), "{\"amount\":\"123456\",\"precision\":3,\"nai\":\"@@000000021\"}" );
+    BOOST_CHECK_EQUAL( pixa.symbol.asset_num, HIVE_ASSET_NUM_PIXA );
+    BOOST_CHECK_EQUAL( fc::json::to_string( asset( 50, PIXA_SYMBOL ) ), "{\"amount\":\"50\",\"precision\":3,\"nai\":\"@@000000021\"}" );
+    BOOST_CHECK_EQUAL( fc::json::to_string( asset( 50000, PIXA_SYMBOL ) ), "{\"amount\":\"50000\",\"precision\":3,\"nai\":\"@@000000021\"}" );
 
-    BOOST_CHECK_EQUAL( hbd.amount.value, 654321 );
-    BOOST_CHECK_EQUAL( hbd.symbol.decimals(), 3 );
-    BOOST_CHECK_EQUAL( fc::json::to_string( hbd ), "{\"amount\":\"654321\",\"precision\":3,\"nai\":\"@@000000013\"}" );
-    BOOST_CHECK_EQUAL( hbd.symbol.asset_num, HIVE_ASSET_NUM_HBD );
-    BOOST_CHECK_EQUAL( fc::json::to_string( asset( 50, HBD_SYMBOL ) ), "{\"amount\":\"50\",\"precision\":3,\"nai\":\"@@000000013\"}" );
-    BOOST_CHECK_EQUAL( fc::json::to_string( asset( 50000, HBD_SYMBOL ) ), "{\"amount\":\"50000\",\"precision\":3,\"nai\":\"@@000000013\"}" );
+    BOOST_CHECK_EQUAL( pxs.amount.value, 654321 );
+    BOOST_CHECK_EQUAL( pxs.symbol.decimals(), 3 );
+    BOOST_CHECK_EQUAL( fc::json::to_string( pxs ), "{\"amount\":\"654321\",\"precision\":3,\"nai\":\"@@000000013\"}" );
+    BOOST_CHECK_EQUAL( pxs.symbol.asset_num, HIVE_ASSET_NUM_PXS );
+    BOOST_CHECK_EQUAL( fc::json::to_string( asset( 50, PXS_SYMBOL ) ), "{\"amount\":\"50\",\"precision\":3,\"nai\":\"@@000000013\"}" );
+    BOOST_CHECK_EQUAL( fc::json::to_string( asset( 50000, PXS_SYMBOL ) ), "{\"amount\":\"50000\",\"precision\":3,\"nai\":\"@@000000013\"}" );
 
     BOOST_CHECK_EQUAL( vests.amount.value, 123456789 );
     BOOST_CHECK_EQUAL( vests.symbol.decimals(), 6 );
@@ -269,13 +269,13 @@ std::string hex_bytes( const T& obj )
 
 void old_pack_symbol(vector<char>& v, asset_symbol_type sym)
 {
-  if( sym == HIVE_SYMBOL )
+  if( sym == PIXA_SYMBOL )
   {
     v.push_back('\x03'); v.push_back('T' ); v.push_back('E' ); v.push_back('S' );
     v.push_back('T'   ); v.push_back('S' ); v.push_back('\0'); v.push_back('\0');
     // 03 54 45 53 54 53 00 00
   }
-  else if( sym == HBD_SYMBOL )
+  else if( sym == PXS_SYMBOL )
   {
     v.push_back('\x03'); v.push_back('T' ); v.push_back('B' ); v.push_back('D' );
     v.push_back('\0'  ); v.push_back('\0'); v.push_back('\0'); v.push_back('\0');
@@ -312,7 +312,7 @@ void old_pack_asset( vector<char>& v, const asset& a )
 std::string old_json_asset( const asset& a )
 {
   size_t decimal_places = 0;
-  if( (a.symbol == HIVE_SYMBOL) || (a.symbol == HBD_SYMBOL) )
+  if( (a.symbol == PIXA_SYMBOL) || (a.symbol == PXS_SYMBOL) )
     decimal_places = 3;
   else if( a.symbol == VESTS_SYMBOL )
     decimal_places = 6;
@@ -320,9 +320,9 @@ std::string old_json_asset( const asset& a )
   ss << std::setfill('0') << std::setw(decimal_places+1) << a.amount.value;
   std::string result = ss.str();
   result.insert( result.length() - decimal_places, 1, '.' );
-  if( a.symbol == HIVE_SYMBOL )
+  if( a.symbol == PIXA_SYMBOL )
     result += " TESTS";
-  else if( a.symbol == HBD_SYMBOL )
+  else if( a.symbol == PXS_SYMBOL )
     result += " TBD";
   else if( a.symbol == VESTS_SYMBOL )
     result += " VESTS";
@@ -335,8 +335,8 @@ BOOST_AUTO_TEST_CASE( asset_raw_test )
 {
   try
   {
-    BOOST_CHECK( HBD_SYMBOL < HIVE_SYMBOL );
-    BOOST_CHECK( HIVE_SYMBOL < VESTS_SYMBOL );
+    BOOST_CHECK( PXS_SYMBOL < PIXA_SYMBOL );
+    BOOST_CHECK( PIXA_SYMBOL < VESTS_SYMBOL );
 
     // get a bunch of random bits
     fc::sha256 h = fc::sha256::hash("");
@@ -355,8 +355,8 @@ BOOST_AUTO_TEST_CASE( asset_raw_test )
 
     std::vector< asset_symbol_type > symbols;
 
-    symbols.push_back( HIVE_SYMBOL );
-    symbols.push_back( HBD_SYMBOL   );
+    symbols.push_back( PIXA_SYMBOL );
+    symbols.push_back( PXS_SYMBOL   );
     symbols.push_back( VESTS_SYMBOL );
 
     for( const share_type& amount : amounts )
@@ -692,13 +692,13 @@ BOOST_AUTO_TEST_CASE( legacy_signed_transaction )
 
   BOOST_CHECK_NO_THROW(
     serialize_with_legacy< annotated_signed_transaction >(
-      "{\"ref_block_num\": 41047, \"ref_block_prefix\": 4089157749, \"expiration\": \"2018-03-28T19:05:47\", \"operations\": [[\"witness_update\", {\"owner\": \"test\", \"url\": \"foo\", \"block_signing_key\": \"STM1111111111111111111111111111111114T1Anm\", \"props\": {\"account_creation_fee\": \"0.500 TESTS\", \"maximum_block_size\": 65536, \"hbd_interest_rate\": 0}, \"fee\": \"0.000 TESTS\"}]], \"extensions\": [], \"signatures\": [\"1f1b2d47427a46513777ae9ed032b761b504423b18350e673beb991a1b52d2381c26c36368f9cc4a72c9de3cc16bca83b269c2ea1960e28647caf151e17c35bf3f\"]}",
+      "{\"ref_block_num\": 41047, \"ref_block_prefix\": 4089157749, \"expiration\": \"2018-03-28T19:05:47\", \"operations\": [[\"witness_update\", {\"owner\": \"test\", \"url\": \"foo\", \"block_signing_key\": \"STM1111111111111111111111111111111114T1Anm\", \"props\": {\"account_creation_fee\": \"0.500 TESTS\", \"maximum_block_size\": 65536, \"pxs_interest_rate\": 0}, \"fee\": \"0.000 TESTS\"}]], \"extensions\": [], \"signatures\": [\"1f1b2d47427a46513777ae9ed032b761b504423b18350e673beb991a1b52d2381c26c36368f9cc4a72c9de3cc16bca83b269c2ea1960e28647caf151e17c35bf3f\"]}",
       transaction_serialization_type::legacy )
   );
 
   BOOST_CHECK_NO_THROW(
     serialize_with_legacy< annotated_signed_transaction >(
-      "{\"ref_block_num\": 41047, \"ref_block_prefix\": 4089157749, \"expiration\": \"2018-03-28T19:05:47\", \"operations\": [[\"witness_update\", {\"owner\": \"test\", \"url\": \"foo\", \"block_signing_key\": \"STM82m7LE1Hxf4SqGUYiUzL62mLyqAZmcGNEz33hJ1P3FTa6a8hws\", \"props\": {\"account_creation_fee\": \"0.500 TESTS\", \"maximum_block_size\": 65536, \"hbd_interest_rate\": 0}, \"fee\": \"0.000 TESTS\"}]], \"extensions\": [], \"signatures\": [\"1f1b2d47427a46513777ae9ed032b761b504423b18350e673beb991a1b52d2381c26c36368f9cc4a72c9de3cc16bca83b269c2ea1960e28647caf151e17c35bf3f\"]}",
+      "{\"ref_block_num\": 41047, \"ref_block_prefix\": 4089157749, \"expiration\": \"2018-03-28T19:05:47\", \"operations\": [[\"witness_update\", {\"owner\": \"test\", \"url\": \"foo\", \"block_signing_key\": \"STM82m7LE1Hxf4SqGUYiUzL62mLyqAZmcGNEz33hJ1P3FTa6a8hws\", \"props\": {\"account_creation_fee\": \"0.500 TESTS\", \"maximum_block_size\": 65536, \"pxs_interest_rate\": 0}, \"fee\": \"0.000 TESTS\"}]], \"extensions\": [], \"signatures\": [\"1f1b2d47427a46513777ae9ed032b761b504423b18350e673beb991a1b52d2381c26c36368f9cc4a72c9de3cc16bca83b269c2ea1960e28647caf151e17c35bf3f\"]}",
       transaction_serialization_type::legacy )
   );
 }
@@ -725,7 +725,7 @@ BOOST_AUTO_TEST_CASE( static_variant_json_test )
     transfer_operation t = op.get< transfer_operation >();
     BOOST_CHECK_EQUAL( t.from, "foo" );
     BOOST_CHECK_EQUAL( t.to, "bar" );
-    BOOST_CHECK_EQUAL( t.amount, asset( 1000, HIVE_SYMBOL ) );
+    BOOST_CHECK_EQUAL( t.amount, asset( 1000, PIXA_SYMBOL ) );
     BOOST_CHECK_EQUAL( t.memo, "" );
 
     json_str = "{\"type\":1,\"value\":{\"parent_author\":\"foo\",\"parent_permlink\":\"bar\",\"author\":\"foo1\",\"permlink\":\"bar1\",\"title\":\"\",\"body\":\"\",\"json_metadata\":\"\"}}";
@@ -768,16 +768,16 @@ BOOST_AUTO_TEST_CASE( asset_symbol_type_test )
     BOOST_REQUIRE( symbol.get_paired_symbol() == asset_symbol_type::from_asset_num( asset_num ^ SMT_ASSET_NUM_VESTING_MASK ) );
     BOOST_REQUIRE( asset_symbol_type::from_nai( symbol.to_nai(), 3 ) == symbol );
 
-    asset_symbol_type hive = asset_symbol_type::from_asset_num( HIVE_ASSET_NUM_HIVE );
-    asset_symbol_type hbd = asset_symbol_type::from_asset_num( HIVE_ASSET_NUM_HBD );
+    asset_symbol_type pixa = asset_symbol_type::from_asset_num( HIVE_ASSET_NUM_PIXA );
+    asset_symbol_type pxs = asset_symbol_type::from_asset_num( HIVE_ASSET_NUM_PXS );
     asset_symbol_type vests = asset_symbol_type::from_asset_num( HIVE_ASSET_NUM_VESTS );
 
-    BOOST_REQUIRE_EQUAL( hive.space(), asset_symbol_type::asset_symbol_space::legacy_space );
-    BOOST_REQUIRE_EQUAL( hbd.space(), asset_symbol_type::asset_symbol_space::legacy_space );
+    BOOST_REQUIRE_EQUAL( pixa.space(), asset_symbol_type::asset_symbol_space::legacy_space );
+    BOOST_REQUIRE_EQUAL( pxs.space(), asset_symbol_type::asset_symbol_space::legacy_space );
     BOOST_REQUIRE_EQUAL( vests.space(), asset_symbol_type::asset_symbol_space::legacy_space );
 
-    BOOST_REQUIRE( asset_symbol_type::from_nai( hive.to_nai(), HIVE_PRECISION_HIVE ) == hive );
-    BOOST_REQUIRE( asset_symbol_type::from_nai( hbd.to_nai(), HIVE_PRECISION_HBD ) == hbd );
+    BOOST_REQUIRE( asset_symbol_type::from_nai( pixa.to_nai(), HIVE_PRECISION_PIXA ) == pixa );
+    BOOST_REQUIRE( asset_symbol_type::from_nai( pxs.to_nai(), HIVE_PRECISION_PXS ) == pxs );
     BOOST_REQUIRE( asset_symbol_type::from_nai( vests.to_nai(), HIVE_PRECISION_VESTS ) == vests );
 
     HIVE_REQUIRE_THROW( asset_symbol_type::from_nai_string( "@@100000006", HIVE_ASSET_MAX_DECIMALS + 1 ), fc::assert_exception ); // More than max decimals

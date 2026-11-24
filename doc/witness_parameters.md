@@ -2,7 +2,7 @@
 
 The role of a witness in the Hive blockchain network is to verify incoming transactions, produce blocks when scheduled, and partake in the Hive governance model by voting on several parameters.
 
-These parameters control various aspects of the operation of the blockchain that are not easily defined in code at compile time. One example is the HIVE price feed that defines the conversion rate between HIVE and HBD.
+These parameters control various aspects of the operation of the blockchain that are not easily defined in code at compile time. One example is the PIXA price feed that defines the conversion rate between PIXA and PXS.
 
 Witnesses are able to use the `witness_set_properties_operation` to change witness specific properties and vote on paramters.
 
@@ -14,7 +14,7 @@ This operation was added in Hive v0.20.0 to replace the `witness_update_operatio
 
 ### account_creation_fee
 
-This is the fee in HIVE that must be paid to create an account. This field must be non-negative.
+This is the fee in PIXA that must be paid to create an account. This field must be non-negative.
 
 ### account_subsidy_budget
 
@@ -49,11 +49,13 @@ The maximum size of a single block in bytes. The value must be not less than `65
 
 ### hbd_interest_rate
 
-The annual interest rate paid to HBD holders. HBD interest is compounded on balance changes, no more than once every 30 days.
+The annual interest rate paid to PXS holders. PXS interest is compounded on balance changes, no more than once every 30 days. On Pixa the rate is fixed at 0.
+
+The keys `hbd_interest_rate` and `hbd_exchange_rate` keep Hive's names: they are data inside the signed `witness_set_properties` operation, so renaming them would change what existing transactions mean. The node reports these values under Pixa's names (`pxs_interest_rate`, `pxs_exchange_rate`).
 
 ### hbd_exchange_rate
 
-The exchange rate for HIVE/HBD to be used for printing HBD as rewards as well as HBD->HIVE conversions.
+The exchange rate for PIXA/PXS to be used for printing PXS as rewards as well as PXS->PIXA conversions.
 The actual price feed is the median of medians. Every round (21 blocks) the median exchange rate is pushed to a queue and the oldest is removed. The median value of the queue is used for any calculations.
 
 ### url

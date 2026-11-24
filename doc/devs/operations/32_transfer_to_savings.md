@@ -2,11 +2,11 @@
 
 ## 1. Description
 
-A user can place Hive and Hive Dollars into savings balances. Funds can be withdrawn from these balances after a three day delay.
+A user can place PIXA and PXS into savings balances. Funds can be withdrawn from these balances after a three day delay.
 
 Keeping funds on the savings balance mitigates loss from hacked and compromised accounts. The maximum amount a user can lose instantaneously is the sum of what they hold in liquid balances. Assuming an account can be recovered quickly, loss in such situations can be kept to a minimum
 
-Additionally for keeping Hive Dollars on the savings balance, the interests are calculated.
+Additionally for keeping PXS on the savings balance, the interests are calculated.
 
 
 ## 2. Parameters
@@ -15,7 +15,7 @@ Additionally for keeping Hive Dollars on the savings balance, the interests are 
 | -------------- | ------------------------------------------------------------------------------------------------- | ------------ |
 | from           | The account the funds are coming from                                                             |              |
 | to             | The account the funds are going to. The funds may be transferred to someone else savings balance. |              |
-| amount         | The allowed currency: HIVE and HBD, amount >0                                                     | 100.000 HIVE |
+| amount         | The allowed currency: PIXA and PXS, amount >0                                                     | 100.000 PIXA |
 | memo           | Have to be UTF8, must be shorter than 2048                                                        |              |
 
 
@@ -28,7 +28,7 @@ Active
 
 You need:
 
-\- your balance in Hive or Hive Dollars is equal or higher than the operation amount.
+\- your balance in PIXA or PXS is equal or higher than the operation amount.
 
 \- enough Resource Credit (RC)  to make an operation.
 

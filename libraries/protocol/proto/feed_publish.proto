@@ -5,7 +5,7 @@ import "price.proto";
 package hive.protocol.buffers;
 
 /* This is an operation for witnesses. 
- * The witnesses publish the exchange rate between Hive and HBD.
+ * The witnesses publish the exchange rate between Hive and PXS.
  * Only the exchange rate published by the top 20 witnesses is used to define the exchange rate.
  *
  * Description https://gitlab.syncad.com/hive/hive/-/blob/develop/doc/devs/operations/07_feed_publish.md?ref_type=heads
@@ -14,7 +14,7 @@ message feed_publish {
   //  @param {string} publisher - The witness.
   required string publisher = 1;
 
-  // @param {price} exchange_rate - How many HBD the 1 Hive should cost
-  //                                Example: "base":"0.345 HBD","quote":"1.000 HIVE"
+  // @param {price} exchange_rate - How many PXS the 1 Hive should cost
+  //                                Example: "base":"0.345 PXS","quote":"1.000 PIXA"
   required price  exchange_rate = 2 [json_name = "exchange_rate"];
 }

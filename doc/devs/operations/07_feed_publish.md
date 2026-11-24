@@ -4,7 +4,7 @@
 
 This is an operation for witnesses. 
 
-The witnesses publish the exchange rate between Hive and HBD. Only the exchange rate published by the top 20 witnesses is used to define the exchange rate.
+The witnesses publish the exchange rate between PIXA and PXS. Only the exchange rate published by the top 20 witnesses is used to define the exchange rate.
 
 
 ## 2. Parameters
@@ -12,7 +12,7 @@ The witnesses publish the exchange rate between Hive and HBD. Only the exchange 
 | Parameter name | Description | Example |                                                                                                                              
 | -------------- | ---------------------------------------------------------------------------------- | ------- |
 | publisher      | The witness                                                                        |         |
-| exchange\_rate | How many HBD the 1 Hive should costExample:"base":"0.345 HBD","quote":"1.000 HIVE" |         |
+| exchange\_rate | How many PXS the 1 PIXA should costExample:"base":"0.345 PXS","quote":"1.000 PIXA" |         |
 
 ## 3. Authority
 

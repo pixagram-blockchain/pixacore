@@ -68,7 +68,7 @@ void info(const hive::protocol::chain_id_type& chainId)
   ilog("             @@@@@@@@    /@@@@@/    @@@@@@            ");
   ilog("              @@@@@(    @@@@@@    .@@@@@&             ");
   ilog("                @@     @@@@@&    @@@@@@               \n");
-  ilog("                STARTING HIVE NETWORK\n");
+  ilog("                STARTING PIXA NETWORK\n");
   ilog("------------------------------------------------------");
 #endif
   ilog("initminer public key: ${key}", ("key", HIVE_INIT_PUBLIC_KEY_STR) );

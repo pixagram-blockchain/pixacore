@@ -4,10 +4,10 @@ import "asset.proto";
 
 package hive.protocol.buffers;
 
-/* Similar to convert_operation, this operation instructs the blockchain to convert HIVE to HBD.
- * The operation is performed after 3.5 days, but the owner gets HBD immediately.
- * The price risk is cushioned by extra HIVE (HIVE_COLLATERAL_RATIO = 200 % ).
- * After actual conversion takes place the excess HIVE is returned to the owner.
+/* Similar to convert_operation, this operation instructs the blockchain to convert PIXA to PXS.
+ * The operation is performed after 3.5 days, but the owner gets PXS immediately.
+ * The price risk is cushioned by extra PIXA (HIVE_COLLATERAL_RATIO = 200 % ).
+ * After actual conversion takes place the excess PIXA is returned to the owner.
  *
  * Description https://gitlab.syncad.com/hive/hive/-/blob/develop/doc/devs/operations/48_collateralized_convert.md?ref_type=heads
  */

@@ -19,7 +19,7 @@ message fill_recurrent_transfer {
   // @param {string} to_account - user that is target of transfer (receiver of amount)
   required string to_account = 2 [json_name = "to"];
 
-  // @param {asset} amount - (HIVE of HBD) amount transferred in current iteration
+  // @param {asset} amount - (PIXA of PXS) amount transferred in current iteration
   required asset  amount = 3;
 
   // @param {string} memo - memo attached to the transfer

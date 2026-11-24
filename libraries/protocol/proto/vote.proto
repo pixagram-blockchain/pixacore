@@ -20,7 +20,7 @@ package hive.protocol.buffers;
  *
  * The author of the post or the comment may receive the reward,
  * the amount of the author's reward depends on the numbers and powers of the votes.
- * By default the author reward is paid 50% HP and 50 % HBD.
+ * By default the author reward is paid 50% HP and 50 % PXS.
  *
  * A user who votes for the post or the comment may receive the curation reward. It is paid 100% HP. Its share depends on:
  * - voting power
@@ -31,7 +31,7 @@ package hive.protocol.buffers;
  * When a post or a comment receives a reward, it is divided between the author's reward and the curation reward.
  * The curation reward is shared among curators. 
  *
- * The calculated reward should be more than 0.02 HBD to be paid, if it is less, it is not paid.
+ * The calculated reward should be more than 0.02 PXS to be paid, if it is less, it is not paid.
  *
  * A downvoting user doesn’t receive the curation reward.
  * Downvoting may affect the author of the comment's reputation when a user who downvotes has a higher reputation than the author.

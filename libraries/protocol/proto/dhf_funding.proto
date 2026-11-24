@@ -13,6 +13,6 @@ message dhf_funding {
   // @param {string} treasury - treasury account (receiver of additional_funds)
   required string treasury = 1;
 
-  // @param {asset} additional_funds - (HBD) portion inflation accumulated since previous maintenance period
+  // @param {asset} additional_funds - (PXS) portion inflation accumulated since previous maintenance period
   required asset  additional_funds = 2 [json_name = "additional_funds"];
 }

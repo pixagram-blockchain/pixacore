@@ -5,11 +5,11 @@
 
 namespace hive { namespace chain {
 
-using hive::protocol::HBD_price;
+using hive::protocol::PXS_price;
 using chainbase::t_deque;
 
 /**
-  *  This object gets updated once per hour, on the hour. Tracks price of HIVE (technically in HBD, but
+  *  This object gets updated once per hour, on the hour. Tracks price of PIXA (technically in PXS, but
   *  the meaning is in dollars).
   */
 class feed_history_object : public object< feed_history_object_type, feed_history_object, std::true_type >
@@ -18,12 +18,12 @@ class feed_history_object : public object< feed_history_object_type, feed_histor
 public:
   CHAINBASE_DEFAULT_CONSTRUCTOR( feed_history_object, (price_history) )
 
-  HBD_price current_median_history; ///< the current median of the price history, used as the base for most convert operations
-  HBD_price market_median_history; ///< same as current_median_history except when the latter is artificially changed upward
-  HBD_price current_min_history; ///< used as immediate price for collateralized conversion (after fee correction)
-  HBD_price current_max_history;
+  PXS_price current_median_history; ///< the current median of the price history, used as the base for most convert operations
+  PXS_price market_median_history; ///< same as current_median_history except when the latter is artificially changed upward
+  PXS_price current_min_history; ///< used as immediate price for collateralized conversion (after fee correction)
+  PXS_price current_max_history;
 
-  using t_price_history = t_deque< HBD_price >;
+  using t_price_history = t_deque< PXS_price >;
   t_price_history price_history; ///< tracks this last week of median_feed one per hour
 
   size_t get_dynamic_alloc() const

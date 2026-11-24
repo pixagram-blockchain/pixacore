@@ -26,7 +26,7 @@ class database;
 /// Helper function for creating accounts with proper recovery account handling (pre-HF11 uses "steem")
 HIVE_NO_DANGLING
 const account_object& create_account( database& db, const account_name_type& name, const public_key_type& key,
-  const time_point_sec& _creation_time, const time_point_sec& _block_creation_time, bool mined, const HIVE_asset& fee_for_rc_adjustment,
+  const time_point_sec& _creation_time, const time_point_sec& _block_creation_time, bool mined, const PIXA_asset& fee_for_rc_adjustment,
   const account_object* recovery_account = nullptr, const VEST_asset& initial_delegation = VEST_asset( 0 ) );
 
 // Registration functions for evaluators defined in split cpp files
@@ -35,5 +35,6 @@ void register_account_evaluators( evaluator_registry<operation>& registry );
 void register_social_evaluators( evaluator_registry<operation>& registry );
 void register_witness_evaluators( evaluator_registry<operation>& registry );
 void register_dhf_evaluators( evaluator_registry<operation>& registry );
+void register_nft_evaluators( evaluator_registry<operation>& registry );
 
 } } // hive::chain

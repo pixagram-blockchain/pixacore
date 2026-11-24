@@ -14,7 +14,7 @@ After executing the operation claim\_account\_operation, a new account is not cr
 | Parameter name | Description | Example |                                                                                                                              
 | -------------- | -------------------------------------------------------------------------------------------------------------- | ------------ |
 | creator        | Account name                                                                                                                                                                                |         |
-| fee            | The amount of fee for creating a new account is decided by the witnesses.<br>It may be paid in HIVE or in the Recourse Credit (RC).<br>If a user wants to pay a fee in RC, it should be set {fee= 0} |         |
+| fee            | The amount of fee for creating a new account is decided by the witnesses.<br>It may be paid in PIXA or in the Recourse Credit (RC).<br>If a user wants to pay a fee in RC, it should be set {fee= 0} |         |
 | extensions     | Not currently used.                                                                                                                                                                         |         |
 
 
@@ -27,7 +27,7 @@ Active
 
 You need:
 
-\- enough HIVE or RC to pay a fee for creating an account.
+\- enough PIXA or RC to pay a fee for creating an account.
 
 \- enough Resource Credit (RC)  to make an operation.
 
@@ -38,6 +38,6 @@ After the operation:
 
 \- a { creator} receives a token: Pending claimed accounts.
 
-\- HIVE or Recourse Credit balance is decreased by { fee }.
+\- PIXA or Recourse Credit balance is decreased by { fee }.
 
 \- RC cost is paid by { account }.

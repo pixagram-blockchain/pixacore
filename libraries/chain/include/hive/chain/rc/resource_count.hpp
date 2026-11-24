@@ -1,5 +1,7 @@
 #pragma once
 
+#include <hive/protocol/config.hpp>
+
 #include <fc/int_array.hpp>
 #include <fc/reflect/reflect.hpp>
 #include <vector>
@@ -43,13 +45,15 @@ typedef fc::int_array< uint16_t, HIVE_RC_NUM_RESOURCE_TYPES > resource_share_typ
 
 typedef resource_count_type count_resources_result;
 
-// scans transaction for used resources
+// scans transaction for used resources; delegation_return_period is the global property in force
+// (a removed delegation is held that long)
 void count_resources(
   const hive::protocol::signed_transaction& tx,
   const size_t size,
   count_resources_result& result,
   const fc::time_point_sec now,
-  bool price_custom_data_by_length = false );
+  bool price_custom_data_by_length = false,
+  uint32_t delegation_return_period = HIVE_DELEGATION_RETURN_PERIOD_HF20 );
 
 // scans single nonstandard operation for used extra resources (implemented for rc_custom_operation)
 template< typename OpType >

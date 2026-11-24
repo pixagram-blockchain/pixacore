@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE( additional_allocation_after_snapshot_load )
         witness_create( HIVE_INIT_MINER_NAME + fc::to_string( i ), init_account_priv_key, "foo.bar", init_account_pub_key, HIVE_MIN_PRODUCER_REWARD );
       }
       validate_database();
-      set_price_feed( HBD_price( 1000, 1000 ) );
+      set_price_feed( PXS_price( 1000, 1000 ) );
 
       generate_block();
 
@@ -50,11 +50,11 @@ BOOST_AUTO_TEST_CASE( additional_allocation_after_snapshot_load )
 
       ACTOR( NO_VESTING, alice );
       generate_block();
-      ISSUE_FUNDS( "alice", HIVE_asset( 100'000'000 ) );
+      ISSUE_FUNDS( "alice", PIXA_asset( 100'000'000 ) );
       BOOST_REQUIRE( compare_delayed_vote_count("alice", {}) );
       BOOST_REQUIRE_EQUAL(index.get_item_additional_allocation(), initial_allocations);
 
-      vest( "alice", "alice", HIVE_asset( 100'000 ), alice_private_key );
+      vest( "alice", "alice", PIXA_asset( 100'000 ), alice_private_key );
       generate_block();
       BOOST_CHECK( compare_delayed_vote_count("alice", { static_cast<uint64_t>(get_vesting( "alice" ).amount.value) }) );
       BOOST_CHECK_GT(index.get_item_additional_allocation(), initial_allocations);

@@ -72,14 +72,14 @@ BOOST_AUTO_TEST_CASE( blocked_operations )
 
     ACTORS( DEFAULT_VESTING, ( alice ) );
     generate_block();
-    issue_funds( "alice", HIVE_asset( 10'000 ) );
-    issue_funds( "alice", HBD_asset( 10'000 ) );
+    issue_funds( "alice", PIXA_asset( 10'000 ) );
+    issue_funds( "alice", PXS_asset( 10'000 ) );
     generate_block();
 
     signed_transaction tx;
     tx.set_expiration( db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
 
-    //check vesting of non-HBD
+    //check vesting of non-PXS
     {
       transfer_to_vesting_operation op;
       op.from = "alice";
@@ -139,11 +139,11 @@ BOOST_AUTO_TEST_CASE( blocked_operations )
       op.to = "alice";
       tx.operations.push_back( op );
       push_transaction( tx, alice_private_key );
-      BOOST_REQUIRE_EQUAL( get_hive_savings( "alice" ), HIVE_asset( 1'000 ) );
+      BOOST_REQUIRE_EQUAL( get_pixa_savings( "alice" ), PIXA_asset( 1'000 ) );
     }
     tx.clear();
 
-    //check transfer from savings of non-HBD
+    //check transfer from savings of non-PXS
     {
       transfer_from_savings_operation op;
       op.from = "alice";
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE( comment_beneficiary )
   {
     BOOST_TEST_MESSAGE( "After HF24 steem.dao as comment beneficiary gives directly to new treasury account" );
 
-    ACTORS( HIVE_asset( 20'000 ), ( alice ) ); // give more vests to clear HIVE_VOTE_DUST_THRESHOLD
+    ACTORS( PIXA_asset( 20'000 ), ( alice ) ); // give more vests to clear HIVE_VOTE_DUST_THRESHOLD
     generate_block();
 
     db_plugin->debug_update( []( database& db )
@@ -180,8 +180,8 @@ BOOST_AUTO_TEST_CASE( comment_beneficiary )
         gpo.set_proposal_fund_percent( 0 );
       } );
     } );
-    fund( "alice", HIVE_asset( 10'000 ) );
-    fund( "alice", HBD_asset( 10'000 ) );
+    fund( "alice", PIXA_asset( 10'000 ) );
+    fund( "alice", PXS_asset( 10'000 ) );
     generate_block();
 
     signed_transaction tx;
@@ -223,12 +223,12 @@ BOOST_AUTO_TEST_CASE( comment_beneficiary )
     }
     tx.clear();
 
-    HBD_asset initial_treasury_balance = db->get_treasury().get_hbd_balance();
+    PXS_asset initial_treasury_balance = db->get_treasury().get_pxs_balance();
     ilog( "initial treasury balance = ${b}", ( "b", initial_treasury_balance ) );
     generate_blocks( db->find_comment_cashout( *db->get_comment( "alice", string( "test" ) ) )->get_cashout_time() );
-    ilog( "treasury balance after cashout = ${b}", ( "b", db->get_treasury().get_hbd_balance() ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( OBSOLETE_TREASURY_ACCOUNT ), HBD_asset( 0 ) );
-    BOOST_REQUIRE_EQUAL( db->get_treasury().get_hbd_balance(), HBD_asset( 9011 ) + initial_treasury_balance );
+    ilog( "treasury balance after cashout = ${b}", ( "b", db->get_treasury().get_pxs_balance() ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( OBSOLETE_TREASURY_ACCOUNT ), PXS_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( db->get_treasury().get_pxs_balance(), PXS_asset( 9011 ) + initial_treasury_balance );
 
     database_fixture::validate_database();
   }
@@ -248,74 +248,74 @@ BOOST_AUTO_TEST_CASE( consolidate_balance )
     {
       auto& dgpo = db.get_dynamic_global_properties();
 
-      temp_HIVE_balance hive_balance;
-      temp_HBD_balance hbd_balance;
+      temp_PIXA_balance pixa_balance;
+      temp_PXS_balance pxs_balance;
       db.modify( dgpo, [&]( dynamic_global_property_object& gpo )
       {
         gpo.set_proposal_fund_percent( 0 );
-        hive_balance = gpo.issue_HIVE( HIVE_asset( 20'000 ) );
-        hbd_balance = gpo.issue_HBD( HBD_asset( 10'000 ), db.get_hbd_price() );
+        pixa_balance = gpo.issue_PIXA( PIXA_asset( 20'000 ) );
+        pxs_balance = gpo.issue_PXS( PXS_asset( 10'000 ), db.get_pxs_price() );
       } );
 
-      vested_3 = HIVE_asset( 3'000 ) * dgpo.get_vesting_share_price();
-      vested_7 = HIVE_asset( 7'000 ) * dgpo.get_vesting_share_price();
+      vested_3 = PIXA_asset( 3'000 ) * dgpo.get_vesting_share_price();
+      vested_7 = PIXA_asset( 7'000 ) * dgpo.get_vesting_share_price();
       auto& old_treasury = db.get_account( OBSOLETE_TREASURY_ACCOUNT );
       {
-        temp_HIVE_balance to_vest;
-        to_vest.transfer_from( hive_balance, HIVE_asset( 7'000 ) );
+        temp_PIXA_balance to_vest;
+        to_vest.transfer_from( pixa_balance, PIXA_asset( 7'000 ) );
         db.create_vesting( old_treasury, to_vest );
       }
       {
-        temp_HIVE_balance to_vest;
-        to_vest.transfer_from( hive_balance, HIVE_asset( 3'000 ) );
+        temp_PIXA_balance to_vest;
+        to_vest.transfer_from( pixa_balance, PIXA_asset( 3'000 ) );
         db.create_vesting( old_treasury, to_vest, true );
       }
       db.modify( old_treasury, [&]( account_object& t )
       {
-        t.access_hive_balance().transfer_from( hive_balance, HIVE_asset( 5'000 ) );
-        t.access_hive_savings().transfer_from( hive_balance, HIVE_asset( 3'000 ) );
-        t.access_hive_rewards().transfer_from( hive_balance, HIVE_asset( 2'000 ) );
-        t.access_hbd_balance().transfer_from( hbd_balance, HBD_asset( 5'000 ) );
-        t.access_hbd_savings().transfer_from( hbd_balance, HBD_asset( 3'000 ) );
-        t.access_hbd_rewards().transfer_from( hbd_balance, HBD_asset( 2'000 ) );
+        t.access_pixa_balance().transfer_from( pixa_balance, PIXA_asset( 5'000 ) );
+        t.access_pixa_savings().transfer_from( pixa_balance, PIXA_asset( 3'000 ) );
+        t.access_pixa_rewards().transfer_from( pixa_balance, PIXA_asset( 2'000 ) );
+        t.access_pxs_balance().transfer_from( pxs_balance, PXS_asset( 5'000 ) );
+        t.access_pxs_savings().transfer_from( pxs_balance, PXS_asset( 3'000 ) );
+        t.access_pxs_rewards().transfer_from( pxs_balance, PXS_asset( 2'000 ) );
       } );
     } );
     database_fixture::validate_database();
     {
       auto& old_treasury = db->get_account( OBSOLETE_TREASURY_ACCOUNT );
-      BOOST_REQUIRE_EQUAL( old_treasury.get_hive_balance(), HIVE_asset( 5000 ) );
-      BOOST_REQUIRE_EQUAL( old_treasury.get_hive_savings(), HIVE_asset( 3000 ) );
-      BOOST_REQUIRE_EQUAL( old_treasury.get_hive_rewards(), HIVE_asset( 2000 ) );
-      BOOST_REQUIRE_EQUAL( old_treasury.get_hbd_balance(), HBD_asset( 5000 ) );
-      BOOST_REQUIRE_EQUAL( old_treasury.get_hbd_savings(), HBD_asset( 3000 ) );
-      BOOST_REQUIRE_EQUAL( old_treasury.get_hbd_rewards(), HBD_asset( 2000 ) );
+      BOOST_REQUIRE_EQUAL( old_treasury.get_pixa_balance(), PIXA_asset( 5000 ) );
+      BOOST_REQUIRE_EQUAL( old_treasury.get_pixa_savings(), PIXA_asset( 3000 ) );
+      BOOST_REQUIRE_EQUAL( old_treasury.get_pixa_rewards(), PIXA_asset( 2000 ) );
+      BOOST_REQUIRE_EQUAL( old_treasury.get_pxs_balance(), PXS_asset( 5000 ) );
+      BOOST_REQUIRE_EQUAL( old_treasury.get_pxs_savings(), PXS_asset( 3000 ) );
+      BOOST_REQUIRE_EQUAL( old_treasury.get_pxs_rewards(), PXS_asset( 2000 ) );
       BOOST_REQUIRE_EQUAL( old_treasury.get_vesting(), vested_7 );
       BOOST_REQUIRE_EQUAL( old_treasury.get_vest_rewards(), vested_3 );
     }
 
-    HBD_asset initial_treasury_balance = db->get_treasury().get_hbd_balance();
+    PXS_asset initial_treasury_balance = db->get_treasury().get_pxs_balance();
     generate_block();
     database_fixture::validate_database();
 
     {
       auto& old_treasury = db->get_account( OBSOLETE_TREASURY_ACCOUNT );
-      BOOST_REQUIRE_EQUAL( old_treasury.get_hive_balance(), HIVE_asset( 0 ) );
-      BOOST_REQUIRE_EQUAL( old_treasury.get_hive_savings(), HIVE_asset( 0 ) );
-      BOOST_REQUIRE_EQUAL( old_treasury.get_hive_rewards(), HIVE_asset( 0 ) );
-      BOOST_REQUIRE_EQUAL( old_treasury.get_hbd_balance(), HBD_asset( 0 ) );
-      BOOST_REQUIRE_EQUAL( old_treasury.get_hbd_savings(), HBD_asset( 0 ) );
-      BOOST_REQUIRE_EQUAL( old_treasury.get_hbd_rewards(), HBD_asset( 0 ) );
+      BOOST_REQUIRE_EQUAL( old_treasury.get_pixa_balance(), PIXA_asset( 0 ) );
+      BOOST_REQUIRE_EQUAL( old_treasury.get_pixa_savings(), PIXA_asset( 0 ) );
+      BOOST_REQUIRE_EQUAL( old_treasury.get_pixa_rewards(), PIXA_asset( 0 ) );
+      BOOST_REQUIRE_EQUAL( old_treasury.get_pxs_balance(), PXS_asset( 0 ) );
+      BOOST_REQUIRE_EQUAL( old_treasury.get_pxs_savings(), PXS_asset( 0 ) );
+      BOOST_REQUIRE_EQUAL( old_treasury.get_pxs_rewards(), PXS_asset( 0 ) );
       BOOST_REQUIRE_EQUAL( old_treasury.get_vesting(), VEST_asset( 0 ) );
       BOOST_REQUIRE_EQUAL( old_treasury.get_vest_rewards(), VEST_asset( 0 ) );
     }
     {
       auto& treasury = db->get_account( NEW_HIVE_TREASURY_ACCOUNT );
-      BOOST_REQUIRE_EQUAL( treasury.get_hive_balance(), HIVE_asset( 14999 ) ); //rounding during vest->hive conversion
-      BOOST_REQUIRE_EQUAL( treasury.get_hive_savings(), HIVE_asset( 3000 ) );
-      BOOST_REQUIRE_EQUAL( treasury.get_hive_rewards(), HIVE_asset( 2000 ) );
-      BOOST_REQUIRE_EQUAL( treasury.get_hbd_balance(), HBD_asset( 5000 ) + initial_treasury_balance );
-      BOOST_REQUIRE_EQUAL( treasury.get_hbd_savings(), HBD_asset( 3000 ) );
-      BOOST_REQUIRE_EQUAL( treasury.get_hbd_rewards(), HBD_asset( 2000 ) );
+      BOOST_REQUIRE_EQUAL( treasury.get_pixa_balance(), PIXA_asset( 14999 ) ); //rounding during vest->hive conversion
+      BOOST_REQUIRE_EQUAL( treasury.get_pixa_savings(), PIXA_asset( 3000 ) );
+      BOOST_REQUIRE_EQUAL( treasury.get_pixa_rewards(), PIXA_asset( 2000 ) );
+      BOOST_REQUIRE_EQUAL( treasury.get_pxs_balance(), PXS_asset( 5000 ) + initial_treasury_balance );
+      BOOST_REQUIRE_EQUAL( treasury.get_pxs_savings(), PXS_asset( 3000 ) );
+      BOOST_REQUIRE_EQUAL( treasury.get_pxs_rewards(), PXS_asset( 2000 ) );
       BOOST_REQUIRE_EQUAL( treasury.get_vesting(), VEST_asset( 0 ) );
       BOOST_REQUIRE_EQUAL( treasury.get_vest_rewards(), VEST_asset( 0 ) );
     }
@@ -328,21 +328,21 @@ BOOST_AUTO_TEST_CASE( treasury_debt_ratio )
   try
   {
     ACTORS( DEFAULT_VESTING, (alice) );
-    BOOST_TEST_MESSAGE( "After HF24 funds in the treasury don't count towards the HBD debt ratio" );
-    set_price_feed( HBD_price( 1000, 10000 ) );
+    BOOST_TEST_MESSAGE( "After HF24 funds in the treasury don't count towards the PXS debt ratio" );
+    set_price_feed( PXS_price( 1000, 10000 ) );
     generate_block();
     auto& dgpo = db->get_dynamic_global_properties();
-    const auto before_hbd_print_rate = dgpo.get_hbd_print_rate();
+    const auto before_pxs_print_rate = dgpo.get_pxs_print_rate();
 
-    ISSUE_FUNDS("alice", HBD_asset( 50'000'000'000 ));
-    const auto during_hbd_print_rate = dgpo.get_hbd_print_rate();
+    ISSUE_FUNDS("alice", PXS_asset( 50'000'000'000 ));
+    const auto during_pxs_print_rate = dgpo.get_pxs_print_rate();
 
-    transfer( "alice", db->get_treasury_name(), asset( 50000000000, HBD_SYMBOL ), "", alice_private_key );
+    transfer( "alice", db->get_treasury_name(), asset( 50000000000, PXS_SYMBOL ), "", alice_private_key );
     generate_block();
-    const auto after_hbd_print_rate = dgpo.get_hbd_print_rate();
+    const auto after_pxs_print_rate = dgpo.get_pxs_print_rate();
 
-    BOOST_REQUIRE_EQUAL( after_hbd_print_rate, before_hbd_print_rate );
-    BOOST_REQUIRE_NE( after_hbd_print_rate, during_hbd_print_rate );
+    BOOST_REQUIRE_EQUAL( after_pxs_print_rate, before_pxs_print_rate );
+    BOOST_REQUIRE_NE( after_pxs_print_rate, during_pxs_print_rate );
     database_fixture::validate_database();
   }
   FC_LOG_AND_RETHROW()

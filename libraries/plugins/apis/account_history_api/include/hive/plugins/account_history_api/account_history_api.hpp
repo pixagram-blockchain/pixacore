@@ -137,7 +137,7 @@ enum class get_account_history_op_filter_low : uint64_t
   cancel_transfer_from_savings_operation                = 0x00000004'00000000ull,
   custom_binary_operation                               = 0x00000008'00000000ull,
   decline_voting_rights_operation                       = 0x00000010'00000000ull,
-  reset_account_operation                               = 0x00000020'00000000ull, // (number to be reused with new operation)
+  nft_operation                                         = 0x00000020'00000000ull, // (HF32; the number of the former reset_account_operation placeholder)
   set_reset_account_operation                           = 0x00000040'00000000ull, // (number to be reused with new operation)
   claim_reward_balance_operation                        = 0x00000080'00000000ull,
   delegate_vesting_shares_operation                     = 0x00000100'00000000ull,
@@ -200,7 +200,9 @@ enum class get_account_history_op_filter_high : uint64_t
   escrow_rejected_operation                             = 0x00000000'04000000ull,
   proxy_cleared_operation                               = 0x00000000'08000000ull,
   declined_voting_rights_operation                      = 0x00000000'10000000ull,
-  // Add new operations here or reuse (set_)reset_account_operation values in operation_filter_low
+  nft_sold_operation                                    = 0x00000000'20000000ull,
+  nft_royalty_operation                                 = 0x00000000'40000000ull,
+  // Add new operations here or reuse the set_reset_account_operation value in operation_filter_low
 };
 
 enum enum_vops_filter : uint64_t
@@ -249,6 +251,8 @@ enum enum_vops_filter : uint64_t
   escrow_rejected_operation                     = 0x0100'00000000ull,
   proxy_cleared_operation                       = 0x0200'00000000ull,
   declined_voting_rights_operation              = 0x0400'00000000ull,
+  nft_sold_operation                            = 0x0800'00000000ull,
+  nft_royalty_operation                         = 0x1000'00000000ull,
 };
 
 /** Allows to specify range of blocks to retrieve virtual operations for.

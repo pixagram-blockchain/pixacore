@@ -25,7 +25,7 @@ public:
 
 // getters:
 
-  //amount of savings to withdraw (HIVE or HBD)
+  //amount of savings to withdraw (PIXA or PXS)
   const asset& get_withdraw_amount() const { return amount; }
 
   const account_name_type& get_from() const { return from; }
@@ -55,7 +55,7 @@ private:
   account_name_type to; // can't be replaced with account_id_type - see database_api.list_savings_withdrawals API
   shared_string     memo;
   uint32_t          request_id = 0;
-  balance           amount; // can hold HIVE or HBD
+  balance           amount; // can hold PIXA or PXS
   time_point_sec    complete;
 
   void init( const account_object& _from, const account_object& _to, const string& _memo );

@@ -17,7 +17,7 @@ long next_hf_time();
 #define HIVE_HARDFORK_1_28_FIX_CANCEL_POWER_DOWN (HIVE_HARDFORK_1_28)
 // use max mana instead of current when determining strength of vote (issue #609)
 #define HIVE_HARDFORK_1_28_STABLE_VOTE (HIVE_HARDFORK_1_28)
-// max block size and HBD APR activated with schedule activation instead of with schedule creation
+// max block size and PXS APR activated with schedule activation instead of with schedule creation
 #define HIVE_HARDFORK_1_28_GLOBAL_WITNESS_PROPS (HIVE_HARDFORK_1_28)
 // expiration time for a transaction is longer
 #define HIVE_HARDFORK_1_28_EXPIRATION_TIME (HIVE_HARDFORK_1_28)
@@ -25,8 +25,8 @@ long next_hf_time();
 #define HIVE_HARDFORK_1_28_ALLOW_STRICT_AND_MIXED_AUTHORITIES (HIVE_HARDFORK_1_28)
 //Redundant signatures are allowed
 #define HIVE_HARDFORK_1_28_ALLOW_REDUNDANT_SIGNATURES (HIVE_HARDFORK_1_28)
-//Remove DHF HBD from inflation calculations
-#define HIVE_HARDFORK_1_28_NO_DHF_HBD_IN_INFLATION (HIVE_HARDFORK_1_28)
+//Remove DHF PXS from inflation calculations
+#define HIVE_HARDFORK_1_28_NO_DHF_PXS_IN_INFLATION (HIVE_HARDFORK_1_28)
 //Don't try to vote on nonexistent proposal
 #define HIVE_HARDFORK_1_28_DONT_TRY_VOTE_FOR_NONEXISTENT_PROPOSAL (HIVE_HARDFORK_1_28)
 //Don't try to remove nonexistent proposal

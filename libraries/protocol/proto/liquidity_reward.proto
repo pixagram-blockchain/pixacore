@@ -5,7 +5,7 @@ import "asset.proto";
 package hive.protocol.buffers;
 
 /* Related to limit_order_create_operation and limit_order_create2_operation.
- * Generated during block processing to indicate reward paid to the market makers on internal HIVE<->HBD market.
+ * Generated during block processing to indicate reward paid to the market makers on internal PIXA<->PXS market.
  * No longer active after HF12.
  * @see fill_order_operation
  */
@@ -13,6 +13,6 @@ message liquidity_reward {
   // @param {string} owner - market maker (receiver of payout)
   required string owner = 1;
 
-  // @param {asset} payout - (HIVE) reward for provided liquidity
+  // @param {asset} payout - (PIXA) reward for provided liquidity
   required asset  payout = 2;
 }

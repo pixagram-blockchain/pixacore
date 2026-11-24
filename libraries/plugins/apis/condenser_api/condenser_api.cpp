@@ -54,7 +54,7 @@ namespace hive { namespace plugins { namespace condenser_api {
 api_chain_properties::api_chain_properties( const hive::chain::chain_properties& c ) :
   account_creation_fee( legacy_asset::from_asset( c.account_creation_fee.to_asset() ) ),
   maximum_block_size( c.maximum_block_size ),
-  hbd_interest_rate( c.hbd_interest_rate ),
+  pxs_interest_rate( c.pxs_interest_rate ),
   account_subsidy_budget( c.account_subsidy_budget ),
   account_subsidy_decay( c.account_subsidy_decay )
 {}
@@ -186,15 +186,15 @@ namespace detail
     legacy_substitutes_type _result
     {
       {"VESTS_SYMBOL",             fc::variant{ legacy_asset::from_asset( asset(0, VESTS_SYMBOL) ).asset_num_to_string() } },
-      {"HIVE_SYMBOL",              fc::variant{ legacy_asset::from_asset( asset(0, HIVE_SYMBOL) ).asset_num_to_string() } },
-      {"HBD_SYMBOL",               fc::variant{ legacy_asset::from_asset( asset(0, HBD_SYMBOL) ).asset_num_to_string() } },
+      {"PIXA_SYMBOL",              fc::variant{ legacy_asset::from_asset( asset(0, PIXA_SYMBOL) ).asset_num_to_string() } },
+      {"PXS_SYMBOL",               fc::variant{ legacy_asset::from_asset( asset(0, PXS_SYMBOL) ).asset_num_to_string() } },
       {"HIVE_MINING_REWARD",        fc::variant{ _asset_type{ HIVE_MINING_REWARD.to_asset(),         transaction_serialization_type::legacy } } },
       {"HIVE_MIN_LIQUIDITY_REWARD", fc::variant{ _asset_type{ HIVE_MIN_LIQUIDITY_REWARD.to_asset(),  transaction_serialization_type::legacy } } },
       {"HIVE_MIN_CONTENT_REWARD",   fc::variant{ _asset_type{ HIVE_MIN_CONTENT_REWARD.to_asset(),    transaction_serialization_type::legacy } } },
       {"HIVE_MIN_CURATE_REWARD",    fc::variant{ _asset_type{ HIVE_MIN_CURATE_REWARD.to_asset(),     transaction_serialization_type::legacy } } },
       {"HIVE_MIN_PRODUCER_REWARD",  fc::variant{ _asset_type{ HIVE_MIN_PRODUCER_REWARD.to_asset(),   transaction_serialization_type::legacy } } },
       {"HIVE_MIN_POW_REWARD",       fc::variant{ _asset_type{ HIVE_MIN_POW_REWARD.to_asset(),        transaction_serialization_type::legacy } } },
-      {"HIVE_MIN_PAYOUT_HBD",       fc::variant{ _asset_type{ HIVE_MIN_PAYOUT_HBD.to_asset(),        transaction_serialization_type::legacy } } }
+      {"HIVE_MIN_PAYOUT_PXS",       fc::variant{ _asset_type{ HIVE_MIN_PAYOUT_PXS.to_asset(),        transaction_serialization_type::legacy } } }
     };
     return _result;
   }
@@ -374,7 +374,8 @@ namespace detail
       auto itr = idx.find( name );
       if ( itr != idx.end() )
       {
-        results.emplace_back( extended_account( database_api::api_account_object( *itr, _db, _metadata_plugin, delayed_votes_active ) ) );
+        results.emplace_back( extended_account( database_api::api_account_object( *itr, _db, _metadata_plugin, delayed_votes_active ),
+          _db.get_dynamic_global_properties().get_voting_mana_regeneration_seconds() ) );
 
         if(_reputation_api)
         {
@@ -415,7 +416,8 @@ namespace detail
 
       if( itr )
       {
-        result.push_back( api_account_object( database_api::api_account_object( *itr, _db, _metadata_plugin, delayed_votes_active ) ) );
+        result.push_back( api_account_object( database_api::api_account_object( *itr, _db, _metadata_plugin, delayed_votes_active ),
+          _db.get_dynamic_global_properties().get_voting_mana_regeneration_seconds() ) );
       }
       else
       {
@@ -618,7 +620,7 @@ namespace detail
   DEFINE_API_IMPL( condenser_api_impl, get_conversion_requests )
   {
     CHECK_ARG_SIZE( 1 )
-    auto requests = _database_api->find_hbd_conversion_requests(
+    auto requests = _database_api->find_pxs_conversion_requests(
       {
         args.at(0).as< account_name_type >()
       }).requests;
@@ -737,7 +739,7 @@ namespace detail
     {
       result.push_back( *itr );
 
-      if( itr->get_sell_price().base.symbol == HIVE_SYMBOL )
+      if( itr->get_sell_price().base.symbol == PIXA_SYMBOL )
         result.back().real_price = ASSET_TO_REAL( itr->get_sell_price().quote ) / ASSET_TO_REAL( itr->get_sell_price().base );
       else
         result.back().real_price =  ASSET_TO_REAL( itr->get_sell_price().base ) / ASSET_TO_REAL( itr->get_sell_price().quote );
@@ -1164,7 +1166,8 @@ namespace detail
 
 } // detail
 
-uint16_t api_account_object::_compute_voting_power( const database_api::api_account_object& a )
+uint16_t api_account_object::_compute_voting_power( const database_api::api_account_object& a,
+  uint32_t voting_mana_regeneration_seconds )
 {
   if( a.voting_manabar.last_update_time < HIVE_HARDFORK_0_20_TIME )
     return (uint16_t) a.voting_manabar.current_mana;
@@ -1179,13 +1182,16 @@ uint16_t api_account_object::_compute_voting_power( const database_api::api_acco
   //
   // Let t1 = last_vote_time, t2 = last_update_time
   // vp_t2 = HIVE_100_PERCENT * current_mana / vests
-  // vp_t1 = vp_t2 - HIVE_100_PERCENT * (t2 - t1) / HIVE_VOTING_MANA_REGENERATION_SECONDS
+  // vp_t1 = vp_t2 - HIVE_100_PERCENT * (t2 - t1) / voting_mana_regeneration_seconds
+  //
+  // The refill time is the one in force now: for an account whose last update came before hardfork 32
+  // and whose last vote is older still, the value is an approximation, as this legacy field always was.
   //
 
   uint32_t t1 = a.last_vote_time.sec_since_epoch();
   uint32_t t2 = a.voting_manabar.last_update_time;
   uint64_t dt = (t2 > t1) ? (t2 - t1) : 0;
-  uint64_t vp_dt = HIVE_100_PERCENT * dt / HIVE_VOTING_MANA_REGENERATION_SECONDS;
+  uint64_t vp_dt = HIVE_100_PERCENT * dt / voting_mana_regeneration_seconds;
 
   uint128_t vp_t2 = HIVE_100_PERCENT;
   vp_t2 *= a.voting_manabar.current_mana;

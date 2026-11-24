@@ -77,5 +77,6 @@
     "nai": "@@000000021",
     "precision": 3
   },
-  "vote_power_reserve_rate": 40
+  "vote_power_reserve_rate": 40,
+  "voting_mana_regeneration_seconds": 432000
 }

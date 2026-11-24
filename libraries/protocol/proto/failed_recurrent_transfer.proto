@@ -18,7 +18,7 @@ message failed_recurrent_transfer {
   // @param {string} to_account - user that is target of transfer (would be receiver of amount, but no transfer actually happened)
   required string to_account = 2 [json_name = "to"];
 
-  // @param {asset} amount - (HIVE of HBD) amount that was scheduled for transferred in current iteration but failed
+  // @param {asset} amount - (PIXA of PXS) amount that was scheduled for transferred in current iteration but failed
   required asset  amount = 3;
 
   // @param {string} memo - memo attached to the transfer

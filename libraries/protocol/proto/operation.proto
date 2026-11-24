@@ -36,6 +36,7 @@ import "transfer_to_savings.proto";
 import "transfer_from_savings.proto";
 import "cancel_transfer_from_savings.proto";
 import "decline_voting_rights.proto";
+import "nft.proto";
 import "claim_reward_balance.proto";
 import "delegate_vesting_shares.proto";
 import "account_create_with_delegation.proto";
@@ -92,6 +93,8 @@ import "escrow_approved.proto";
 import "escrow_rejected.proto";
 import "proxy_cleared.proto";
 import "declined_voting_rights.proto";
+import "nft_sold.proto";
+import "nft_royalty.proto";
 
 package hive.protocol.buffers;
 
@@ -136,6 +139,7 @@ message operation {
         transfer_from_savings transfer_from_savings_operation = 34 [json_name = "transfer_from_savings_operation"];
         cancel_transfer_from_savings cancel_transfer_from_savings_operation = 35 [json_name = "cancel_transfer_from_savings_operation"];
         decline_voting_rights decline_voting_rights_operation = 37 [json_name = "decline_voting_rights_operation"];
+        nft nft_operation = 38 [json_name = "nft_operation"];
         claim_reward_balance claim_reward_balance_operation = 40 [json_name = "claim_reward_balance_operation"];
         delegate_vesting_shares delegate_vesting_shares_operation = 41 [json_name = "delegate_vesting_shares_operation"];
         account_create_with_delegation account_create_with_delegation_operation = 42 [json_name = "account_create_with_delegation_operation"];
@@ -192,5 +196,7 @@ message operation {
         escrow_rejected escrow_rejected_operation = 140 [json_name = "escrow_rejected_operation"];
         proxy_cleared proxy_cleared_operation = 141 [json_name = "proxy_cleared_operation"];
         declined_voting_rights declined_voting_rights_operation = 142 [json_name = "declined_voting_rights_operation"];
+        nft_sold nft_sold_operation = 143 [json_name = "nft_sold_operation"];
+        nft_royalty nft_royalty_operation = 144 [json_name = "nft_royalty_operation"];
     }
 }

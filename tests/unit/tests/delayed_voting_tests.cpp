@@ -98,13 +98,13 @@ BOOST_AUTO_TEST_CASE( delayed_proposal_test_01 )
     )");
 
     // const
-    const auto TESTS_1000 = HIVE_asset( 1'000'000 );
-    const auto TBD_100 = HBD_asset( 100'000 );
+    const auto TESTS_1000 = PIXA_asset( 1'000'000 );
+    const auto TBD_100 = PXS_asset( 100'000 );
     
     //setup
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     ISSUE_FUNDS( "alice", TESTS_1000 );
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE( delayed_proposal_test_01 )
     BOOST_REQUIRE_GE( proposal_1, 0 );
 
     // carol vest
-    vest("carol", "carol", HIVE_asset( 10'000 ), carol_private_key);
+    vest("carol", "carol", PIXA_asset( 10'000 ), carol_private_key);
 
     // carol votes
     vote_proposal("carol", { proposal_1 }, true, carol_private_key);
@@ -167,13 +167,13 @@ BOOST_AUTO_TEST_CASE( delayed_proposal_test_02 )
     )");
 
     // const
-    const auto TESTS_1000 = HIVE_asset( 1'000'000 );
-    const auto TBD_100 = HBD_asset( 100'000 );
+    const auto TESTS_1000 = PIXA_asset( 1'000'000 );
+    const auto TBD_100 = PXS_asset( 100'000 );
 
     //setup
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     ISSUE_FUNDS( "alice", TESTS_1000 );
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE( delayed_proposal_test_02 )
     BOOST_REQUIRE_GE( proposal_2, 0 );
 
     // carol vest
-    vest("carol", "carol", HIVE_asset( 10'000 ), carol_private_key);
+    vest("carol", "carol", PIXA_asset( 10'000 ), carol_private_key);
 
     // carol votes
     vote_proposal("carol", { proposal_1 }, true, carol_private_key);
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE( delayed_proposal_test_02 )
 
       if( i == (12 * nr_intervals_in_delayed_voting()))
       {
-        vest("carol", "carol", HIVE_asset( 10'000 ), carol_private_key);
+        vest("carol", "carol", PIXA_asset( 10'000 ), carol_private_key);
         vote_proposal("carol", { proposal_1, proposal_2 }, true, carol_private_key);
       }
 
@@ -273,27 +273,27 @@ BOOST_AUTO_TEST_CASE( delayed_voting_proxy_02 )
   {
     BOOST_TEST_MESSAGE( "Testing: Setting proxy - more complex tests" );
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     auto start_time = db->head_block_time();
 
     ACTORS( DEFAULT_VESTING, (alice)(bob)(celine) );
-    ACTORS( HIVE_asset( 15'000 ), (witness1)(witness2) ); // extra RC for witness_create
+    ACTORS( PIXA_asset( 15'000 ), (witness1)(witness2) ); // extra RC for witness_create
     generate_block();
 
-    HIVE_asset _1( 1'000 );
-    HIVE_asset _2( 2'000 );
-    HIVE_asset _3( 3'000 );
-    HIVE_asset _4( 4'000 );
-    HIVE_asset _5( 5'000 );
+    PIXA_asset _1( 1'000 );
+    PIXA_asset _2( 2'000 );
+    PIXA_asset _3( 3'000 );
+    PIXA_asset _4( 4'000 );
+    PIXA_asset _5( 5'000 );
 
     auto amount = []( const VEST_asset& _asset )
     {
       return _asset.amount.value;
     };
 
-    auto vamount = [ &amount, this ]( const HIVE_asset& _asset )
+    auto vamount = [ &amount, this ]( const PIXA_asset& _asset )
     {
       return amount( to_vest( _asset ) );
     };
@@ -362,11 +362,11 @@ BOOST_AUTO_TEST_CASE( delayed_voting_proxy_02 )
     {
       BOOST_TEST_MESSAGE( "Preparing accounts..." );
 
-      ISSUE_FUNDS( "alice", HIVE_asset( 10'000'000 ) );
-      ISSUE_FUNDS( "bob", HIVE_asset( 10'000'000 ) );
-      ISSUE_FUNDS( "celine", HIVE_asset( 10'000'000 ) );
-      ISSUE_FUNDS( "witness1", HIVE_asset( 10'000'000 ) );
-      ISSUE_FUNDS( "witness2", HIVE_asset( 10'000'000 ) );
+      ISSUE_FUNDS( "alice", PIXA_asset( 10'000'000 ) );
+      ISSUE_FUNDS( "bob", PIXA_asset( 10'000'000 ) );
+      ISSUE_FUNDS( "celine", PIXA_asset( 10'000'000 ) );
+      ISSUE_FUNDS( "witness1", PIXA_asset( 10'000'000 ) );
+      ISSUE_FUNDS( "witness2", PIXA_asset( 10'000'000 ) );
 
       witness_create( "witness1", witness1_private_key, "url.witness1", witness1_private_key.get_public_key(), HIVE_MIN_PRODUCER_REWARD );
       witness_plugin->add_signing_key( witness1_private_key );
@@ -867,19 +867,19 @@ BOOST_AUTO_TEST_CASE( delayed_voting_proxy_01 )
     BOOST_TEST_MESSAGE( "Testing: Setting proxy" );
 
     ACTORS( DEFAULT_VESTING, (alice)(bob)(celine) );
-    ACTORS( HIVE_asset( 15'000 ), (witness) ); // extra RC for witness_create
+    ACTORS( PIXA_asset( 15'000 ), (witness) ); // extra RC for witness_create
     generate_block();
 
     {
       BOOST_TEST_MESSAGE( "Preparing accounts..." );
 
-      set_price_feed( HBD_price( 1000, 1000 ) );
+      set_price_feed( PXS_price( 1000, 1000 ) );
       generate_block();
 
-      ISSUE_FUNDS( "alice", HIVE_asset( 10'000'000 ) );
-      ISSUE_FUNDS( "bob", HIVE_asset( 10'000'000 ) );
-      ISSUE_FUNDS( "celine", HIVE_asset( 10'000'000 ) );
-      ISSUE_FUNDS( "witness", HIVE_asset( 10'000'000 ) );
+      ISSUE_FUNDS( "alice", PIXA_asset( 10'000'000 ) );
+      ISSUE_FUNDS( "bob", PIXA_asset( 10'000'000 ) );
+      ISSUE_FUNDS( "celine", PIXA_asset( 10'000'000 ) );
+      ISSUE_FUNDS( "witness", PIXA_asset( 10'000'000 ) );
     }
     {
       BOOST_TEST_MESSAGE( "Preparing witnesses..." );
@@ -889,10 +889,10 @@ BOOST_AUTO_TEST_CASE( delayed_voting_proxy_01 )
       generate_block();
     }
 
-    HIVE_asset _1( 1'000 );
-    HIVE_asset _2( 2'000 );
-    HIVE_asset _3( 3'000 );
-    HIVE_asset _4( 4'000 );
+    PIXA_asset _1( 1'000 );
+    PIXA_asset _2( 2'000 );
+    PIXA_asset _3( 3'000 );
+    PIXA_asset _4( 4'000 );
 
     auto start_time = db->head_block_time();
 
@@ -1010,18 +1010,18 @@ BOOST_AUTO_TEST_CASE( delayed_voting_many_vesting_01 )
     BOOST_TEST_MESSAGE( "Testing: Transferring vests many times from one person to another" );
 
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
-    ACTORS( HIVE_asset( 15'000 ), (witness) ); // extra RC for witness_create
+    ACTORS( PIXA_asset( 15'000 ), (witness) ); // extra RC for witness_create
     generate_block();
 
     {
       BOOST_TEST_MESSAGE( "Preparing accounts..." );
 
-      set_price_feed( HBD_price( 1000, 1000 ) );
+      set_price_feed( PXS_price( 1000, 1000 ) );
       generate_block();
 
-      ISSUE_FUNDS( "alice", HIVE_asset( 10'000'000 ) );
-      ISSUE_FUNDS( "bob", HIVE_asset( 10'000'000 ) );
-      ISSUE_FUNDS( "witness", HIVE_asset( 10'000'000 ) );
+      ISSUE_FUNDS( "alice", PIXA_asset( 10'000'000 ) );
+      ISSUE_FUNDS( "bob", PIXA_asset( 10'000'000 ) );
+      ISSUE_FUNDS( "witness", PIXA_asset( 10'000'000 ) );
     }
     {
       BOOST_TEST_MESSAGE( "Preparing witnesses..." );
@@ -1031,7 +1031,7 @@ BOOST_AUTO_TEST_CASE( delayed_voting_many_vesting_01 )
       generate_block();
     }
 
-    HIVE_asset _one( 1'000 );
+    PIXA_asset _one( 1'000 );
 
     auto start_time = db->head_block_time();
 
@@ -1113,17 +1113,17 @@ BOOST_AUTO_TEST_CASE( delayed_voting_01 )
     BOOST_TEST_MESSAGE( "Testing: delaying voting" );
 
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
-    ACTORS( HIVE_asset( 15'000 ), (witness) ); // extra RC for witness_create
+    ACTORS( PIXA_asset( 15'000 ), (witness) ); // extra RC for witness_create
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //auto start_time = db->head_block_time();
 
-    ISSUE_FUNDS( "alice", HIVE_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "bob", HIVE_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "witness", HIVE_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "alice", PIXA_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "bob", PIXA_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "witness", PIXA_asset( 10'000'000 ) );
     //Prepare witnesses
     
     witness_create( "witness", witness_private_key, "url.witness", witness_private_key.get_public_key(), HIVE_MIN_PRODUCER_REWARD );
@@ -1137,7 +1137,7 @@ BOOST_AUTO_TEST_CASE( delayed_voting_01 )
     share_type basic_votes = get_votes( "witness" );
 
     //Make some vests
-    vest( "bob", "alice", HIVE_asset( 1'000'000 ), bob_private_key );
+    vest( "bob", "alice", PIXA_asset( 1'000'000 ), bob_private_key );
     generate_block();
 
     share_type votes_01 = get_votes( "witness" );
@@ -1162,16 +1162,16 @@ BOOST_AUTO_TEST_CASE( delayed_voting_04 )
     BOOST_TEST_MESSAGE( "Testing: delaying voting v4" );
 
     ACTORS( DEFAULT_VESTING, (bob) );
-    ACTORS( HIVE_asset( 15'000 ), (witness) ); // extra RC for witness_create
+    ACTORS( PIXA_asset( 15'000 ), (witness) ); // extra RC for witness_create
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //auto start_time = db->head_block_time();
 
-    ISSUE_FUNDS( "bob", HIVE_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "witness", HIVE_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "bob", PIXA_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "witness", PIXA_asset( 10'000'000 ) );
     
     //Prepare witnesses
     witness_create( "witness", witness_private_key, "url.witness", witness_private_key.get_public_key(), HIVE_MIN_PRODUCER_REWARD );
@@ -1182,7 +1182,7 @@ BOOST_AUTO_TEST_CASE( delayed_voting_04 )
     const share_type basic_votes = get_votes( "witness" );
 
     //Make some vests
-    vest( "bob", "bob", HIVE_asset( 1'000'000 ), bob_private_key );
+    vest( "bob", "bob", PIXA_asset( 1'000'000 ), bob_private_key );
     generate_block();
 
     witness_vote( "bob", "witness", true/*approve*/, bob_private_key );
@@ -1212,17 +1212,17 @@ BOOST_AUTO_TEST_CASE( delayed_voting_05 )
     BOOST_TEST_MESSAGE( "Testing: delaying voting v5" );
 
     ACTORS( DEFAULT_VESTING, (bob) );
-    ACTORS( HIVE_asset( 15'000 ), (witness1)(witness2) ); // extra RC for witness_create
+    ACTORS( PIXA_asset( 15'000 ), (witness1)(witness2) ); // extra RC for witness_create
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //auto start_time = db->head_block_time();
 
-    ISSUE_FUNDS( "bob", HIVE_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "witness1", HIVE_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "witness2", HIVE_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "bob", PIXA_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "witness1", PIXA_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "witness2", PIXA_asset( 10'000'000 ) );
     
     //Prepare witnesses
     witness_create( "witness1", witness1_private_key, "url.witness1", witness1_private_key.get_public_key(), HIVE_MIN_PRODUCER_REWARD );
@@ -1236,7 +1236,7 @@ BOOST_AUTO_TEST_CASE( delayed_voting_05 )
     share_type basic_votes_2 = get_votes( "witness2" );
 
     //Make some vests
-    vest( "bob", "bob", HIVE_asset( 1'000'000 ), bob_private_key );
+    vest( "bob", "bob", PIXA_asset( 1'000'000 ), bob_private_key );
     generate_block();
 
     witness_vote( "bob", "witness1", true/*approve*/, bob_private_key );
@@ -1273,16 +1273,16 @@ BOOST_AUTO_TEST_CASE( delayed_voting_06 )
     BOOST_TEST_MESSAGE( "Testing: delaying voting v6" );
 
     ACTORS( DEFAULT_VESTING, (bob) );
-    ACTORS( HIVE_asset( 15'000 ), (witness) ); // extra RC for witness_create
+    ACTORS( PIXA_asset( 15'000 ), (witness) ); // extra RC for witness_create
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //auto start_time = db->head_block_time();
 
-    ISSUE_FUNDS( "bob", HIVE_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "witness", HIVE_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "bob", PIXA_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "witness", PIXA_asset( 10'000'000 ) );
     
     //Prepare witnesses
     const auto start_time = db->head_block_time();
@@ -1293,7 +1293,7 @@ BOOST_AUTO_TEST_CASE( delayed_voting_06 )
     const share_type basic_votes = get_votes( "witness" );
 
     //Make some vests
-    vest( "bob", "bob", HIVE_asset( 1'000'000 ), bob_private_key );
+    vest( "bob", "bob", PIXA_asset( 1'000'000 ), bob_private_key );
     generate_block();
 
     HIVE_REQUIRE_THROW( witness_vote( "bob", "witness", false/*approve*/, bob_private_key ), fc::assert_exception) ;
@@ -1453,27 +1453,27 @@ BOOST_AUTO_TEST_CASE( delayed_voting_basic_03 )
 {
   try
   {
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     // user setup
     BOOST_TEST_MESSAGE( "Testing: `delayed_voting::run` method" );
     const auto start_time = db->head_block_time();
     ACTORS( DEFAULT_VESTING, (alice)(celine)(bob) );
-    ACTORS( HIVE_asset( 15'000 ), (witness) ); // extra RC for witness_create
+    ACTORS( PIXA_asset( 15'000 ), (witness) ); // extra RC for witness_create
     generate_block();
-    ISSUE_FUNDS( "bob", HIVE_asset( 100'000'000 ) );
-    ISSUE_FUNDS( "celine", HIVE_asset( 100'000'000 ) );
-    ISSUE_FUNDS( "alice", HIVE_asset( 100'000'000 ) );
-    ISSUE_FUNDS( "witness", HIVE_asset( 100'000'000 ) );
+    ISSUE_FUNDS( "bob", PIXA_asset( 100'000'000 ) );
+    ISSUE_FUNDS( "celine", PIXA_asset( 100'000'000 ) );
+    ISSUE_FUNDS( "alice", PIXA_asset( 100'000'000 ) );
+    ISSUE_FUNDS( "witness", PIXA_asset( 100'000'000 ) );
     
     //Prepare witnesses
     witness_create( "witness", witness_private_key, "url.witness", witness_private_key.get_public_key(), HIVE_MIN_PRODUCER_REWARD );
     witness_plugin->add_signing_key( witness_private_key );
     generate_block();
-    vest( "bob", "bob", HIVE_asset( 100'000 ), bob_private_key );
-    vest( "alice", "alice", HIVE_asset( 100'000 ), alice_private_key );
-    vest( "celine", "celine", HIVE_asset( 100'000 ), celine_private_key );
+    vest( "bob", "bob", PIXA_asset( 100'000 ), bob_private_key );
+    vest( "alice", "alice", PIXA_asset( 100'000 ), alice_private_key );
+    vest( "celine", "celine", PIXA_asset( 100'000 ), celine_private_key );
     generate_block();
 
     // validation data
@@ -1511,7 +1511,7 @@ BOOST_AUTO_TEST_CASE( delayed_voting_basic_03 )
       witness_vote("celine", "witness", s, celine_private_key);
 
       // alice tap
-      vest( "alice", "alice", HIVE_asset( 100'000 ), alice_private_key );
+      vest( "alice", "alice", PIXA_asset( 100'000 ), alice_private_key );
 
       // alice check
       const uint64_t val = static_cast<uint64_t>(get_vesting( "alice" ).amount.value);
@@ -1627,14 +1627,14 @@ BOOST_AUTO_TEST_CASE( delayed_voting_basic_02 )
 
   BOOST_TEST_MESSAGE( "Testing: `delayed_voting::update_votes` method" );
 
-  set_price_feed( HBD_price( 1000, 1000 ) );
+  set_price_feed( PXS_price( 1000, 1000 ) );
   generate_block();
 
   ACTORS( DEFAULT_VESTING, (alice)(bob) );
   generate_block();
 
-  ISSUE_FUNDS( "alice", HIVE_asset( 10'000'000 ) );
-  ISSUE_FUNDS( "bob", HIVE_asset( 10'000'000 ) );
+  ISSUE_FUNDS( "alice", PIXA_asset( 10'000'000 ) );
+  ISSUE_FUNDS( "bob", PIXA_asset( 10'000'000 ) );
 
   generate_block();
 
@@ -2038,16 +2038,16 @@ BOOST_AUTO_TEST_CASE( decline_voting_rights_01 )
     BOOST_TEST_MESSAGE( "Testing: decline voting rights: casual use" );
 
     ACTORS( DEFAULT_VESTING, (bob)(alice) );
-    ACTORS( HIVE_asset( 15'000 ), (witness) ); // extra RC for witness_create
+    ACTORS( PIXA_asset( 15'000 ), (witness) ); // extra RC for witness_create
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     // auto start_time = db->head_block_time();
-    ISSUE_FUNDS( "bob", HIVE_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "alice", HIVE_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "witness", HIVE_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "bob", PIXA_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "alice", PIXA_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "witness", PIXA_asset( 10'000'000 ) );
     
     //Prepare witnesses
     witness_create( "witness", witness_private_key, "url.witness", witness_private_key.get_public_key(), HIVE_MIN_PRODUCER_REWARD );
@@ -2056,8 +2056,8 @@ BOOST_AUTO_TEST_CASE( decline_voting_rights_01 )
 
     //Make some vests
     const share_type basic_votes = get_votes( "witness" );
-    vest( "bob", "bob", HIVE_asset( 1'000'000 ), bob_private_key );
-    vest( "alice", "alice", HIVE_asset( 1'000'000 ), alice_private_key );
+    vest( "bob", "bob", PIXA_asset( 1'000'000 ), bob_private_key );
+    vest( "alice", "alice", PIXA_asset( 1'000'000 ), alice_private_key );
     generate_block();
 
     // alice - do
@@ -2090,15 +2090,15 @@ BOOST_AUTO_TEST_CASE( decline_voting_rights_02 )
     BOOST_TEST_MESSAGE( "Testing: decline voting rights: casual use with spontaneus vote" );
 
     ACTORS( DEFAULT_VESTING, (bob)(alice) );
-    ACTORS( HIVE_asset( 15'000 ), (witness) ); // extra RC for witness_create
+    ACTORS( PIXA_asset( 15'000 ), (witness) ); // extra RC for witness_create
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
-    ISSUE_FUNDS( "bob", HIVE_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "alice", HIVE_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "witness", HIVE_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "bob", PIXA_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "alice", PIXA_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "witness", PIXA_asset( 10'000'000 ) );
     
     //Prepare witnesses
     witness_create( "witness", witness_private_key, "url.witness", witness_private_key.get_public_key(), HIVE_MIN_PRODUCER_REWARD );
@@ -2107,8 +2107,8 @@ BOOST_AUTO_TEST_CASE( decline_voting_rights_02 )
 
     //Make some vests
     const share_type basic_votes = get_votes( "witness" );
-    vest( "bob", "bob", HIVE_asset( 1'000'000 ), bob_private_key );
-    vest( "alice", "alice", HIVE_asset( 1'000'000 ), alice_private_key );
+    vest( "bob", "bob", PIXA_asset( 1'000'000 ), bob_private_key );
+    vest( "alice", "alice", PIXA_asset( 1'000'000 ), alice_private_key );
     generate_days_blocks( 30, true );
 
     // alice - do
@@ -2160,17 +2160,17 @@ BOOST_AUTO_TEST_CASE( decline_voting_rights_03 )
     };
 
     ACTORS( DEFAULT_VESTING, (bob)(alice) );
-    ACTORS( HIVE_asset( 15'000 ), (witness)(witness2) ); // extra RC for witness_create
+    ACTORS( PIXA_asset( 15'000 ), (witness)(witness2) ); // extra RC for witness_create
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     // auto start_time = db->head_block_time();
-    ISSUE_FUNDS( "bob", HIVE_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "alice", HIVE_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "witness", HIVE_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "witness2", HIVE_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "bob", PIXA_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "alice", PIXA_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "witness", PIXA_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "witness2", PIXA_asset( 10'000'000 ) );
     
     //Prepare witnesses
     witness_create( "witness", witness_private_key, "url.witness", witness_private_key.get_public_key(), HIVE_MIN_PRODUCER_REWARD );
@@ -2182,8 +2182,8 @@ BOOST_AUTO_TEST_CASE( decline_voting_rights_03 )
     //Make some vests
     const share_type basic_votes = get_votes( "witness" );
     const share_type basic_votes2 = get_votes( "witness2" );
-    vest( "bob", "bob", HIVE_asset( 1'000'000 ), bob_private_key );
-    vest( "alice", "alice", HIVE_asset( 1'000'000 ), alice_private_key );
+    vest( "bob", "bob", PIXA_asset( 1'000'000 ), bob_private_key );
+    vest( "alice", "alice", PIXA_asset( 1'000'000 ), alice_private_key );
     generate_days_blocks( 30, true );
 
     // alice - do
@@ -2232,7 +2232,7 @@ BOOST_AUTO_TEST_CASE( decline_voting_rights_04 )
   {
     BOOST_TEST_MESSAGE( "Testing: decline voting rights: casual use with cancel" );
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     const std::function<bool(const account_name_type)>  is_cancelled = [&](const account_name_type name)
@@ -2242,13 +2242,13 @@ BOOST_AUTO_TEST_CASE( decline_voting_rights_04 )
     };
 
     ACTORS( DEFAULT_VESTING, (bob)(alice) );
-    ACTORS( HIVE_asset( 15'000 ), (witness) ); // extra RC for witness_create
+    ACTORS( PIXA_asset( 15'000 ), (witness) ); // extra RC for witness_create
     generate_block();
 
     // auto start_time = db->head_block_time();
-    ISSUE_FUNDS( "bob", HIVE_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "alice", HIVE_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "witness", HIVE_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "bob", PIXA_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "alice", PIXA_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "witness", PIXA_asset( 10'000'000 ) );
     
     //Prepare witnesses
     witness_create( "witness", witness_private_key, "url.witness", witness_private_key.get_public_key(), HIVE_MIN_PRODUCER_REWARD );
@@ -2257,7 +2257,7 @@ BOOST_AUTO_TEST_CASE( decline_voting_rights_04 )
 
     //Make some vests
     const share_type basic_votes = get_votes( "witness" );
-    vest( "bob", "bob", HIVE_asset( 1'000'000 ), bob_private_key );
+    vest( "bob", "bob", PIXA_asset( 1'000'000 ), bob_private_key );
     witness_vote( "bob", "witness", true, bob_private_key );
     generate_block();
     BOOST_REQUIRE_EQUAL( get_votes("witness"), basic_votes );
@@ -2296,17 +2296,17 @@ BOOST_AUTO_TEST_CASE( small_common_test_01 )
   {
     BOOST_TEST_MESSAGE( "Testing: simulation of trying to overcome system" );
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     ACTORS( DEFAULT_VESTING, (alice) );
-    ACTORS( HIVE_asset( 15'000 ), (witness) ); // extra RC for witness_create
+    ACTORS( PIXA_asset( 15'000 ), (witness) ); // extra RC for witness_create
     generate_block();
 
     //auto start_time = db->head_block_time();
 
-    ISSUE_FUNDS( "alice", HIVE_asset( 1'000'000'001 ) );
-    ISSUE_FUNDS( "witness", HIVE_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "alice", PIXA_asset( 1'000'000'001 ) );
+    ISSUE_FUNDS( "witness", PIXA_asset( 10'000'000 ) );
     //Prepare witnesses
     
     witness_create( "witness", witness_private_key, "url.witness", witness_private_key.get_public_key(), HIVE_MIN_PRODUCER_REWARD );
@@ -2320,7 +2320,7 @@ BOOST_AUTO_TEST_CASE( small_common_test_01 )
     share_type basic_votes = get_votes( "witness" );
 
     //First start timer with low, not suspicious amount of vests
-    vest( "alice", "alice", HIVE_asset( 1 ), alice_private_key );
+    vest( "alice", "alice", PIXA_asset( 1 ), alice_private_key );
     generate_block();
 
     share_type votes_01 = get_votes( "witness" );
@@ -2331,7 +2331,7 @@ BOOST_AUTO_TEST_CASE( small_common_test_01 )
 
     // just before lock down alice vests huge amount of TESTs
     const auto alice_vp = get_vesting( "alice" ).amount.value;
-    vest( "alice", "alice", HIVE_asset( 1'000'000'000 ), alice_private_key );
+    vest( "alice", "alice", PIXA_asset( 1'000'000'000 ), alice_private_key );
     const auto alice_vp_2 = get_vesting( "alice" ).amount.value;
     generate_block();
 
@@ -2351,7 +2351,7 @@ BOOST_AUTO_TEST_CASE( small_common_test_01 )
 
 #define ACCOUNT_REPORT( account ) \
   BOOST_TEST_MESSAGE( "[scenario_01]: " << account << " has " << asset_to_string( get_vesting( account )) ); \
-  BOOST_TEST_MESSAGE( "[scenario_01]: " << account << " has " << asset_to_string( get_hive_balance( account )) ); \
+  BOOST_TEST_MESSAGE( "[scenario_01]: " << account << " has " << asset_to_string( get_pixa_balance( account )) ); \
   BOOST_TEST_MESSAGE( "[scenario_01]: " << account << " has " << VOTING_POWER( account ) << " voting power" ); \
   BOOST_TEST_MESSAGE( "[scenario_01]: " << account << " has " << PROXIED_VSF( account ) << " proxied vsf" )
 
@@ -2373,8 +2373,8 @@ BOOST_AUTO_TEST_CASE( small_common_test_01 )
 #define CHECK_ACCOUNT_VESTS( account ) \
   BOOST_REQUIRE_EQUAL( get_vesting( #account ), expected_ ## account ## _vests )
 
-#define CHECK_ACCOUNT_HIVE( account ) \
-  BOOST_REQUIRE_EQUAL( get_hive_balance( #account ), expected_ ## account ## _hive )
+#define CHECK_ACCOUNT_PIXA( account ) \
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( #account ), expected_ ## account ## _pixa )
 
 #define CHECK_ACCOUNT_VP( account ) \
   BOOST_REQUIRE_EQUAL( VOTING_POWER( #account ), expected_ ## account ## _vp )
@@ -2383,8 +2383,8 @@ BOOST_AUTO_TEST_CASE( small_common_test_01 )
   BOOST_REQUIRE_EQUAL( WITNESS_VOTES( #witness ), expected_ ## witness ## _votes )
 
 #define DAY_CHECK_VOTES_BALANCES \
-  BOOST_REQUIRE_NE( get_hive_balance( "alice" ), HIVE_asset( 0 ) ); \
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), get_hive_balance( "carol" ) ); \
+  BOOST_REQUIRE_NE( get_pixa_balance( "alice" ), PIXA_asset( 0 ) ); \
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), get_pixa_balance( "carol" ) ); \
   BOOST_TEST_MESSAGE( "[scenario_01]: " << "expected_alice_vests = " << asset_to_string( expected_alice_vests ) ); \
   CHECK_ACCOUNT_VESTS( alice ); \
   BOOST_REQUIRE_EQUAL( VOTING_POWER( "alice" ), WITNESS_VOTES( "alice0bp" ) ); \
@@ -2421,7 +2421,7 @@ BOOST_AUTO_TEST_CASE( scenario_01 )
   int64_t initial_bob0bp_vp;
   int64_t initial_bob0bp_votes;
   int64_t initial_bob0bp_delayed_votes;
-  HIVE_asset initial_carol_hive;
+  PIXA_asset initial_carol_pixa;
 
   VEST_asset expected_alice_vests = initial_alice_vests;
   VEST_asset expected_alice0bp_vests;
@@ -2433,18 +2433,18 @@ BOOST_AUTO_TEST_CASE( scenario_01 )
   int64_t expected_bob0bp_vp;
   int64_t expected_bob0bp_votes;
   int64_t expected_bob0bp_delayed_votes;
-  HIVE_asset expected_carol_hive;
+  PIXA_asset expected_carol_pixa;
 
 /* https://gitlab.syncad.com/hive-group/hive/issues/5#note_24084
 
   actors: alice, alice.bp (witness of alice choice), bob, bob.bp (witness of bob choice), carol
 */
-  ACTORS( HIVE_asset( 15'000 ), (alice)(alice0bp)(bob)(bob0bp)(carol) ); // extra RC for various operations
+  ACTORS( PIXA_asset( 15'000 ), (alice)(alice0bp)(bob)(bob0bp)(carol) ); // extra RC for various operations
   generate_block();
 
   BOOST_TEST_MESSAGE( "[scenario_01]: after account creation" );
   BOOST_TEST_MESSAGE( "[scenario_01]: alice has " << asset_to_string( get_vesting( "alice" )) );
-  BOOST_TEST_MESSAGE( "[scenario_01]: alice has " << asset_to_string( get_hive_balance( "alice" )) );
+  BOOST_TEST_MESSAGE( "[scenario_01]: alice has " << asset_to_string( get_pixa_balance( "alice" )) );
 
   witness_create( "alice0bp", alice0bp_private_key, "url.alice.bp", alice0bp_private_key.get_public_key(), HIVE_MIN_PRODUCER_REWARD );
   witness_plugin->add_signing_key( alice0bp_private_key );
@@ -2453,10 +2453,10 @@ BOOST_AUTO_TEST_CASE( scenario_01 )
   generate_block();
 
 /*
-  For simplicity we are going to assume 1 vest == 1 HIVE at all times but in reality all conversions
+  For simplicity we are going to assume 1 vest == 1 PIXA at all times but in reality all conversions
   are done using rate from the time when action is performed.
   
-  Before test starts alice has 1300 HIVE in liquid form. She sets up vest route in the following way:
+  Before test starts alice has 1300 PIXA in liquid form. She sets up vest route in the following way:
   - to alice in vest form 25%
   - to bob in vest form 25%
   - to carol in liquid form 25%
@@ -2464,7 +2464,7 @@ BOOST_AUTO_TEST_CASE( scenario_01 )
   leaving remaining 25% for herself in liquid form.
 */
   signed_transaction tx;
-  issue_funds( "alice", HIVE_asset( 1'300'000 ) );
+  issue_funds( "alice", PIXA_asset( 1'300'000 ) );
 
   {
   BOOST_TEST_MESSAGE( "[scenario_01]: Setting up alice destination" );
@@ -2508,7 +2508,7 @@ BOOST_AUTO_TEST_CASE( scenario_01 )
   generate_block();
 
 /*
-  Day 0: alice powers up 1000 HIVE; she has 1000 vests, including delayed maturing on day 30 and 300 HIVE
+  Day 0: alice powers up 1000 PIXA; she has 1000 vests, including delayed maturing on day 30 and 300 PIXA
 */
   uint32_t today = 0;
   VEST_asset origin_alice_vests = get_vesting( "alice" );
@@ -2516,11 +2516,11 @@ BOOST_AUTO_TEST_CASE( scenario_01 )
   BOOST_TEST_MESSAGE( "[scenario_01]: head_block_num = " << db->head_block_num() );
 
   BOOST_TEST_MESSAGE( "[scenario_01]: alice powers up 1000" );
-  vest( "alice", "alice", HIVE_asset( 1'000'000 ), alice_private_key );
+  vest( "alice", "alice", PIXA_asset( 1'000'000 ), alice_private_key );
   validate_database();
 
   INTERVAL_REPORT( today );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 300'000 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 300'000 ) );
 
 /*
   Analyzing delayed votes before they are removed.
@@ -2554,18 +2554,18 @@ BOOST_AUTO_TEST_CASE( scenario_01 )
 */
 
 /*
-  Day 5: alice powers up 300 HIVE; she has 1300 vests, including delayed 1000 maturing on day 30 and 300 maturing on day 35, 0 HIVE
+  Day 5: alice powers up 300 PIXA; she has 1300 vests, including delayed 1000 maturing on day 30 and 300 maturing on day 35, 0 PIXA
 */
   BOOST_TEST_MESSAGE( "[scenario_01]: before set_current_day( 5 ): " << get_current_time_iso_string() );
   GOTO_DAY( 5 );
   BOOST_TEST_MESSAGE( "[scenario_01]: after set_current_day( 5 ): " << get_current_time_iso_string() );
 
   BOOST_TEST_MESSAGE( "[scenario_01]: alice powers up 300" );
-  vest( "alice", "alice", HIVE_asset( 300'000 ), alice_private_key );
+  vest( "alice", "alice", PIXA_asset( 300'000 ), alice_private_key );
   validate_database();
 
   INTERVAL_REPORT( today );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 0 ) );
 
 /*
   Day 10: alice powers down 1300 vests; this schedules virtual PD actions on days 17, 24, 31, 38, 45, 52, 59, 66, 73, 80, 87, 94 and 101
@@ -2583,10 +2583,10 @@ BOOST_AUTO_TEST_CASE( scenario_01 )
   validate_database();
 
   INTERVAL_REPORT( today );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 0 ) );
 
 /*
-  Day 17: PD of 100 vests from alice gives 25 HIVE to carol, 25 HIVE to alice, powers up 25 vests to bob (maturing on day 47)
+  Day 17: PD of 100 vests from alice gives 25 PIXA to carol, 25 PIXA to alice, powers up 25 vests to bob (maturing on day 47)
   and ignores 25 vests of power down (power down canceled in 25% by vest route to alice);
   since there is nonzero balance as delayed, 75 vests are subtracted from second record leaving 1000 (30day) + 225 (35day)
   alice 25S+1225v=0+1000(30d)+225(35d); bob 25v=0+25(47d); carol 25S
@@ -2601,7 +2601,7 @@ BOOST_AUTO_TEST_CASE( scenario_01 )
   initial_bob0bp_vp = VOTING_POWER( "bob0bp");
   initial_bob0bp_votes = WITNESS_VOTES( "bob0bp" );
   initial_bob0bp_delayed_votes = DELAYED_VOTES( "bob0bp" );
-  initial_carol_hive = get_hive_balance( "carol" );
+  initial_carol_pixa = get_pixa_balance( "carol" );
 
   expected_alice_vests = initial_alice0bp_vests;
   expected_alice0bp_vests = initial_alice0bp_vests;
@@ -2611,7 +2611,7 @@ BOOST_AUTO_TEST_CASE( scenario_01 )
   expected_bob0bp_vests = initial_bob0bp_vests;
   expected_bob0bp_vp = initial_bob0bp_vp;
   expected_bob0bp_votes = initial_bob0bp_votes;
-  expected_carol_hive = initial_carol_hive;
+  expected_carol_pixa = initial_carol_pixa;
 
   GOTO_DAY( 17 );
   INTERVAL_REPORT( today );
@@ -2898,7 +2898,7 @@ BOOST_AUTO_TEST_CASE( scenario_01 )
 #undef DELAYED_VOTES
 #undef INTERVAL_REPORT
 #undef CHECK_ACCOUNT_VESTS
-#undef CHECK_ACCOUNT_HIVE
+#undef CHECK_ACCOUNT_PIXA
 #undef CHECK_ACCOUNT_VP
 #undef CHECK_WITNESS_VOTES
 #undef DAY_CHECK

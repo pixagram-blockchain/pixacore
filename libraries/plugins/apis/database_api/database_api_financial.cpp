@@ -399,13 +399,13 @@ DEFINE_API_IMPL( database_api_impl, find_vesting_delegation_expirations )
 }
 
 
-/* HBD Conversion Requests */
+/* PXS Conversion Requests */
 
-DEFINE_API_IMPL( database_api_impl, list_hbd_conversion_requests )
+DEFINE_API_IMPL( database_api_impl, list_pxs_conversion_requests )
 {
   FC_ASSERT( 0 < args.limit && args.limit <= DATABASE_API_SINGLE_QUERY_LIMIT, "limit not set or too big" );
 
-  list_hbd_conversion_requests_return result;
+  list_pxs_conversion_requests_return result;
   result.requests.reserve( args.limit );
 
   switch( args.order )
@@ -456,9 +456,19 @@ DEFINE_API_IMPL( database_api_impl, list_hbd_conversion_requests )
   return result;
 }
 
+DEFINE_API_IMPL( database_api_impl, list_hbd_conversion_requests )
+{
+  return list_pxs_conversion_requests( args );
+}
+
 DEFINE_API_IMPL( database_api_impl, find_hbd_conversion_requests )
 {
-  find_hbd_conversion_requests_return result;
+  return find_pxs_conversion_requests( args );
+}
+
+DEFINE_API_IMPL( database_api_impl, find_pxs_conversion_requests )
+{
+  find_pxs_conversion_requests_return result;
 
   const auto* owner = _db.find_account( args.account );
   FC_ASSERT( owner != nullptr, "Given account does not exist." );
@@ -693,36 +703,36 @@ DEFINE_API_IMPL( database_api_impl, get_order_book )
   FC_ASSERT( 0 < args.limit && args.limit <= DATABASE_API_SINGLE_QUERY_LIMIT, "limit not set or too big" );
   get_order_book_return result;
 
-  auto max_sell = price::max( HBD_SYMBOL, HIVE_SYMBOL );
-  auto max_buy = price::max( HIVE_SYMBOL, HBD_SYMBOL );
+  auto max_sell = price::max( PXS_SYMBOL, PIXA_SYMBOL );
+  auto max_buy = price::max( PIXA_SYMBOL, PXS_SYMBOL );
 
   const auto& limit_price_idx = _db.get_index< chain::limit_order_index >().indices().get< chain::by_price >();
   auto sell_itr = limit_price_idx.lower_bound( max_sell );
   auto buy_itr  = limit_price_idx.lower_bound( max_buy );
   auto end = limit_price_idx.end();
 
-  while( sell_itr != end && sell_itr->get_sell_price().base.symbol == HBD_SYMBOL && result.bids.size() < args.limit )
+  while( sell_itr != end && sell_itr->get_sell_price().base.symbol == PXS_SYMBOL && result.bids.size() < args.limit )
   {
     auto itr = sell_itr;
     order cur;
     cur.order_price = itr->get_sell_price();
     cur.real_price  = 0.0;
     // cur.real_price  = (cur.order_price).to_real();
-    cur.hbd = itr->amount_for_sale().amount;
-    cur.hive = ( itr->amount_for_sale() * cur.order_price ).amount;
+    cur.pxs = itr->amount_for_sale().amount;
+    cur.pixa = ( itr->amount_for_sale() * cur.order_price ).amount;
     cur.created = itr->get_created();
     result.bids.emplace_back( std::move( cur ) );
     ++sell_itr;
   }
-  while( buy_itr != end && buy_itr->get_sell_price().base.symbol == HIVE_SYMBOL && result.asks.size() < args.limit )
+  while( buy_itr != end && buy_itr->get_sell_price().base.symbol == PIXA_SYMBOL && result.asks.size() < args.limit )
   {
     auto itr = buy_itr;
     order cur;
     cur.order_price = itr->get_sell_price();
     cur.real_price = 0.0;
     // cur.real_price  = (~cur.order_price).to_real();
-    cur.hive    = itr->amount_for_sale().amount;
-    cur.hbd     = ( itr->amount_for_sale() * cur.order_price ).amount;
+    cur.pixa    = itr->amount_for_sale().amount;
+    cur.pxs     = ( itr->amount_for_sale() * cur.order_price ).amount;
     cur.created = itr->get_created();
     result.asks.emplace_back( std::move( cur ) );
     ++buy_itr;

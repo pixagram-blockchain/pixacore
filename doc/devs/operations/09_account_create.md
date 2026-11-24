@@ -14,7 +14,7 @@ The account may be created in two ways:
 ## 2. Parameters
 | Parameter name | Description | Example |                                                                                                                              
 | -------------- | ----------- | ------------ |
-| fee                | Paid by {creator}The witnesses decide the amount of the fee. Now, it is 3 HIVE.                                                                                                         |         |
+| fee                | Paid by {creator}The witnesses decide the amount of the fee. Now, it is 3 PIXA.                                                                                                         |         |
 | creator            | An account that creates a new account.                                                                                                                                                  |         |
 | new\_account\_name | Account name<br>Valid account name may consist of many parts separated by a dot, total may have up to 16 characters, parts have to start from a letter, may be followed by numbers, or “-“. |         |
 | owner              | authority                                                                                                                                                                               |         |
@@ -33,7 +33,7 @@ Active
 
 You need:
 
-\- enough HIVE to pay the fee.
+\- enough PIXA to pay the fee.
 
 \- enough Resource Credit (RC) to make an operation.
 
@@ -42,7 +42,7 @@ You need:
 
 After the operation:
 
-\- HIVE balance of {creator} is decreased by {fee}.
+\- PIXA balance of {creator} is decreased by {fee}.
 
 \- a new account { new\_account\_name}  is created.
 

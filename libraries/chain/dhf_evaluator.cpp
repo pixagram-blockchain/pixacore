@@ -41,7 +41,7 @@ void create_proposal_evaluator::do_apply( const create_proposal_operation& o )
     */
     HIVE_CHAIN_TIME_ASSERT( o.end_date > _db.head_block_time(), o.end_date, "Can't create inactive proposals..." );
 
-    HBD_asset fee_hbd( HIVE_TREASURY_FEE );
+    PXS_asset fee_pxs( HIVE_TREASURY_FEE );
 
     if( _db.has_hardfork(HIVE_HARDFORK_1_24) )
     {
@@ -50,7 +50,7 @@ void create_proposal_evaluator::do_apply( const create_proposal_operation& o )
       if( proposal_run_time > HIVE_PROPOSAL_FEE_INCREASE_DAYS_SEC )
       {
         uint32_t extra_days = (proposal_run_time / HIVE_ONE_DAY_SECONDS) - HIVE_PROPOSAL_FEE_INCREASE_DAYS;
-        fee_hbd += HBD_asset( HIVE_PROPOSAL_FEE_INCREASE_AMOUNT * extra_days );
+        fee_pxs += PXS_asset( HIVE_PROPOSAL_FEE_INCREASE_AMOUNT * extra_days );
       }
     }
 
@@ -90,12 +90,12 @@ void create_proposal_evaluator::do_apply( const create_proposal_operation& o )
       proposal.permlink = o.permlink.c_str();
     } );
 
-    temp_HBD_balance fee;
-    _db.adjust_balance( owner_account, fee, -fee_hbd );
+    temp_PXS_balance fee;
+    _db.adjust_balance( owner_account, fee, -fee_pxs );
     /// Fee shall be paid to the treasury
-    _db.adjust_balance( treasury_account, fee, fee_hbd );
+    _db.adjust_balance( treasury_account, fee, fee_pxs );
 
-    push_virtual_operation( _db,  proposal_fee_operation( o.creator, treasury_account.get_name(), proposal_id, fee_hbd ) );
+    push_virtual_operation( _db,  proposal_fee_operation( o.creator, treasury_account.get_name(), proposal_id, fee_pxs ) );
   }
   FC_CAPTURE_AND_RETHROW( (o) )
 }
@@ -117,7 +117,7 @@ void update_proposal_evaluator::do_apply( const update_proposal_operation& o )
       HIVE_CHAIN_STATE_ASSERT(commentObject && "Proposal permlink must point to the article posted by creator or the receiver", o.permlink, "Permlink '${subject}' not found under creator or receiver.");
     }
 
-    HBD_asset o_daily_pay( o.daily_pay );
+    PXS_asset o_daily_pay( o.daily_pay );
     HIVE_CHAIN_LIMIT_ASSERT( o_daily_pay <= proposal.daily_pay, o_daily_pay, "You cannot increase the daily pay" );
 
     const update_proposal_end_date* ed = nullptr;

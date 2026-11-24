@@ -113,7 +113,7 @@ public:
     const fc::string& name,
     const fc::string& creator,
     const private_key_type& creator_key,
-    const HIVE_asset& initial_vesting,
+    const PIXA_asset& initial_vesting,
     const public_key_type& key,
     const public_key_type& post_key,
     const fc::string& json_metadata
@@ -127,7 +127,7 @@ public:
     const fc::string& name,
     const public_key_type& key,
     const public_key_type& post_key,
-    const HIVE_asset& initial_vesting
+    const PIXA_asset& initial_vesting
   )
   {
     FC_ASSERT(fixture);
@@ -148,7 +148,7 @@ public:
     const private_key_type& owner_key,
     const fc::string& url,
     const public_key_type& signing_key,
-    const HIVE_asset& fee
+    const PIXA_asset& fee
   )
   {
     FC_ASSERT(fixture);
@@ -198,22 +198,22 @@ public:
     return fixture->push_transaction_ex(tx, keys, skip_flags, pack_type);
   }
 
-  void fund( const fc::string& account_name, const HIVE_asset& amount )
+  void fund( const fc::string& account_name, const PIXA_asset& amount )
   {
     FC_ASSERT(fixture);
     return fixture->fund(account_name, amount);
   }
-  void fund( const fc::string& account_name, const HBD_asset& amount )
+  void fund( const fc::string& account_name, const PXS_asset& amount )
   {
     FC_ASSERT(fixture);
     return fixture->fund(account_name, amount);
   }
-  void issue_funds( const fc::string& account_name, const HIVE_asset& amount )
+  void issue_funds( const fc::string& account_name, const PIXA_asset& amount )
   {
     FC_ASSERT(fixture);
     return fixture->issue_funds(account_name, amount);
   }
-  void issue_funds( const fc::string& account_name, const HBD_asset& amount, bool update_print_rate = true )
+  void issue_funds( const fc::string& account_name, const PXS_asset& amount, bool update_print_rate = true )
   {
     FC_ASSERT(fixture);
     return fixture->issue_funds(account_name, amount, update_print_rate);
@@ -229,22 +229,22 @@ public:
     FC_ASSERT(fixture);
     return fixture->recurrent_transfer(from, to, amount, memo, recurrence, executions, key);
   }
-  void convert_hbd_to_hive( const std::string& owner, uint32_t requestid, const HBD_asset& amount, const fc::ecc::private_key& key )
+  void convert_pxs_to_pixa( const std::string& owner, uint32_t requestid, const PXS_asset& amount, const fc::ecc::private_key& key )
   {
     FC_ASSERT(fixture);
-    return fixture->convert_hbd_to_hive(owner, requestid, amount, key);
+    return fixture->convert_pxs_to_pixa(owner, requestid, amount, key);
   }
-  void collateralized_convert_hive_to_hbd( const std::string& owner, uint32_t requestid, const HIVE_asset& amount, const fc::ecc::private_key& key )
+  void collateralized_convert_pixa_to_pxs( const std::string& owner, uint32_t requestid, const PIXA_asset& amount, const fc::ecc::private_key& key )
   {
     FC_ASSERT(fixture);
-    return fixture->collateralized_convert_hive_to_hbd(owner, requestid, amount, key);
+    return fixture->collateralized_convert_pixa_to_pxs(owner, requestid, amount, key);
   }
-  void vest( const fc::string& to, const HIVE_asset& amount )
+  void vest( const fc::string& to, const PIXA_asset& amount )
   {
     FC_ASSERT(fixture);
     return fixture->vest(to, amount);
   }
-  void vest( const fc::string& from, const fc::string& to, const HIVE_asset& amount, const fc::ecc::private_key& key )
+  void vest( const fc::string& from, const fc::string& to, const PIXA_asset& amount, const fc::ecc::private_key& key )
   {
     FC_ASSERT(fixture);
     return fixture->vest(from, to, amount, key);
@@ -269,7 +269,7 @@ public:
     FC_ASSERT(fixture);
     return fixture->proxy(_account, _proxy, _key);
   }
-  void set_price_feed( const HBD_price& new_price, bool stop_at_update_block = false )
+  void set_price_feed( const PXS_price& new_price, bool stop_at_update_block = false )
   {
     FC_ASSERT(fixture);
     return fixture->set_price_feed(new_price, stop_at_update_block);
@@ -279,7 +279,7 @@ public:
     FC_ASSERT(fixture);
     return fixture->set_witness_props(new_props);
   }
-  void witness_feed_publish( const fc::string& publisher, const HBD_price& exchange_rate, const private_key_type& key )
+  void witness_feed_publish( const fc::string& publisher, const PXS_price& exchange_rate, const private_key_type& key )
   {
     FC_ASSERT(fixture);
     return fixture->witness_feed_publish(publisher, exchange_rate, key);
@@ -311,12 +311,12 @@ public:
     FC_ASSERT(fixture);
     return fixture->limit_order2_create(owner, amount_to_sell, exchange_rate, fill_or_kill, expiration_shift, orderid, key);
   }
-  void escrow_transfer( const fc::string& from, const fc::string& to, const fc::string& agent, const HIVE_asset& hive_amount,
-                        const HBD_asset& hbd_amount, const asset& fee, const std::string& json_meta, const fc::microseconds& ratification_shift,
+  void escrow_transfer( const fc::string& from, const fc::string& to, const fc::string& agent, const PIXA_asset& pixa_amount,
+                        const PXS_asset& pxs_amount, const asset& fee, const std::string& json_meta, const fc::microseconds& ratification_shift,
                         const fc::microseconds& expiration_shift, uint32_t escrow_id, const fc::ecc::private_key& key )
   {
     FC_ASSERT(fixture);
-    return fixture->escrow_transfer(from, to, agent, hive_amount, hbd_amount, fee, json_meta, ratification_shift, expiration_shift, escrow_id, key);
+    return fixture->escrow_transfer(from, to, agent, pixa_amount, pxs_amount, fee, json_meta, ratification_shift, expiration_shift, escrow_id, key);
   }
   void escrow_approve( const fc::string& from, const fc::string& to, const fc::string& agent, const fc::string& who, bool approve, uint32_t escrow_id, const fc::ecc::private_key& key )
   {
@@ -324,10 +324,10 @@ public:
     return fixture->escrow_approve(from, to, agent, who, approve, escrow_id, key);
   }
   void escrow_release( const fc::string& from, const fc::string& to, const fc::string& agent, const fc::string& who, const fc::string& receiver,
-                       const HIVE_asset& hive_amount, const HBD_asset& hbd_amount, uint32_t escrow_id, const fc::ecc::private_key& key )
+                       const PIXA_asset& pixa_amount, const PXS_asset& pxs_amount, uint32_t escrow_id, const fc::ecc::private_key& key )
   {
     FC_ASSERT(fixture);
-    return fixture->escrow_release(from, to, agent, who, receiver, hive_amount, hbd_amount, escrow_id, key);
+    return fixture->escrow_release(from, to, agent, who, receiver, pixa_amount, pxs_amount, escrow_id, key);
   }
   void escrow_dispute( const fc::string& from, const fc::string& to, const fc::string& agent, const fc::string& who, uint32_t escrow_id, const fc::ecc::private_key& key )
   {
@@ -372,14 +372,14 @@ public:
   }
 
   int64_t create_proposal( const std::string& creator, const std::string& receiver, const std::string& subject, const std::string& permlink,
-                           fc::time_point_sec start_date, fc::time_point_sec end_date, HBD_asset daily_pay, const fc::ecc::private_key& key )
+                           fc::time_point_sec start_date, fc::time_point_sec end_date, PXS_asset daily_pay, const fc::ecc::private_key& key )
   {
     FC_ASSERT(fixture);
     return fixture->create_proposal(creator, receiver, subject, permlink, start_date, end_date, daily_pay, key);
   }
   int64_t create_proposal(   std::string creator, std::string receiver,
                     fc::time_point_sec start_date, fc::time_point_sec end_date,
-                    HBD_asset daily_pay, const fc::ecc::private_key& active_key, const fc::ecc::private_key& post_key, bool with_block_generation = true )
+                    PXS_asset daily_pay, const fc::ecc::private_key& active_key, const fc::ecc::private_key& post_key, bool with_block_generation = true )
   {
     FC_ASSERT(fixture);
     return fixture->create_proposal(creator, receiver, start_date, end_date, daily_pay, active_key, post_key, with_block_generation);
@@ -394,7 +394,7 @@ public:
     FC_ASSERT(fixture);
     return fixture->remove_proposal(_deleter, _proposal_id, _key);
   }
-  void update_proposal(uint64_t proposal_id, std::string creator, HBD_asset daily_pay, std::string subject, std::string permlink, const fc::ecc::private_key& key, fc::time_point_sec* end_date = nullptr )
+  void update_proposal(uint64_t proposal_id, std::string creator, PXS_asset daily_pay, std::string subject, std::string permlink, const fc::ecc::private_key& key, fc::time_point_sec* end_date = nullptr )
   {
     FC_ASSERT(fixture);
     return fixture->update_proposal(proposal_id, creator, daily_pay, subject, permlink, key, end_date);
@@ -431,35 +431,35 @@ public:
     FC_ASSERT(fixture);
     return fixture->get_account_id(account_name);
   }
-  HIVE_asset get_hive_balance( const fc::string& account_name )const
+  PIXA_asset get_pixa_balance( const fc::string& account_name )const
   {
     FC_ASSERT(fixture);
-    return fixture->get_hive_balance(account_name);
+    return fixture->get_pixa_balance(account_name);
   }
-  HBD_asset get_hbd_balance( const fc::string& account_name )const
+  PXS_asset get_pxs_balance( const fc::string& account_name )const
   {
     FC_ASSERT(fixture);
-    return fixture->get_hbd_balance(account_name);
+    return fixture->get_pxs_balance(account_name);
   }
-  HIVE_asset get_hive_savings( const fc::string& account_name )const
+  PIXA_asset get_pixa_savings( const fc::string& account_name )const
   {
     FC_ASSERT(fixture);
-    return fixture->get_hive_savings(account_name);
+    return fixture->get_pixa_savings(account_name);
   }
-  HBD_asset get_hbd_savings( const fc::string& account_name )const
+  PXS_asset get_pxs_savings( const fc::string& account_name )const
   {
     FC_ASSERT(fixture);
-    return fixture->get_hbd_savings(account_name);
+    return fixture->get_pxs_savings(account_name);
   }
-  HIVE_asset get_hive_rewards( const fc::string& account_name )const
+  PIXA_asset get_pixa_rewards( const fc::string& account_name )const
   {
     FC_ASSERT(fixture);
-    return fixture->get_hive_rewards(account_name);
+    return fixture->get_pixa_rewards(account_name);
   }
-  HBD_asset get_hbd_rewards( const fc::string& account_name )const
+  PXS_asset get_pxs_rewards( const fc::string& account_name )const
   {
     FC_ASSERT(fixture);
-    return fixture->get_hbd_rewards(account_name);
+    return fixture->get_pxs_rewards(account_name);
   }
   VEST_asset get_vesting( const fc::string& account_name )const
   {
@@ -471,10 +471,10 @@ public:
     FC_ASSERT(fixture);
     return fixture->get_vest_rewards(account_name);
   }
-  HIVE_asset get_vest_rewards_as_hive( const fc::string& account_name )const
+  PIXA_asset get_vest_rewards_as_pixa( const fc::string& account_name )const
   {
     FC_ASSERT(fixture);
-    return fixture->get_vest_rewards_as_hive(account_name);
+    return fixture->get_vest_rewards_as_pixa(account_name);
   }
 
   bool compare_delayed_vote_count( const account_name_type& name, const std::vector<uint64_t>& data_to_compare )

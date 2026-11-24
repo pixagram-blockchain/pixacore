@@ -18,6 +18,6 @@ message proposal_pay {
   // @param {string} payer - treasury account, source of payment
   required string payer = 3;
 
-  // @param {asset} payment - (HBD) paid amount
+  // @param {asset} payment - (PXS) paid amount
   required asset  payment = 4;
 }

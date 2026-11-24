@@ -6,7 +6,7 @@ package hive.protocol.buffers;
 
 /* Related to withdraw_vesting_operation and set_withdraw_vesting_route_operation.
  * Generated during block processing in batches for each active withdraw route (including implied
- * from_account(VESTS)->from_account(HIVE)) each time vesting withdrawal period passes.
+ * from_account(VESTS)->from_account(PIXA)) each time vesting withdrawal period passes.
  * Note: not generated for implied route when all funds were already distributed along explicit routes
  */
 message fill_vesting_withdraw {
@@ -19,6 +19,6 @@ message fill_vesting_withdraw {
   // @param {asset} withdraw - (VESTS) source amount
   required asset  withdrawn = 3;
 
-  //  @param {asset} deposited - (HIVE or VESTS) [converted] target amount
+  //  @param {asset} deposited - (PIXA or VESTS) [converted] target amount
   required asset  deposited = 4;
 }

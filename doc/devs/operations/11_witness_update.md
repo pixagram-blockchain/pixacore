@@ -21,7 +21,7 @@ If the witness doesn’t want to be a witness any more, the operation witness\_u
 | url                 | url to information about witness                                                                                          |         |
 | block\_signing\_key | Public block signing key                                                                                                  |         |
 | props               | legacy\_chain\_properties                                                                                                 |         |
-| fee                 | The asset is validated (the format should be correct and should be expressed in Hive), but the fee is currently ignored.  |         |
+| fee                 | The asset is validated (the format should be correct and should be expressed in PIXA), but the fee is currently ignored.  |         |
 
 
 ## 3. Authority

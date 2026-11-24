@@ -8,6 +8,8 @@ This is one of the two operations allowing to update witness properties (see wit
 
 The whole list of properties is available here: https\://gitlab.syncad.com/hive/hive/-/blob/master/doc/witness\_parameters.md.
 
+The property keys `hbd_interest_rate` and `hbd_exchange_rate` keep Hive's names: they are data inside the signed operation. The node reports the values under Pixa's names (`pxs_interest_rate` in the witness properties, `pxs_exchange_rate` in the witness object).
+
 ## 2. Parameters
 
 | Parameter name | Description | Example |                                                                                                                              

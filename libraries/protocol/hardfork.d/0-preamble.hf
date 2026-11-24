@@ -12,11 +12,7 @@
 #include <hive/protocol/version.hpp>
 #include <set>
 
-#if defined(USE_ALTERNATE_CHAIN_ID)
-  #define HIVE_NUM_HARDFORKS 31
-#else
-  /// Mainnet binary supports HF30; activated 2026-10-07 12:00:00 UTC at block 949330.
-  /// HF31 (upstream Hive's HF29 features, see 1_31.hf) is compiled in but cannot activate
-  /// until this is raised to 31.
-  #define HIVE_NUM_HARDFORKS 30
-#endif
+/// Every build supports hardfork 32. Mainnet activated HF30 on 2026-10-07 12:00:00 UTC at block 949330.
+/// HF31 (upstream Hive's HF29 features, see 1_31.hf) and HF32 (native NFTs, see 1_32.hf) keep a
+/// far-future default time on mainnet until their rollout is scheduled, so neither can activate before.
+#define HIVE_NUM_HARDFORKS 32

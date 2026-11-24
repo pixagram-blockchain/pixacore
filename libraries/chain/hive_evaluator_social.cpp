@@ -57,6 +57,12 @@ inline void validate_permlink_0_1( const string& permlink )
 void delete_comment_evaluator::do_apply( const delete_comment_operation& o )
 {
   auto comment = _db.get_comment( o.author, o.permlink );
+
+  // HF32: a minted post is the artwork the NFT stands for, so it can no longer be removed
+  if( _db.has_hardfork( HIVE_HARDFORK_1_32_NFT ) )
+    HIVE_CHAIN_STATE_ASSERT( _db.find_nft( o.author, o.permlink ) == nullptr && "nft_post_delete", o.author,
+      "Post ${a}/${p} is minted as an NFT and cannot be deleted.", ( "a", o.author )( "p", o.permlink ) );
+
   const comment_cashout_object* comment_cashout = _db.find_comment_cashout( *comment );
   if( comment_cashout )
     HIVE_CHAIN_STATE_ASSERT( !comment_cashout->has_replies(), o.author, "Cannot delete a comment with replies." );
@@ -152,7 +158,7 @@ void comment_options_evaluator::do_apply( const comment_options_operation& o )
     return;
   }
 
-  HBD_asset o_max_accepted_payout = o.get_max_accepted_payout();
+  PXS_asset o_max_accepted_payout = o.get_max_accepted_payout();
 
   if( !o.allow_curation_rewards || !o.allow_votes || o_max_accepted_payout < comment_cashout->get_max_accepted_payout() )
     HIVE_CHAIN_VOTING_ASSERT( !comment_cashout->has_votes(), o.author, "One of the included comment options requires the comment to have no rshares allocated to it." );
@@ -160,11 +166,11 @@ void comment_options_evaluator::do_apply( const comment_options_operation& o )
   HIVE_CHAIN_STATE_ASSERT( comment_cashout->allows_curation_rewards() >= o.allow_curation_rewards, o.author, "Curation rewards cannot be re-enabled." );
   HIVE_CHAIN_VOTING_ASSERT( comment_cashout->allows_votes() >= o.allow_votes, o.author, "Voting cannot be re-enabled." );
   HIVE_CHAIN_STATE_ASSERT( comment_cashout->get_max_accepted_payout() >= o_max_accepted_payout, o.author, "A comment cannot accept a greater payout." );
-  HIVE_CHAIN_STATE_ASSERT( comment_cashout->get_percent_hbd() >= o.percent_hbd, o.author, "A comment cannot accept a greater percent HBD." );
+  HIVE_CHAIN_STATE_ASSERT( comment_cashout->get_percent_pxs() >= o.percent_pxs, o.author, "A comment cannot accept a greater percent PXS." );
 
   _db.modify( *comment_cashout, [&]( comment_cashout_object& c )
   {
-    c.configure_options( o.percent_hbd, o_max_accepted_payout, o.allow_votes, o.allow_curation_rewards );
+    c.configure_options( o.percent_pxs, o_max_accepted_payout, o.allow_votes, o.allow_curation_rewards );
   } );
 
   for( auto& e : o.extensions )
@@ -281,6 +287,12 @@ void comment_evaluator::do_apply( const comment_operation& o )
   }
   else // start edit case
   {
+    // HF32: a minted post is frozen. Consensus keeps no post content, so freezing means rejecting
+    // every later comment_operation for it; title, body and metadata stay what they were at mint.
+    if( _db.has_hardfork( HIVE_HARDFORK_1_32_NFT ) )
+      HIVE_CHAIN_STATE_ASSERT( _db.find_nft( auth.get_id(), o.permlink ) == nullptr && "nft_post_edit", o.author,
+        "Post ${a}/${p} is minted as an NFT and cannot be edited.", ( "a", o.author )( "p", o.permlink ) );
+
     if( _db.has_hardfork( HIVE_HARDFORK_0_21__3313 ) ) // see block 1119418 (new post also counts as post edit)
       HIVE_CHAIN_TIME_ASSERT( _now - auth.last_post_edit >= HIVE_MIN_COMMENT_EDIT_INTERVAL, o.author, "Can only perform one comment edit per block." ); // the check is here to match delay on new posts
 
@@ -371,11 +383,11 @@ void pre_hf20_vote_evaluator( const vote_operation& o, database& _db )
 
   if( _db.has_hardfork( HIVE_HARDFORK_0_14__259 ) )
   {
-    HIVE_CHAIN_BALANCE_ASSERT( abs_rshares > HIVE_VOTE_DUST_THRESHOLD || o.weight == 0, o.voter, "Voting weight is too small, please accumulate more voting power or Hive Power." );
+    HIVE_CHAIN_BALANCE_ASSERT( abs_rshares > HIVE_VOTE_DUST_THRESHOLD || o.weight == 0, o.voter, "Voting weight is too small, please accumulate more voting power or Pixa Power." );
   }
   else if( _db.has_hardfork( HIVE_HARDFORK_0_13__248 ) )
   {
-    HIVE_CHAIN_BALANCE_ASSERT( abs_rshares > HIVE_VOTE_DUST_THRESHOLD || abs_rshares == 1, o.voter, "Voting weight is too small, please accumulate more voting power or Hive Power." );
+    HIVE_CHAIN_BALANCE_ASSERT( abs_rshares > HIVE_VOTE_DUST_THRESHOLD || abs_rshares == 1, o.voter, "Voting weight is too small, please accumulate more voting power or Pixa Power." );
   }
 
   const auto& comment_vote_idx = _db.get_index< comment_vote_index, by_comment_voter >();
@@ -686,7 +698,8 @@ void hf20_vote_evaluator( const vote_operation& o, database& _db )
     used_mana = ( uint128_t( voter.voting_manabar.current_mana ) * abs_weight * 60 * 60 * 24 ) / HIVE_100_PERCENT;
   }
 
-  int64_t max_vote_denom = dgpo.get_vote_power_reserve_rate() * HIVE_VOTING_MANA_REGENERATION_SECONDS;
+  // the refill time is a global property since hardfork 32 (5 days before it)
+  int64_t max_vote_denom = int64_t( dgpo.get_vote_power_reserve_rate() ) * dgpo.get_voting_mana_regeneration_seconds();
   HIVE_CHAIN_UNREACHABLE_CODE_ASSERT( max_vote_denom > 0, "Maximum vote denominator must be positive." );
 
   used_mana = ( used_mana + max_vote_denom - 1 ) / max_vote_denom;

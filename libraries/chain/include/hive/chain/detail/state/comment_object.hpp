@@ -19,7 +19,7 @@ class account_object;
 using chainbase::t_vector;
 using chainbase::t_pair;
 using hive::protocol::asset;
-using hive::protocol::HBD_asset;
+using hive::protocol::PXS_asset;
 
 class comment_object : public object< comment_object_type, comment_object, std::false_type /* no dynamic alloc */, std::true_type /* enable no undo remove */>
 {
@@ -129,9 +129,9 @@ public:
     init( _author, _permlink );
   }
 
-  void configure_options( uint16_t _percent_hbd, const HBD_asset& _max_accepted_payout, bool _allow_votes, bool _allow_curation )
+  void configure_options( uint16_t _percent_pxs, const PXS_asset& _max_accepted_payout, bool _allow_votes, bool _allow_curation )
   {
-    percent_hbd = _percent_hbd;
+    percent_pxs = _percent_pxs;
     max_accepted_payout = _max_accepted_payout;
     allow_votes = _allow_votes;
     allow_curation_rewards = _allow_curation;
@@ -151,9 +151,9 @@ public:
   time_point_sec get_cashout_time() const { return cashout_time; }
 
   //returns max payout configured for related comment
-  const HBD_asset& get_max_accepted_payout() const { return max_accepted_payout; }
-  //returns configured percent of reward (in basis points) that can be paid in HBD to be actually paid in HBD
-  uint16_t get_percent_hbd() const { return percent_hbd; }
+  const PXS_asset& get_max_accepted_payout() const { return max_accepted_payout; }
+  //returns configured percent of reward (in basis points) that can be paid in PXS to be actually paid in PXS
+  uint16_t get_percent_pxs() const { return percent_pxs; }
   //returns list of weighted accounts to receive part of comment author reward
   const t_beneficiaries& get_beneficiaries() const { return beneficiaries; }
 
@@ -235,7 +235,7 @@ private:
 
   uint64_t          total_vote_weight = 0; /// the total weight of voting rewards, used to calculate pro-rata share of curation payouts
 
-  HBD_asset         max_accepted_payout = HBD_asset( 1'000'000'000 ); /// HBD value of the maximum payout this post will receive
+  PXS_asset         max_accepted_payout = PXS_asset( 1'000'000'000 ); /// PXS value of the maximum payout this post will receive
 
   int32_t           net_votes = 0; // only used by APIs
   uint32_t          children = 0; // tracks number of direct replies
@@ -243,7 +243,7 @@ private:
   time_point_sec    created;
   time_point_sec    cashout_time; // since HF17 it is 7 days after creation time, earlier rules were more complex
 
-  uint16_t          percent_hbd = HIVE_100_PERCENT; /// the percent of HBD to key, unkept amounts will be received as VESTS
+  uint16_t          percent_pxs = HIVE_100_PERCENT; /// the percent of PXS to key, unkept amounts will be received as VESTS
 
   bool              allow_votes = true;
   bool              allow_curation_rewards = true;
@@ -308,11 +308,11 @@ public:
   time_point_sec get_max_cashout_time() const { return max_cashout_time; }
 
   //returns accumulated value of payouts across potentially multiple cashout windows
-  const HBD_asset& get_total_payout() const { return total_payout_value; }
+  const PXS_asset& get_total_payout() const { return total_payout_value; }
   //returns accumulated value of payouts to curators
-  const HBD_asset& get_curator_payout() const { return curator_payout_value; }
+  const PXS_asset& get_curator_payout() const { return curator_payout_value; }
   //returns accumulated value of payouts to beneficiaries
-  const HBD_asset& get_beneficiary_payout() const { return beneficiary_payout_value; }
+  const PXS_asset& get_beneficiary_payout() const { return beneficiary_payout_value; }
 
   //returns percentage of max post reward allowed for related post (in basis points)
   uint16_t get_reward_weight() const { return reward_weight; }
@@ -333,7 +333,7 @@ public:
     max_cashout_time = new_max;
   }
   //accumulates payout values (on successful payout)
-  void add_payout_values( const HBD_asset& payout, const HBD_asset& curator_payout, const HBD_asset& beneficiary_payout )
+  void add_payout_values( const PXS_asset& payout, const PXS_asset& curator_payout, const PXS_asset& beneficiary_payout )
   {
     total_payout_value += payout;
     curator_payout_value += curator_payout;
@@ -356,9 +356,9 @@ private:
   share_type      abs_rshares; // only used for very early comments
   share_type      children_abs_rshares; /// used to calculate cashout time of a discussion
 
-  HBD_asset       total_payout_value;
-  HBD_asset       curator_payout_value;
-  HBD_asset       beneficiary_payout_value;
+  PXS_asset       total_payout_value;
+  PXS_asset       curator_payout_value;
+  PXS_asset       beneficiary_payout_value;
 
   uint16_t        reward_weight; // before HF17 posts received less reward when they were more frequent than assumed average
 
@@ -431,7 +431,7 @@ FC_REFLECT( hive::chain::comment_cashout_object,
           (total_vote_weight)(max_accepted_payout)
           (net_votes)(children)
           (created)(cashout_time)
-          (percent_hbd)
+          (percent_pxs)
           (allow_votes)(allow_curation_rewards)(was_voted_on)
           (beneficiaries)
         )

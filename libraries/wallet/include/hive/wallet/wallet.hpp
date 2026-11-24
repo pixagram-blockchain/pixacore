@@ -141,7 +141,7 @@ class wallet_api
 
     /** Gets the account balance information for all accounts for which this wallet has a private key
       *
-      * @returns table with HIVE, VESTS and HBD balances for all accounts for which this wallet has a private key
+      * @returns table with PIXA, VESTS and PXS balances for all accounts for which this wallet has a private key
       */
     variant list_my_accounts();
 
@@ -397,7 +397,7 @@ class wallet_api
     /** This method will claim a subsidized account creation without waiting for the transaction to confirm.
       *
       * @param creator The account to receive the account creation credit
-      * @param fee The fee to pay for claiming the account (either "0.000 HIVE" for a discounted account, or the full account fee)
+      * @param fee The fee to pay for claiming the account (either "0.000 PIXA" for a discounted account, or the full account fee)
       * @param broadcast true if you wish to broadcast the transaction
       */
     wallet_signed_transaction claim_account_creation_nonblocking( const string& creator,
@@ -475,10 +475,10 @@ class wallet_api
       * that is paid by the creator. The current account creation fee can be found with the
       * \c info wallet command.
       *
-      * These accounts are created with combination of HIVE and delegated HP
+      * These accounts are created with combination of PIXA and delegated HP
       *
       * @param creator The account creating the new account
-      * @param hive_fee The amount of the fee to be paid with HIVE
+      * @param pixa_fee The amount of the fee to be paid with PIXA
       * @param delegated_vests The amount of the fee to be paid with delegation
       * @param new_account_name The name of the new account
       * @param json_meta JSON Metadata associated with the new account
@@ -486,7 +486,7 @@ class wallet_api
       */
     wallet_signed_transaction create_account_delegated(
       const string& creator,
-      const wallet_serializer_wrapper<hive::protocol::asset>& hive_fee,
+      const wallet_serializer_wrapper<hive::protocol::asset>& pixa_fee,
       const wallet_serializer_wrapper<hive::protocol::asset>& delegated_vests,
       const string& new_account_name,
       const string& json_meta,
@@ -497,10 +497,10 @@ class wallet_api
       * wallet. There is a fee associated with account creation that is paid by the creator.
       * The current account creation fee can be found with the \c info wallet command.
       *
-      * These accounts are created with combination of HIVE and delegated HP
+      * These accounts are created with combination of PIXA and delegated HP
       *
       * @param creator The account creating the new account
-      * @param hive_fee The amount of the fee to be paid with HIVE
+      * @param pixa_fee The amount of the fee to be paid with PIXA
       * @param delegated_vests The amount of the fee to be paid with delegation
       * @param newname The name of the new account
       * @param json_meta JSON Metadata associated with the new account
@@ -512,7 +512,7 @@ class wallet_api
       */
     wallet_signed_transaction create_account_with_keys_delegated(
       const string& creator,
-      const wallet_serializer_wrapper<hive::protocol::asset>& hive_fee,
+      const wallet_serializer_wrapper<hive::protocol::asset>& pixa_fee,
       const wallet_serializer_wrapper<hive::protocol::asset>& delegated_vests,
       const string& newname,
       const string& json_meta,
@@ -646,14 +646,14 @@ class wallet_api
       bool broadcast );
 
     /** This method delegates VESTS and executes transfer with memo
-      * from one account to another, intended for sending a 0.001 HIVE
+      * from one account to another, intended for sending a 0.001 PIXA
       * memo messages in same transaction.
       *
       * @param delegator The name of the account delegating VESTS
       * @param delegatee The name of the account receiving VESTS
       * @param vesting_shares The amount of VESTS to delegate
-      * @param transfer_amount The amount of HIVE to transfer
-      * @param transfer_memo Message associated with HIVE transfer
+      * @param transfer_amount The amount of PIXA to transfer
+      * @param transfer_memo Message associated with PIXA transfer
       * @param broadcast true if you wish to broadcast the transaction
       */
   wallet_signed_transaction delegate_vesting_shares_and_transfer(
@@ -671,8 +671,8 @@ class wallet_api
       * @param delegator The name of the account delegating VESTS
       * @param delegatee The name of the account receiving VESTS
       * @param vesting_shares The amount of VESTS to delegate
-      * @param transfer_amount The amount of HIVE to transfer
-      * @param transfer_memo Message associated with HIVE transfer
+      * @param transfer_amount The amount of PIXA to transfer
+      * @param transfer_memo Message associated with PIXA transfer
       * @param broadcast true if you wish to broadcast the transaction
       */
     wallet_signed_transaction delegate_vesting_shares_and_transfer_nonblocking(
@@ -785,14 +785,14 @@ class wallet_api
       bool approve = true,
       bool broadcast = false);
 
-    /** Transfer funds from one account to another. HIVE and HBD can be transferred.
+    /** Transfer funds from one account to another. PIXA and PXS can be transferred.
       *
       * Memo for the transaction can be encrypted if message is started with `#`.
       * Private Memo Key must already be in the wallet for encrypted memo to work.
       *
       * @param from The account the funds are coming from
       * @param to The account the funds are going to
-      * @param amount The funds being transferred. i.e. "100.000 HIVE"
+      * @param amount The funds being transferred. i.e. "100.000 PIXA"
       * @param memo A memo for the transaction, can by encrypted if started with '#'
       * @param broadcast true if you wish to broadcast the transaction
       */
@@ -803,14 +803,14 @@ class wallet_api
       const string& memo,
       bool broadcast = false);
 
-    /** Transfer funds from one account to another using escrow. HIVE and HBD can be transferred.
+    /** Transfer funds from one account to another using escrow. PIXA and PXS can be transferred.
       *
       * @param from The account the funds are coming from
       * @param to The account the funds are going to
       * @param agent The account acting as the agent in case of dispute
       * @param escrow_id A unique id for the escrow transfer. (from, escrow_id) must be a unique pair
-      * @param hbd_amount The amount of HBD to transfer
-      * @param hive_amount The amount of HIVE to transfer
+      * @param pxs_amount The amount of PXS to transfer
+      * @param pixa_amount The amount of PIXA to transfer
       * @param fee The fee paid to the agent
       * @param ratification_deadline The deadline for \c to and \c agent to approve the escrow transfer
       * @param escrow_expiration The expiration of the escrow transfer, after which either party can claim the funds
@@ -822,8 +822,8 @@ class wallet_api
       const string& to,
       const string& agent,
       uint32_t escrow_id,
-      const wallet_serializer_wrapper<hive::protocol::asset>& hbd_amount,
-      const wallet_serializer_wrapper<hive::protocol::asset>& hive_amount,
+      const wallet_serializer_wrapper<hive::protocol::asset>& pxs_amount,
+      const wallet_serializer_wrapper<hive::protocol::asset>& pixa_amount,
       const wallet_serializer_wrapper<hive::protocol::asset>& fee,
       const time_point_sec& ratification_deadline,
       const time_point_sec& escrow_expiration,
@@ -878,8 +878,8 @@ class wallet_api
       * @param who The account authorizing the release
       * @param receiver The account that will receive funds being released
       * @param escrow_id A unique id for the escrow transfer
-      * @param hbd_amount The amount of HBD that will be released
-      * @param hive_amount The amount of HIVE that will be released
+      * @param pxs_amount The amount of PXS that will be released
+      * @param pixa_amount The amount of PIXA that will be released
       * @param broadcast true if you wish to broadcast the transaction
       */
     wallet_signed_transaction escrow_release(
@@ -889,19 +889,19 @@ class wallet_api
       const string& who,
       const string& receiver,
       uint32_t escrow_id,
-      const wallet_serializer_wrapper<hive::protocol::asset>& hbd_amount,
-      const wallet_serializer_wrapper<hive::protocol::asset>& hive_amount,
+      const wallet_serializer_wrapper<hive::protocol::asset>& pxs_amount,
+      const wallet_serializer_wrapper<hive::protocol::asset>& pixa_amount,
       bool broadcast = false
     );
 
     /**
-      * Transfer HIVE into a vesting fund represented by vesting shares (VESTS). VESTS are required to vesting
+      * Transfer PIXA into a vesting fund represented by vesting shares (VESTS). VESTS are required to vesting
       * for a minimum of one coin year and can be withdrawn once a week over a two year withdraw period.
-      * VESTS are protected against dilution up until 90% of HIVE is vesting.
+      * VESTS are protected against dilution up until 90% of PIXA is vesting.
       *
-      * @param from The account the HIVE is coming from
+      * @param from The account the PIXA is coming from
       * @param to The account getting the VESTS
-      * @param amount The amount of HIVE to vest i.e. "100.00 HIVE"
+      * @param amount The amount of PIXA to vest i.e. "100.00 PIXA"
       * @param broadcast true if you wish to broadcast the transaction
       */
     wallet_signed_transaction transfer_to_vesting(
@@ -986,7 +986,7 @@ class wallet_api
       *
       * @param from The account the VESTS are withdrawn from
       * @param vesting_shares The amount of VESTS to withdraw over the next 13 weeks. Each week (amount/13) shares are
-      *    withdrawn and deposited back as HIVE. i.e. "10.000000 VESTS"
+      *    withdrawn and deposited back as PIXA. i.e. "10.000000 VESTS"
       * @param broadcast true if you wish to broadcast the transaction
       */
     wallet_signed_transaction withdraw_vesting(
@@ -999,11 +999,11 @@ class wallet_api
       * based on the specified weights.
       *
       * @param from The account the VESTS are withdrawn from.
-      * @param to   The account receiving either VESTS or HIVE.
+      * @param to   The account receiving either VESTS or PIXA.
       * @param percent The percent of the withdraw to go to the 'to' account. This is denoted in hundreths of a percent.
       *    i.e. 100 is 1% and 10000 is 100%. This value must be between 1 and 100000
       * @param auto_vest Set to true if the from account should receive the VESTS as VESTS, or false if it should receive
-      *    them as HIVE.
+      *    them as PIXA.
       * @param broadcast true if you wish to broadcast the transaction.
       */
     wallet_signed_transaction set_withdraw_vesting_route(
@@ -1014,12 +1014,43 @@ class wallet_api
       bool broadcast = false );
 
     /**
-      *  This method will convert HBD to HIVE at the current_median_history price HIVE_CONVERSION_DELAY
+      *  This method will convert PXS to PIXA at the current_median_history price HIVE_CONVERSION_DELAY
       *  (3.5 days) from the time it is executed. This method depends upon there being a valid price feed.
       *
-      *  @param from The account requesting conversion of its HBD i.e. "1.000 HBD"
-      *  @param amount The amount of HBD to convert
+      *  @param from The account requesting conversion of its PXS i.e. "1.000 PXS"
+      *  @param amount The amount of PXS to convert
       *  @param broadcast true if you wish to broadcast the transaction
+      */
+    wallet_signed_transaction convert_pxs(
+      const string& from,
+      const wallet_serializer_wrapper<hive::protocol::asset>& amount,
+      bool broadcast = false );
+
+    /**
+      *  This method will convert PIXA to PXS at the market_median_history price plus HIVE_COLLATERALIZED_CONVERSION_FEE (5%)
+      *  after HIVE_COLLATERALIZED_CONVERSION_DELAY (3.5 days) from the time it is executed. The caller gets PXS immediately
+      *  calculated at current_min_history corrected with fee (as if conversion took place immediately, but only PIXA amount
+      *  sliced by HIVE_CONVERSION_COLLATERAL_RATIO is calculated - that is, half the amount) and remainder from collateral
+      *  amount is returned after actual conversion takes place. This method depends upon there being a valid price feed.
+      *
+      *  @param from The account requesting conversion of its PIXA i.e. "2.000 PIXA"
+      *  @param collateral_amount The amount of PIXA collateral
+      *  @param broadcast true if you wish to broadcast the transaction
+      */
+    wallet_signed_transaction convert_pixa_with_collateral(
+      const string& from,
+      const wallet_serializer_wrapper<hive::protocol::asset>& collateral_amount,
+      bool broadcast = false );
+
+    /**
+      *  Calculates amount of PIXA collateral to be passed to convert_pixa_with_collateral in order to immediately get
+      *  given pxs_amount_to_get in PXS. Note that there is no guarantee to get given PXS - when actual transaction
+      *  takes place price might be different than during estimation.
+      */
+    wallet_serializer_wrapper<hive::protocol::asset> estimate_pixa_collateral( const wallet_serializer_wrapper<hive::protocol::asset>& pxs_amount_to_get );
+
+    /**
+      *  Hive's name of convert_pxs, kept for existing scripts.
       */
     wallet_signed_transaction convert_hbd(
       const string& from,
@@ -1027,15 +1058,7 @@ class wallet_api
       bool broadcast = false );
 
     /**
-      *  This method will convert HIVE to HBD at the market_median_history price plus HIVE_COLLATERALIZED_CONVERSION_FEE (5%)
-      *  after HIVE_COLLATERALIZED_CONVERSION_DELAY (3.5 days) from the time it is executed. The caller gets HBD immediately
-      *  calculated at current_min_history corrected with fee (as if conversion took place immediately, but only HIVE amount
-      *  sliced by HIVE_CONVERSION_COLLATERAL_RATIO is calculated - that is, half the amount) and remainder from collateral
-      *  amount is returned after actual conversion takes place. This method depends upon there being a valid price feed.
-      *
-      *  @param from The account requesting conversion of its HIVE i.e. "2.000 HIVE"
-      *  @param collateral_amount The amount of HIVE collateral
-      *  @param broadcast true if you wish to broadcast the transaction
+      *  Hive's name of convert_pixa_with_collateral, kept for existing scripts.
       */
     wallet_signed_transaction convert_hive_with_collateral(
       const string& from,
@@ -1043,15 +1066,13 @@ class wallet_api
       bool broadcast = false );
 
     /**
-      *  Calculates amount of HIVE collateral to be passed to convert_hive_with_collateral in order to immediately get
-      *  given hbd_amount_to_get in HBD. Note that there is no guarantee to get given HBD - when actual transaction
-      *  takes place price might be different than during estimation.
+      *  Hive's name of estimate_pixa_collateral, kept for existing scripts.
       */
-    wallet_serializer_wrapper<hive::protocol::asset> estimate_hive_collateral( const wallet_serializer_wrapper<hive::protocol::asset>& hbd_amount_to_get );
+    wallet_serializer_wrapper<hive::protocol::asset> estimate_hive_collateral( const wallet_serializer_wrapper<hive::protocol::asset>& pxs_amount_to_get );
 
     /**
-      * A witness can public a price feed for the HIVE:HBD market. The median price feed is used
-      * to process conversion requests between HBD and HIVE.
+      * A witness can public a price feed for the PIXA:PXS market. The median price feed is used
+      * to process conversion requests between PXS and PIXA.
       *
       * @param witness The witness publishing the price feed
       * @param exchange_rate The desired exchange rate
@@ -1093,7 +1114,7 @@ class wallet_api
     wallet_serializer_wrapper<operation> get_prototype_operation(const string& operation_type);
 
     /**
-      * Gets the current order book for HIVE:HBD
+      * Gets the current order book for PIXA:PXS
       *
       * @param limit Maximum number of orders to return for bids and asks. Max is 1000.
       */
@@ -1105,7 +1126,7 @@ class wallet_api
       *
       *  @param owner The name of the account creating the order
       *  @param order_id is a unique identifier assigned by the creator of the order, it can be reused after the order has been filled
-      *  @param amount_to_sell The amount of either HBD or HIVE you wish to sell
+      *  @param amount_to_sell The amount of either PXS or PIXA you wish to sell
       *  @param min_to_receive The amount of the other asset you will receive at a minimum
       *  @param fill_or_kill true if you want the order to be killed if it cannot immediately be filled
       *  @param expiration the time the order should expire if it has not been filled
@@ -1155,7 +1176,7 @@ class wallet_api
       bool broadcast );
 
     /**
-      * Vote on a comment to be paid HIVE
+      * Vote on a comment to be paid PIXA
       *
       * @param voter The account voting
       * @param author The author of the comment to be voted on
@@ -1253,8 +1274,8 @@ class wallet_api
 
     wallet_signed_transaction claim_reward_balance(
       const string& account,
-      const wallet_serializer_wrapper<hive::protocol::asset>& reward_hive,
-      const wallet_serializer_wrapper<hive::protocol::asset>& reward_hbd,
+      const wallet_serializer_wrapper<hive::protocol::asset>& reward_pixa,
+      const wallet_serializer_wrapper<hive::protocol::asset>& reward_pxs,
       const wallet_serializer_wrapper<hive::protocol::asset>& reward_vests,
       bool broadcast );
 
@@ -1264,7 +1285,7 @@ class wallet_api
       * @param receiver   - the account that will be funded,
       * @param start_date - start date of proposal,
       * @param end_date   - end date of proposal,
-      * @param daily_pay  - the amount of HBD that is being requested to be paid out daily,
+      * @param daily_pay  - the amount of PXS that is being requested to be paid out daily,
       * @param subject    - briefly description of proposal of its title,
       * @param permlink   - permlink of the post for the proposal.
       * @param broadcast  - true if you wish to broadcast the transaction
@@ -1281,7 +1302,7 @@ class wallet_api
       * Update worker proposal
       * @param proposal_id - the id of the proposal to update,
       * @param creator     - the account that created the proposal,
-      * @param daily_pay   - new amount of HBD to be requested to be paid out daily,
+      * @param daily_pay   - new amount of PXS to be requested to be paid out daily,
       * @param subject     - new description of the proposal,
       * @param permlink    - new permlink of the post for the proposal.
       * @param end_date    - new end_date of the proposal.
@@ -1351,11 +1372,11 @@ class wallet_api
                                             bool broadcast );
 
     /**
-      * Creates a recurrent transfer of funds from one account to another. HIVE and HBD can be transferred.
+      * Creates a recurrent transfer of funds from one account to another. PIXA and PXS can be transferred.
       *
       * @param from The account the funds are coming from
       * @param to The account from which the funds are going to
-      * @param amount The funds being transferred. i.e. "100.000 HIVE"
+      * @param amount The funds being transferred. i.e. "100.000 PIXA"
       * @param memo A memo for the transaction, encrypted with the to account's public memo key
       * @param recurrence how often the transfer should be executed in hours. eg: 24
       * @param executions how many times should the recurrent transfer be executed
@@ -1371,11 +1392,11 @@ class wallet_api
             bool broadcast );
 
     /**
-      * Creates a recurrent transfer of funds from one account to another while specifying a unique id. HIVE and HBD can be transferred.
+      * Creates a recurrent transfer of funds from one account to another while specifying a unique id. PIXA and PXS can be transferred.
       *
       * @param from The account the funds are coming from
       * @param to The account from which the funds are going to
-      * @param amount The funds being transferred. i.e. "100.000 HIVE"
+      * @param amount The funds being transferred. i.e. "100.000 PIXA"
       * @param memo A memo for the transaction, encrypted with the to account's public memo key
       * @param recurrence how often the transfer should be executed in hours. eg: 24
       * @param executions how many times should the recurrent transfer be executed
@@ -1541,6 +1562,9 @@ FC_API( hive::wallet::wallet_api,
       (transfer_to_vesting_nonblocking)
       (withdraw_vesting)
       (set_withdraw_vesting_route)
+      (convert_pxs)
+      (convert_pixa_with_collateral)
+      (estimate_pixa_collateral)
       (convert_hbd)
       (convert_hive_with_collateral)
       (estimate_hive_collateral)

@@ -106,7 +106,7 @@ void update_manabar( const PropType& gpo, AccountType& account, int64_t new_mana
 {
   auto effective_vests = account.get_effective_vesting_shares().get_amount();
   try {
-  manabar_params params( effective_vests, HIVE_VOTING_MANA_REGENERATION_SECONDS );
+  manabar_params params( effective_vests, gpo.get_voting_mana_regeneration_seconds() );
   account.voting_manabar.regenerate_mana( params, gpo.get_head_block_time() );
   account.voting_manabar.use_mana( -new_mana );
   } FC_CAPTURE_LOG_AND_RETHROW( (account)(effective_vests) )
@@ -115,7 +115,7 @@ void update_manabar( const PropType& gpo, AccountType& account, int64_t new_mana
   if( gpo.get_downvote_pool_percent() )
   {
     manabar_params params;
-    params.regen_time = HIVE_VOTING_MANA_REGENERATION_SECONDS;
+    params.regen_time = gpo.get_voting_mana_regeneration_seconds();
 
 #if defined(IS_TEST_NET) || defined(HIVE_CONVERTER_ICEBERG_PLUGIN_ENABLED)
     if( true )

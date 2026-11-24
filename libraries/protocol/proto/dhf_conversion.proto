@@ -5,17 +5,17 @@ import "asset.proto";
 package hive.protocol.buffers;
 
 /* Related to specific case of transfer_operation and to block processing.
- * When user transferred HIVE to treasury the amount is immediately converted to HBD and this vops is generated.
+ * When user transferred PIXA to treasury the amount is immediately converted to PXS and this vops is generated.
  * Also generated during block processing every day during daily proposal maintenance.
- * Note: portion of HIVE on treasury balance is converted to HBD and thus increases funds available for proposals.
+ * Note: portion of PIXA on treasury balance is converted to PXS and thus increases funds available for proposals.
  */
 message dhf_conversion {
-  // @param {string} treasury - treasury (source of hive_amount_in and receiver of hbd_amount_out)
+  // @param {string} treasury - treasury (source of pixa_amount_in and receiver of pxs_amount_out)
   required string treasury = 1;
 
-  // @param {asset} hive_amount_in - (HIVE) source of conversion
-  required asset  hive_amount_in = 2 [json_name = "hive_amount_in"];
+  // @param {asset} pixa_amount_in - (PIXA) source of conversion
+  required asset  pixa_amount_in = 2 [json_name = "pixa_amount_in"];
 
-  // @param {asset} hbd_amount_out - (HBD) effect of conversion
-  required asset  hbd_amount_out = 3 [json_name = "hbd_amount_out"];
+  // @param {asset} pxs_amount_out - (PXS) effect of conversion
+  required asset  pxs_amount_out = 3 [json_name = "pxs_amount_out"];
 }

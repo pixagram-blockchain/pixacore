@@ -3,8 +3,8 @@
 ## 1. Description
 
 A user may vote for a witness directly using an operation: account\_witness\_vote\_operation or indirectly using the proxy - operation:  account\_witness\_proxy\_operation, // 13.    
-All accounts with a Hive Power (also called Vesting Fund Shares  or VESTS) can vote for up to 30 witnesses, but you cannot vote twice for the same witnesses.     
-If a proxy is specified then all existing votes are removed.Your vote power depends on your HP.     
+All accounts with a Pixa Power (also called Vesting Fund Shares  or VESTS) can vote for up to 30 witnesses, but you cannot vote twice for the same witnesses.     
+If a proxy is specified then all existing votes are removed.Your vote power depends on your PXP.     
 If the operation account\_witness\_vote\_operation or account\_witness\_proxy\_operation or update\_proposal\_votes\_operation is not executed in a HIVE\_GOVERNANCE\_VOTE\_EXPIRATION\_PERIOD, the votes are removed and the virtual operation: expired\_account\_notification\_operation is generated.    
 
 The global parameters:    

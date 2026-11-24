@@ -5,12 +5,12 @@
 
 namespace hive { namespace chain {
 
-using hive::protocol::HBD_asset;
-using hive::protocol::HIVE_asset;
+using hive::protocol::PXS_asset;
+using hive::protocol::PIXA_asset;
 class account_object;
 
 /**
-  *  This object is used to track pending requests to convert HIVE to HBD with collateral
+  *  This object is used to track pending requests to convert PIXA to PXS with collateral
   */
 class collateralized_convert_request_object : public object< collateralized_convert_request_object_type, collateralized_convert_request_object >
 {
@@ -18,7 +18,7 @@ class collateralized_convert_request_object : public object< collateralized_conv
 public:
   template< typename Allocator >
   collateralized_convert_request_object( allocator< Allocator > a, uint64_t _id,
-    const account_object& _owner, temp_HIVE_balance&& _collateral_amount, const HBD_asset& _converted_amount,
+    const account_object& _owner, temp_PIXA_balance&& _collateral_amount, const PXS_asset& _converted_amount,
     const time_point_sec& _conversion_time, uint32_t _requestid )
   : id( _id ), collateral_amount( std::move( _collateral_amount ) ), converted_amount( _converted_amount ),
     requestid( _requestid ), conversion_date( _conversion_time )
@@ -28,10 +28,10 @@ public:
 
 // getters:
 
-  //amount of HIVE collateral
-  const HIVE_asset& get_collateral_amount() const { return collateral_amount; }
-  //amount of HBD that was already given to owner
-  const HBD_asset& get_converted_amount() const { return converted_amount; }
+  //amount of PIXA collateral
+  const PIXA_asset& get_collateral_amount() const { return collateral_amount; }
+  //amount of PXS that was already given to owner
+  const PXS_asset& get_converted_amount() const { return converted_amount; }
 
   //request owner
   account_id_type get_owner() const { return owner; }
@@ -47,12 +47,12 @@ public:
 
 // setters:
 
-  HIVE_balance& access_hive_collateral() { return collateral_amount; }
+  HIVE_balance& access_pixa_collateral() { return collateral_amount; }
 
 private:
   account_id_type owner;
   HIVE_balance    collateral_amount;
-  HBD_asset       converted_amount;
+  PXS_asset       converted_amount;
   uint32_t        requestid = 0; //< id set by owner, the (owner,requestid) pair must be unique
   time_point_sec  conversion_date; //< actual conversion takes place at that time, excess collateral is returned to owner
 

@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE( regular_transactions )
       } );
     } );
 
-    ACTORS( HIVE_asset( 15'000 ), (alice)(bob)(carol)(dan) ); // extra RC for comments
+    ACTORS( PIXA_asset( 15'000 ), (alice)(bob)(carol)(dan) ); // extra RC for comments
     generate_block();
 
     expectation_set check( *db );
@@ -296,9 +296,9 @@ BOOST_AUTO_TEST_CASE( popped_transactions )
 
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
     generate_block();
-    fund( "alice", HIVE_asset( 10'000 ) );
-    fund( "bob", HIVE_asset( 10'000 ) );
-    fund( "carol", HIVE_asset( 10'000 ) );
+    fund( "alice", PIXA_asset( 10'000 ) );
+    fund( "bob", PIXA_asset( 10'000 ) );
+    fund( "carol", PIXA_asset( 10'000 ) );
     generate_block();
 
     expectation_set check( *db );
@@ -401,9 +401,9 @@ BOOST_AUTO_TEST_CASE( popped_transactions )
     check.expect( expectation::pending_transaction( expectation::POST_TX ) );
     generate_block();
     check.check_empty();
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 19990 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 10 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), HIVE_asset( 10000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 19990 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 10 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), PIXA_asset( 10000 ) );
 
     BOOST_TEST_MESSAGE( "Generating block out of remaining previously popped transactions" );
     check.expect( expectation::gen_block( expectation::PRE_TX ) );
@@ -454,9 +454,9 @@ BOOST_AUTO_TEST_CASE( transactions_in_forks )
 
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
     generate_block();
-    fund( "alice", HIVE_asset( 10'000 ) );
-    fund( "bob", HIVE_asset( 10'000 ) );
-    fund( "carol", HIVE_asset( 10'000 ) );
+    fund( "alice", PIXA_asset( 10'000 ) );
+    fund( "bob", PIXA_asset( 10'000 ) );
+    fund( "carol", PIXA_asset( 10'000 ) );
     generate_block();
 
     const auto& dgpo = db->get_dynamic_global_properties();
@@ -654,7 +654,7 @@ BOOST_AUTO_TEST_CASE( failure_during_fork_switch )
 
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
     generate_block();
-    fund( "alice", HIVE_asset( 10'000 ) );
+    fund( "alice", PIXA_asset( 10'000 ) );
     generate_block();
 
     BOOST_TEST_MESSAGE( "Build fork" );
@@ -768,7 +768,7 @@ BOOST_AUTO_TEST_CASE( skip_faulty_tx_during_block_production )
     BOOST_TEST_MESSAGE( "Test if faulty transaction is skipped when block is produced" );
 
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
-    fund( "alice", HIVE_asset( 2000 ) );
+    fund( "alice", PIXA_asset( 2000 ) );
     generate_block();
 
     transfer_operation transfer;
@@ -786,8 +786,8 @@ BOOST_AUTO_TEST_CASE( skip_faulty_tx_during_block_production )
     db_plugin->debug_push_pending_transaction( build_transaction( transfer, bob_private_key ) );
 
     // transactions pushed directly to pending without evaluation
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 2000 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 2000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 0 ) );
 
     // block contains 3 transactions, second one is skipped, but applied after the block from pending
     expectation_set check( *db );
@@ -811,8 +811,8 @@ BOOST_AUTO_TEST_CASE( skip_faulty_tx_during_block_production )
     generate_block();
     check.check_empty();
 
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 0 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 2000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 2000 ) );
 
     // when pending are removed, effects also disappear
     db->clear_pending();
@@ -821,8 +821,8 @@ BOOST_AUTO_TEST_CASE( skip_faulty_tx_during_block_production )
     generate_block();
     check.check_empty();
 
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 2000 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 2000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 0 ) );
 
     // do the same again but without transfer back from bob
     transfer.from = "alice";
@@ -849,8 +849,8 @@ BOOST_AUTO_TEST_CASE( skip_faulty_tx_during_block_production )
     generate_block();
     check.check_empty();
 
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 500 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 1500 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 500 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 1500 ) );
   }
   FC_LOG_AND_RETHROW()
 }

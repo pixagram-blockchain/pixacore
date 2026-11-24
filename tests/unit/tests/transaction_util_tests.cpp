@@ -141,8 +141,8 @@ BOOST_AUTO_TEST_CASE( autodetect_keys_simple )
 {
   auto fee = db->get_witness_schedule_object().median_props.account_creation_fee;
 
-  KEYS( alice ); CREATE_ACCOUNT( alice ); fund( "alice", HIVE_asset( 1'000 ) );
-  KEYS( bob ); CREATE_ACCOUNT( bob ); fund( "bob", HIVE_asset( 1'000 ) );
+  KEYS( alice ); CREATE_ACCOUNT( alice ); fund( "alice", PIXA_asset( 1'000 ) );
+  KEYS( bob ); CREATE_ACCOUNT( bob ); fund( "bob", PIXA_asset( 1'000 ) );
   generate_block();
 
   test_key_collector collector( *db );
@@ -325,8 +325,8 @@ BOOST_AUTO_TEST_CASE( autodetect_keys_1_of_2 )
     push_transaction( op, init_account_priv_key ); \
   } while( 0 )
 
-  KEYS( alice1 ); KEYS( alice2 ); CREATE_ACCOUNT_1_OF_2( alice ); fund( "alice", HIVE_asset( 1'000 ) );
-  KEYS( bob1 ); KEYS( bob2 ); CREATE_ACCOUNT_1_OF_2( bob ); fund( "bob", HIVE_asset( 1'000 ) );
+  KEYS( alice1 ); KEYS( alice2 ); CREATE_ACCOUNT_1_OF_2( alice ); fund( "alice", PIXA_asset( 1'000 ) );
+  KEYS( bob1 ); KEYS( bob2 ); CREATE_ACCOUNT_1_OF_2( bob ); fund( "bob", PIXA_asset( 1'000 ) );
   generate_block();
 
   test_key_collector collector( *db );
@@ -526,8 +526,8 @@ BOOST_AUTO_TEST_CASE( autodetect_keys_2_of_2 )
     push_transaction( op, init_account_priv_key ); \
   } while( 0 )
 
-  KEYS( alice1 ); KEYS( alice2 ); CREATE_ACCOUNT_2_OF_2( alice ); fund( "alice", HIVE_asset( 1'000 ) );
-  KEYS( bob1 ); KEYS( bob2 ); CREATE_ACCOUNT_2_OF_2( bob ); fund( "bob", HIVE_asset( 1'000 ) );
+  KEYS( alice1 ); KEYS( alice2 ); CREATE_ACCOUNT_2_OF_2( alice ); fund( "alice", PIXA_asset( 1'000 ) );
+  KEYS( bob1 ); KEYS( bob2 ); CREATE_ACCOUNT_2_OF_2( bob ); fund( "bob", PIXA_asset( 1'000 ) );
   generate_block();
 
   test_key_collector collector( *db );
@@ -714,9 +714,9 @@ BOOST_AUTO_TEST_CASE( autodetect_keys_indirect_1_of_2 )
 {
   auto fee = db->get_witness_schedule_object().median_props.account_creation_fee;
 
-  KEYS( alice ); CREATE_ACCOUNT( alice ); fund( "alice", HIVE_asset( 1'000 ) );
-  KEYS( bob ); CREATE_ACCOUNT( bob ); fund( "bob", HIVE_asset( 1'000 ) );
-  KEYS( carol ); CREATE_ACCOUNT( carol ); fund( "carol", HIVE_asset( 1'000 ) );
+  KEYS( alice ); CREATE_ACCOUNT( alice ); fund( "alice", PIXA_asset( 1'000 ) );
+  KEYS( bob ); CREATE_ACCOUNT( bob ); fund( "bob", PIXA_asset( 1'000 ) );
+  KEYS( carol ); CREATE_ACCOUNT( carol ); fund( "carol", PIXA_asset( 1'000 ) );
   generate_block();
 
   account_update( "alice", alice_memo, "", authority( 1, alice_owner, 1, "carol", 1 ),
@@ -915,9 +915,9 @@ BOOST_AUTO_TEST_CASE( autodetect_keys_indirect_2_of_2 )
 {
   auto fee = db->get_witness_schedule_object().median_props.account_creation_fee;
 
-  KEYS( alice ); CREATE_ACCOUNT( alice ); fund( "alice", HIVE_asset( 1'000 ) );
-  KEYS( bob ); CREATE_ACCOUNT( bob ); fund( "bob", HIVE_asset( 1'000 ) );
-  KEYS( carol ); CREATE_ACCOUNT( carol ); fund( "carol", HIVE_asset( 1'000 ) );
+  KEYS( alice ); CREATE_ACCOUNT( alice ); fund( "alice", PIXA_asset( 1'000 ) );
+  KEYS( bob ); CREATE_ACCOUNT( bob ); fund( "bob", PIXA_asset( 1'000 ) );
+  KEYS( carol ); CREATE_ACCOUNT( carol ); fund( "carol", PIXA_asset( 1'000 ) );
   generate_block();
 
   account_update( "alice", alice_memo, "", authority( 2, alice_owner, 1, "carol", 1 ),
@@ -1116,10 +1116,10 @@ BOOST_AUTO_TEST_CASE( autodetect_keys_circular_and_deep )
 {
   auto fee = db->get_witness_schedule_object().median_props.account_creation_fee;
 
-  KEYS( alice ); CREATE_ACCOUNT( alice ); fund( "alice", HIVE_asset( 1'000 ) );
-  KEYS( bob ); CREATE_ACCOUNT( bob ); fund( "bob", HIVE_asset( 1'000 ) );
-  KEYS( carol ); CREATE_ACCOUNT( carol ); fund( "carol", HIVE_asset( 1'000 ) );
-  KEYS( dan ); CREATE_ACCOUNT( dan ); fund( "dan", HIVE_asset( 1'000 ) );
+  KEYS( alice ); CREATE_ACCOUNT( alice ); fund( "alice", PIXA_asset( 1'000 ) );
+  KEYS( bob ); CREATE_ACCOUNT( bob ); fund( "bob", PIXA_asset( 1'000 ) );
+  KEYS( carol ); CREATE_ACCOUNT( carol ); fund( "carol", PIXA_asset( 1'000 ) );
+  KEYS( dan ); CREATE_ACCOUNT( dan ); fund( "dan", PIXA_asset( 1'000 ) );
   generate_block();
 
   // one shallow circle alice <-> bob
@@ -1353,10 +1353,10 @@ BOOST_AUTO_TEST_CASE( autodetect_keys_invalid )
 {
   auto fee = db->get_witness_schedule_object().median_props.account_creation_fee;
 
-  KEYS( alice ); CREATE_ACCOUNT( alice ); fund( "alice", HIVE_asset( 1'000 ) );
-  KEYS( bob ); CREATE_ACCOUNT( bob ); fund( "bob", HIVE_asset( 1'000 ) );
-  KEYS( carol ); CREATE_ACCOUNT( carol ); fund( "carol", HIVE_asset( 1'000 ) );
-  KEYS( dan ); CREATE_ACCOUNT( dan ); fund( "dan", HIVE_asset( 1'000 ) );
+  KEYS( alice ); CREATE_ACCOUNT( alice ); fund( "alice", PIXA_asset( 1'000 ) );
+  KEYS( bob ); CREATE_ACCOUNT( bob ); fund( "bob", PIXA_asset( 1'000 ) );
+  KEYS( carol ); CREATE_ACCOUNT( carol ); fund( "carol", PIXA_asset( 1'000 ) );
+  KEYS( dan ); CREATE_ACCOUNT( dan ); fund( "dan", PIXA_asset( 1'000 ) );
   generate_block();
 
   // one shallow circle alice <-> bob but not on active level and no keys

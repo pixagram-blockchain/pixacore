@@ -5,7 +5,7 @@ package hive.protocol.buffers;
 import "asset.proto";
 import "recurrent_transfer_extension.proto";
 
-/* Creates/updates/removes a recurrent transfer in the currency Hive or HBD.
+/* Creates/updates/removes a recurrent transfer in the currency Hive or PXS.
  * Since HF 28, if user has more than one recurrent transfer to the same receiver
  * or if user creates the recurrent transfer using pair_id in the extensions,
  * user has to specify the pair_id in order to update or remove the defined recurrent transfer. 
@@ -31,7 +31,7 @@ message recurrent_transfer {
   // @param {asset} amount - The amount of asset to transfer from @ref from to @ref to.
   //                         If the recurrent transfer failed 10 (HIVE_MAX_CONSECUTIVE_RECURRENT_TRANSFER_FAILURES)
   //                         times because of the lack of funds, the recurrent transfer will be deleted.
-  //                         Allowed currency: Hive and HBD.
+  //                         Allowed currency: Hive and PXS.
   required asset                        amount = 3;
 
   // @param {string} memo - must be shorter than 2048.

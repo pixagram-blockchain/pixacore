@@ -41,11 +41,11 @@ class dhf_processor
 
     void sort_by_votes( t_proposals& proposals );
 
-    const HBD_asset& get_treasury_fund() const;
+    const PXS_asset& get_treasury_fund() const;
 
-    HBD_asset calculate_maintenance_budget( const time_point_sec& head_time );
+    PXS_asset calculate_maintenance_budget( const time_point_sec& head_time );
 
-    void transfer_payments( const time_point_sec& head_time, HBD_asset& maintenance_budget_limit, const t_proposals& proposals );
+    void transfer_payments( const time_point_sec& head_time, PXS_asset& maintenance_budget_limit, const t_proposals& proposals );
 
     void update_settings( const time_point_sec& head_time );
 

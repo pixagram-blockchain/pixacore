@@ -14,8 +14,11 @@ fc::mutable_variant_object get_config( const std::string& treasury_name, const f
   result["HIVE_TREASURY_ACCOUNT"] = treasury_name;
 
   result["VESTS_SYMBOL"] = VESTS_SYMBOL;
-  result["HIVE_SYMBOL"] = HIVE_SYMBOL;
-  result["HBD_SYMBOL"] = HBD_SYMBOL;
+  result["PIXA_SYMBOL"] = PIXA_SYMBOL;
+  result["PXS_SYMBOL"] = PXS_SYMBOL;
+  // Hive's names of the two keys above, kept for clients that read them
+  result["HIVE_SYMBOL"] = PIXA_SYMBOL;
+  result["HBD_SYMBOL"] = PXS_SYMBOL;
 
 #ifdef IS_TEST_NET
   result["IS_TEST_NET"] = true;

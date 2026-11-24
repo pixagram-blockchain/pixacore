@@ -27,24 +27,24 @@ struct get_ticker_return
   double      lowest_ask = 0;
   double      highest_bid = 0;
   double      percent_change = 0;
-  asset       hive_volume = asset( 0 , HIVE_SYMBOL );
-  asset       hbd_volume = asset( 0, HBD_SYMBOL );
+  asset       pixa_volume = asset( 0 , PIXA_SYMBOL );
+  asset       pxs_volume = asset( 0, PXS_SYMBOL );
 };
 
 typedef void_type get_volume_args;
 
 struct get_volume_return
 {
-  asset       hive_volume = asset( 0, HIVE_SYMBOL );
-  asset       hbd_volume = asset( 0, HBD_SYMBOL );
+  asset       pixa_volume = asset( 0, PIXA_SYMBOL );
+  asset       pxs_volume = asset( 0, PXS_SYMBOL );
 };
 
 struct order
 {
   price          order_price;
   double         real_price;
-  share_type     hive;
-  share_type     hbd;
+  share_type     pixa;
+  share_type     pxs;
   time_point_sec created;
 };
 
@@ -138,13 +138,13 @@ class market_history_api
 } } } // hive::plugins::market_history
 
 FC_REFLECT( hive::plugins::market_history::get_ticker_return,
-        (latest)(lowest_ask)(highest_bid)(percent_change)(hive_volume)(hbd_volume) )
+        (latest)(lowest_ask)(highest_bid)(percent_change)(pixa_volume)(pxs_volume) )
 
 FC_REFLECT( hive::plugins::market_history::get_volume_return,
-        (hive_volume)(hbd_volume) )
+        (pixa_volume)(pxs_volume) )
 
 FC_REFLECT( hive::plugins::market_history::order,
-        (order_price)(real_price)(hive)(hbd)(created) )
+        (order_price)(real_price)(pixa)(pxs)(created) )
 
 FC_REFLECT( hive::plugins::market_history::get_order_book_args,
         (limit) )

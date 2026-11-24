@@ -21,6 +21,6 @@ message escrow_approved {
   // @param {number} escrow_id - id of escrow transfer
   required uint32 escrow_id = 4 [json_name = "escrow_id"];
 
-  // @param {asset} fee - (HIVE of HBD) fee paid to agent
+  // @param {asset} fee - (PIXA of PXS) fee paid to agent
   required asset  fee = 5;
 }

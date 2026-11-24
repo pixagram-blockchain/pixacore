@@ -6,7 +6,7 @@
 
 namespace hive { namespace chain {
 
-using hive::protocol::HIVE_asset;
+using hive::protocol::PIXA_asset;
 
 struct block_notification
 {
@@ -54,12 +54,12 @@ struct operation_notification
 
 struct comment_reward_notification
 {
-  comment_reward_notification( const HIVE_asset& _total_reward, const HIVE_asset& _author_tokens, const HIVE_asset& _curation_tokens )
+  comment_reward_notification( const PIXA_asset& _total_reward, const PIXA_asset& _author_tokens, const PIXA_asset& _curation_tokens )
   : total_reward( _total_reward ), author_tokens( _author_tokens ), curation_tokens( _curation_tokens ) {}
 
-  HIVE_asset total_reward;
-  HIVE_asset author_tokens;
-  HIVE_asset curation_tokens;
+  PIXA_asset total_reward;
+  PIXA_asset author_tokens;
+  PIXA_asset curation_tokens;
 };
 
 } }

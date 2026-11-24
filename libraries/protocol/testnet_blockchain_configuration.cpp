@@ -109,17 +109,17 @@ void configuration::set_hive_owner_update_limit( uint16_t limit )
   hive_owner_update_limit = limit;
 }
 
-void configuration::set_initial_asset_supply( const HIVE_asset& hive, const HBD_asset& hbd,
-  const HIVE_asset& to_vest, const VEST_price& vest_price )
+void configuration::set_initial_asset_supply( const PIXA_asset& pixa, const PXS_asset& pxs,
+  const PIXA_asset& to_vest, const VEST_price& vest_price )
 {
   HIVE_PROTOCOL_ASSET_ASSERT(
-    hive >= to_vest,
-    "Too much HIVE requested for vesting compared to given supply",
-    ("subject", hive)("max", to_vest)
+    pixa >= to_vest,
+    "Too much PIXA requested for vesting compared to given supply",
+    ("subject", pixa)("max", to_vest)
   );
 
-  init_hive_supply = hive;
-  init_hbd_supply = hbd;
+  init_pixa_supply = pixa;
+  init_pxs_supply = pxs;
   initial_vesting = to_vest;
   initial_vesting_price = vest_price;
 }

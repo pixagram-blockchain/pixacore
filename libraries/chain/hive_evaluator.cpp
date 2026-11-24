@@ -64,8 +64,8 @@ void copy_legacy_chain_properties( chain_properties& dest, const legacy_chain_pr
 {
   dest.account_creation_fee = src.get_account_creation_fee();
   dest.maximum_block_size = src.maximum_block_size;
-  FC_ASSERT( src.hbd_interest_rate == 0, "hbd_interest_rate is fixed at 0" );
-  dest.hbd_interest_rate = 0;
+  FC_ASSERT( src.pxs_interest_rate == 0, "pxs_interest_rate is fixed at 0" );
+  dest.pxs_interest_rate = 0;
 }
 
 // An account whose active authority has a zero weight threshold is satisfied by anyone, with no
@@ -140,11 +140,11 @@ struct witness_properties_change_flags
 {
   uint32_t account_creation_changed       : 1;
   uint32_t max_block_changed              : 1;
-  uint32_t hbd_interest_changed           : 1;
+  uint32_t pxs_interest_changed           : 1;
   uint32_t account_subsidy_budget_changed : 1;
   uint32_t account_subsidy_decay_changed  : 1;
   uint32_t key_changed                    : 1;
-  uint32_t hbd_exchange_changed           : 1;
+  uint32_t pxs_exchange_changed           : 1;
   uint32_t url_changed                    : 1;
 };
 
@@ -165,8 +165,8 @@ void witness_set_properties_evaluator::do_apply( const witness_set_properties_op
   // Capture old properties. This allows only updating the object once.
   chain_properties  props;
   public_key_type   signing_key;
-  price             hbd_exchange_rate;
-  time_point_sec    last_hbd_exchange_update;
+  price             pxs_exchange_rate;
+  time_point_sec    last_pxs_exchange_update;
   string            url;
 
   witness_properties_change_flags flags;
@@ -184,7 +184,7 @@ void witness_set_properties_evaluator::do_apply( const witness_set_properties_op
   {
     asset fee;
     fc::raw::unpack_from_vector( itr->second, fee );
-    props.account_creation_fee = HIVE_asset( fee );
+    props.account_creation_fee = PIXA_asset( fee );
   }
 
   itr = o.props.find( "maximum_block_size" );
@@ -196,13 +196,13 @@ void witness_set_properties_evaluator::do_apply( const witness_set_properties_op
   if( itr == o.props.end() && _db.has_hardfork( HIVE_HARDFORK_1_24 ) )
     itr = o.props.find( "hbd_interest_rate" );
 
-  flags.hbd_interest_changed = itr != o.props.end();
-  if( flags.hbd_interest_changed )
+  flags.pxs_interest_changed = itr != o.props.end();
+  if( flags.pxs_interest_changed )
   {
-    uint16_t hbd_interest_rate = 0u;
-    fc::raw::unpack_from_vector( itr->second, hbd_interest_rate );
-    FC_ASSERT( hbd_interest_rate == 0ull, "hbd_interest_rate is fixed at 0" );
-    props.hbd_interest_rate = 0;
+    uint16_t pxs_interest_rate = 0u;
+    fc::raw::unpack_from_vector( itr->second, pxs_interest_rate );
+    FC_ASSERT( pxs_interest_rate == 0ull, "pxs_interest_rate is fixed at 0" );
+    props.pxs_interest_rate = 0;
   }
 
   itr = o.props.find( "account_subsidy_budget" );
@@ -227,11 +227,11 @@ void witness_set_properties_evaluator::do_apply( const witness_set_properties_op
   itr = o.props.find( "sbd_exchange_rate" );
   if(itr == o.props.end() && _db.has_hardfork(HIVE_HARDFORK_1_24))
     itr = o.props.find("hbd_exchange_rate");
-  flags.hbd_exchange_changed = itr != o.props.end();
-  if( flags.hbd_exchange_changed )
+  flags.pxs_exchange_changed = itr != o.props.end();
+  if( flags.pxs_exchange_changed )
   {
-    fc::raw::unpack_from_vector( itr->second, hbd_exchange_rate );
-    last_hbd_exchange_update = _db.head_block_time();
+    fc::raw::unpack_from_vector( itr->second, pxs_exchange_rate );
+    last_pxs_exchange_update = _db.head_block_time();
   }
 
   itr = o.props.find( "url" );
@@ -245,9 +245,9 @@ void witness_set_properties_evaluator::do_apply( const witness_set_properties_op
       w.props.account_creation_fee = props.account_creation_fee;
     if( flags.max_block_changed )
       w.props.maximum_block_size = props.maximum_block_size;
-    if( flags.hbd_interest_changed )
+    if( flags.pxs_interest_changed )
     {
-      w.props.hbd_interest_rate = 0;
+      w.props.pxs_interest_rate = 0;
     }
 
     if( flags.account_subsidy_budget_changed )
@@ -256,10 +256,10 @@ void witness_set_properties_evaluator::do_apply( const witness_set_properties_op
       w.props.account_subsidy_decay = props.account_subsidy_decay;
     if( flags.key_changed )
       w.signing_key = signing_key;
-    if( flags.hbd_exchange_changed )
+    if( flags.pxs_exchange_changed )
     {
-      w.hbd_exchange_rate = hbd_exchange_rate;
-      w.last_hbd_exchange_update = last_hbd_exchange_update;
+      w.pxs_exchange_rate = pxs_exchange_rate;
+      w.last_pxs_exchange_update = last_pxs_exchange_update;
     }
     if( flags.url_changed )
       from_string( w.url, url );
@@ -492,7 +492,7 @@ void pow_apply( database& db, Operation o )
   if(itr == accounts_by_name.end())
   {
     const auto& new_account = create_account( db, o.worker_account, o.work.worker, dgp.get_head_block_time(), db.get_current_timestamp(),
-      true /*mined*/, HIVE_asset( 0 ) );
+      true /*mined*/, PIXA_asset( 0 ) );
     // ^ empty recovery account parameter means highest voted witness at time of recovery
 
     {
@@ -549,10 +549,10 @@ void pow_apply( database& db, Operation o )
     } );
   }
   /// POW reward depends upon whether we are before or after MINER_VOTING kicks in
-  HIVE_asset pow_reward_amount = db.get_pow_reward();
+  PIXA_asset pow_reward_amount = db.get_pow_reward();
   if( db.head_block_num() < HIVE_START_MINER_VOTING_BLOCK )
     pow_reward_amount.amount *= HIVE_MAX_WITNESSES;
-  temp_HIVE_balance pow_reward = db.issue_mining_reward( pow_reward_amount );
+  temp_PIXA_balance pow_reward = db.issue_mining_reward( pow_reward_amount );
 
   /// pay the witness that includes this POW
   const auto& inc_witness = db.get_account( dgp.get_current_witness() );
@@ -625,7 +625,7 @@ void pow2_evaluator::do_apply( const pow2_operation& o )
   {
     HIVE_CHAIN_STATE_ASSERT( o.new_owner_key.valid(), worker_account, "New owner key is not valid." );
     const auto& new_account = create_account( db, worker_account, *o.new_owner_key, dgp.get_head_block_time(), _db.get_current_timestamp(),
-      true /*mined*/, HIVE_asset( 0 ) );
+      true /*mined*/, PIXA_asset( 0 ) );
     // ^ empty recovery account parameter means highest voted witness at time of recovery
 
     {
@@ -660,7 +660,7 @@ void pow2_evaluator::do_apply( const pow2_operation& o )
   if( !db.has_hardfork( HIVE_HARDFORK_0_16__551) )
   {
     /// pay the witness that includes this POW
-    temp_HIVE_balance inc_reward = db.issue_mining_reward( db.get_pow_reward() );
+    temp_PIXA_balance inc_reward = db.issue_mining_reward( db.get_pow_reward() );
 
     const auto& inc_witness = db.get_account( dgp.get_current_witness() );
     VEST_asset actual_reward = db.create_vesting( inc_witness, inc_reward );
@@ -674,8 +674,8 @@ void feed_publish_evaluator::do_apply( const feed_publish_operation& o )
   {
     // ABW: unfortunately existence of reversed feed means we won't be able to use "tiny price" for feeds;
     // we can't normalize it either, because it would change price sorting, therefore also median price
-    HIVE_CHAIN_ASSET_ASSERT( is_asset_type( o.exchange_rate.base, HBD_SYMBOL ) && is_asset_type( o.exchange_rate.quote, HIVE_SYMBOL ),
-      o.exchange_rate, "Price feed must be a HBD/HIVE price" );
+    HIVE_CHAIN_ASSET_ASSERT( is_asset_type( o.exchange_rate.base, PXS_SYMBOL ) && is_asset_type( o.exchange_rate.quote, PIXA_SYMBOL ),
+      o.exchange_rate, "Price feed must be a PXS/PIXA price" );
   }
 
   if( _db.has_hardfork( HIVE_HARDFORK_1_30 ) )
@@ -685,8 +685,8 @@ void feed_publish_evaluator::do_apply( const feed_publish_operation& o )
   const auto& witness = _db.get_witness( o.publisher );
   _db.modify( witness, [&]( witness_object& w )
   {
-    w.hbd_exchange_rate = o.exchange_rate;
-    w.last_hbd_exchange_update = _db.head_block_time();
+    w.pxs_exchange_rate = o.exchange_rate;
+    w.last_pxs_exchange_update = _db.head_block_time();
   });
 }
 

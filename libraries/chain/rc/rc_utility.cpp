@@ -570,12 +570,12 @@ bool resource_credits::use_account_rcs( int64_t rc )
         {
           HIVE_ASSERT( has_mana, not_enough_rc_exception,
             "Account: ${account_name} has ${rc_current} RC, needs ${rc} RC with ${surcharge} flood prevention surcharge. "
-            "Please wait to transact, power up HIVE or ask your witnesses to increase block size to deal with increased traffic.",
+            "Please wait to transact, power up PIXA or ask your witnesses to increase block size to deal with increased traffic.",
             ( account_name )( "rc_current", tx_info.rc )( rc )( surcharge )
           );
         }
         HIVE_ASSERT( has_mana, not_enough_rc_exception,
-          "Account: ${account_name} has ${rc_current} RC, needs ${rc} RC. Please wait to transact or power up HIVE.",
+          "Account: ${account_name} has ${rc_current} RC, needs ${rc} RC. Please wait to transact or power up PIXA.",
           ( account_name )( "rc_current", tx_info.rc )( rc )
         );
       }
@@ -839,7 +839,8 @@ void resource_credits::finalize_transaction( const full_transaction_type& full_t
   // note: while we could calculate most of used resources before transaction is executed, doing so for
   // custom operations would be troublesome
   count_resources( tx, full_tx.get_transaction_size(), tx_info.usage, db.head_block_time(),
-    db.has_hardfork( HIVE_HARDFORK_1_30_CUSTOM_DATA_RC ) );
+    db.has_hardfork( HIVE_HARDFORK_1_30_CUSTOM_DATA_RC ),
+    db.get_dynamic_global_properties().get_delegation_return_period() );
 
   // How many RC does this transaction cost?
   int64_t total_cost = compute_cost( &tx_info );

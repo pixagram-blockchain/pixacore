@@ -10,6 +10,6 @@ package hive.protocol.buffers;
  * type) and moved to NEW_HIVE_TREASURY_ACCOUNT ('hive.fund').
  */
 message consolidate_treasury_balance {
-  // @param {asset} total_moved - (HIVE, VESTS or HBD) funds moved from old to new treasury
+  // @param {asset} total_moved - (PIXA, VESTS or PXS) funds moved from old to new treasury
   repeated asset total_moved = 1 [json_name = "total_moved"];
 }

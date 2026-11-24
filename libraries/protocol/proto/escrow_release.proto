@@ -32,9 +32,9 @@ message escrow_release {
   // @param {number} escrow_id - Escrow indicator.
   required uint32 escrow_id = 6 [json_name = "escrow_id"];
 
-  // @param {asset} hbd_amount - The amount of HBD to release.
-  required asset  hbd_amount = 7 [json_name = "hbd_amount"];
+  // @param {asset} pxs_amount - The amount of PXS to release.
+  required asset  pxs_amount = 7 [json_name = "pxs_amount"];
 
-  // @param {asset} hive_amount - The amount of HIVE to release.
-  required asset  hive_amount = 8 [json_name = "hive_amount"];
+  // @param {asset} pixa_amount - The amount of PIXA to release.
+  required asset  pixa_amount = 8 [json_name = "pixa_amount"];
 }

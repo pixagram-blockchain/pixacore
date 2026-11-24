@@ -28,7 +28,7 @@ void initialize_core_indexes_05( database& db )
 
 /**
   *  Iterates over all [collateralized] conversion requests with a conversion date before
-  *  the head block time and then converts them to/from HIVE/HBD at the
+  *  the head block time and then converts them to/from PIXA/PXS at the
   *  current median price feed history price times the premium/fee
   *  Collateralized requests might also return excess collateral.
   */
@@ -41,16 +41,16 @@ void database::process_conversions()
 
   struct pending_record
   {
-    pending_record( account_id_type a, const HIVE_asset& v, const operation& o )
+    pending_record( account_id_type a, const PIXA_asset& v, const operation& o )
       : account( a ), transfer_to_account( v ), vop( o ) {}
     account_id_type account;
-    HIVE_asset transfer_to_account;
+    PIXA_asset transfer_to_account;
     operation vop;
   };
   std::vector< pending_record > pending_data;
-  temp_HBD_balance hbd_balance;
-  temp_HIVE_balance hive_balance;
-  HIVE_asset hive_to_issue( 0 );
+  temp_PXS_balance pxs_balance;
+  temp_PIXA_balance pixa_balance;
+  PIXA_asset pixa_to_issue( 0 );
 
   //first collect amounts to process, build vops and extract balances
 
@@ -64,18 +64,18 @@ void database::process_conversions()
 
     while( itr != request_by_date.end() && itr->get_conversion_date() <= now )
     {
-      HIVE_asset amount_to_issue = itr->get_convert_amount() * fhistory.current_median_history;
+      PIXA_asset amount_to_issue = itr->get_convert_amount() * fhistory.current_median_history;
       const auto& owner = get_account( itr->get_owner() );
 
       pending_data.emplace_back( itr->get_owner(), amount_to_issue,
         fill_convert_request_operation( owner.get_name(), itr->get_request_id(),
         itr->get_convert_amount(), amount_to_issue ) );
 
-      hive_to_issue += amount_to_issue;
+      pixa_to_issue += amount_to_issue;
 
       modify( *itr, [&]( convert_request_object& request )
       {
-        request.access_amount().transfer_to( hbd_balance );
+        request.access_amount().transfer_to( pxs_balance );
       } );
       remove( *itr );
       itr = request_by_date.begin();
@@ -100,30 +100,30 @@ void database::process_conversions()
     {
       const auto& owner = get_account( itr->get_owner() );
 
-      //calculate how much HIVE we'd need for already created HBD at current corrected price
+      //calculate how much PIXA we'd need for already created PXS at current corrected price
       //note that we are using market median price instead of minimal as it was during immediate part of this
       //conversion or current median price as is used in other conversions; the former is by design - we are supposed
       //to use median price here, minimal during immediate conversion was to prevent gaming; the latter is for rare
       //case, when this conversion happens when median price does not reflect market conditions when hard limit was
       //hit - see update_median_feed()
-      HIVE_asset required_hive = hive::protocol::multiply_with_fee< HIVE_ASSET_NUM_HIVE >( itr->get_converted_amount(),
+      PIXA_asset required_pixa = hive::protocol::multiply_with_fee< HIVE_ASSET_NUM_PIXA >( itr->get_converted_amount(),
         fhistory.market_median_history, HIVE_COLLATERALIZED_CONVERSION_FEE );
-      HIVE_asset excess_collateral = itr->get_collateral_amount() - required_hive;
-      HIVE_asset to_return;
+      PIXA_asset excess_collateral = itr->get_collateral_amount() - required_pixa;
+      PIXA_asset to_return;
 
       if( excess_collateral.amount < 0 )
-        required_hive = itr->get_collateral_amount(); // to_return remains empty
+        required_pixa = itr->get_collateral_amount(); // to_return remains empty
       else
         to_return = excess_collateral;
-      hive_to_issue -= required_hive;
+      pixa_to_issue -= required_pixa;
 
       pending_data.emplace_back( itr->get_owner(), excess_collateral,
         fill_collateralized_convert_request_operation( owner.get_name(), itr->get_request_id(),
-        required_hive, itr->get_converted_amount(), to_return ) );
+        required_pixa, itr->get_converted_amount(), to_return ) );
 
       modify( *itr, [&]( collateralized_convert_request_object& request )
       {
-        request.access_hive_collateral().transfer_to( hive_balance );
+        request.access_pixa_collateral().transfer_to( pixa_balance );
       } );
       remove( *itr );
       itr = request_by_date.begin();
@@ -135,26 +135,26 @@ void database::process_conversions()
     _benchmark_dumper.end( "processing", "hive::protocol::collateralized_convert_operation", count );
 
   //we have collected data on expected transfers and drained all balances
-  //now burn all collected HBD and supplement collected HIVE with additional issue
-  FC_ASSERT( ( hive_balance.as_asset() + hive_to_issue ).amount.value >= 0 );
-  //NOTE: hive_to_issue only grows with regular request; it shrinks with collateralized
-  //requests, but only by at most as much as hive_balance grows in the same time
+  //now burn all collected PXS and supplement collected PIXA with additional issue
+  FC_ASSERT( ( pixa_balance.as_asset() + pixa_to_issue ).amount.value >= 0 );
+  //NOTE: pixa_to_issue only grows with regular request; it shrinks with collateralized
+  //requests, but only by at most as much as pixa_balance grows in the same time
 
-  if( hive_to_issue.amount.value | hbd_balance.as_asset().amount.value )
+  if( pixa_to_issue.amount.value | pxs_balance.as_asset().amount.value )
   {
     modify( get_dynamic_global_properties(), [&]( dynamic_global_property_object& p )
     {
-      if( hive_to_issue.amount.value < 0 )
+      if( pixa_to_issue.amount.value < 0 )
       {
-        temp_HIVE_balance to_burn;
-        to_burn.transfer_from( hive_balance, -hive_to_issue );
-        p.burn_HIVE( to_burn );
+        temp_PIXA_balance to_burn;
+        to_burn.transfer_from( pixa_balance, -pixa_to_issue );
+        p.burn_PIXA( to_burn );
       }
       else
       {
-        p.issue_HIVE( hive_to_issue ).transfer_to( hive_balance );
+        p.issue_PIXA( pixa_to_issue ).transfer_to( pixa_balance );
       }
-      p.burn_HBD( hbd_balance, fhistory.current_median_history );
+      p.burn_PXS( pxs_balance, fhistory.current_median_history );
     } );
   }
 
@@ -170,7 +170,7 @@ void database::process_conversions()
   {
     const auto& owner = get_account( pending_data[i].account );
     const auto& amount = pending_data[i].transfer_to_account;
-    adjust_balance( owner, hive_balance, amount );
+    adjust_balance( owner, pixa_balance, amount );
     push_virtual_operation( *this, pending_data[i].vop );
     ++i;
   }
@@ -188,7 +188,7 @@ void database::process_conversions()
     }
     else
     {
-      adjust_balance( owner, hive_balance, amount );
+      adjust_balance( owner, pixa_balance, amount );
     }
     push_virtual_operation( *this, pending_data[i].vop );
     ++i;
@@ -205,13 +205,13 @@ void database::remove_pending_conversion_requests( const account_object& account
     auto& request = *request_itr;
     ++request_itr;
 
-    temp_HBD_balance hbd_drained;
+    temp_PXS_balance pxs_drained;
     modify( request, [&]( convert_request_object& req )
     {
-      req.access_amount().transfer_to( hbd_drained );
+      req.access_amount().transfer_to( pxs_drained );
     } );
 
-    adjust_balance( account, hbd_drained, hbd_drained.as_asset() );
+    adjust_balance( account, pxs_drained, pxs_drained.as_asset() );
     remove( request );
   }
 
@@ -224,12 +224,12 @@ void database::remove_pending_conversion_requests( const account_object& account
     "Collateralized convert requests not handled by clear_account" );
 }
 
-void database::get_convert_request_totals( HIVE_asset& total_collateral, HBD_asset& total_hbd, uint64_t& collateralized_count, uint64_t& convert_count ) const
+void database::get_convert_request_totals( PIXA_asset& total_collateral, PXS_asset& total_pxs, uint64_t& collateralized_count, uint64_t& convert_count ) const
 {
   const auto& convert_request_idx = get_index< convert_request_index >().indices();
   for( auto itr = convert_request_idx.begin(); itr != convert_request_idx.end(); ++itr )
   {
-    total_hbd += itr->get_convert_amount();
+    total_pxs += itr->get_convert_amount();
     ++convert_count;
   }
 

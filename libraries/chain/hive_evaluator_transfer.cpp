@@ -85,36 +85,36 @@ void escrow_transfer_evaluator::do_apply( const escrow_transfer_operation& o )
     HIVE_CHAIN_TIME_ASSERT( o.escrow_expiration > _db.head_block_time(), o.escrow_expiration, "The escrow expiration must be after head block time." );
     HIVE_CHAIN_LIMIT_ASSERT( from_account.pending_escrow_transfers < HIVE_MAX_PENDING_TRANSFERS, from_account.pending_escrow_transfers, "Account already has the maximum number of open escrow transfers." );
 
-    HIVE_asset o_hive_amount = o.get_hive_amount();
-    HBD_asset o_hbd_amount = o.get_hbd_amount();
-    HIVE_asset hive_spent = o_hive_amount;
-    HBD_asset hbd_spent = o_hbd_amount;
-    HIVE_asset hive_fee;
-    HBD_asset hbd_fee;
-    if( o.fee.symbol == HIVE_SYMBOL )
+    PIXA_asset o_pixa_amount = o.get_pixa_amount();
+    PXS_asset o_pxs_amount = o.get_pxs_amount();
+    PIXA_asset pixa_spent = o_pixa_amount;
+    PXS_asset pxs_spent = o_pxs_amount;
+    PIXA_asset pixa_fee;
+    PXS_asset pxs_fee;
+    if( o.fee.symbol == PIXA_SYMBOL )
     {
-      hive_fee = HIVE_asset( o.fee );
-      hive_spent += hive_fee;
+      pixa_fee = PIXA_asset( o.fee );
+      pixa_spent += pixa_fee;
     }
     else
     {
-      hbd_fee = HBD_asset( o.fee );
-      hbd_spent += hbd_fee;
+      pxs_fee = PXS_asset( o.fee );
+      pxs_spent += pxs_fee;
     }
 
-    temp_HIVE_balance escrow_hive;
-    _db.adjust_balance( from_account, escrow_hive, -hive_spent );
-    temp_HBD_balance escrow_hbd;
-    _db.adjust_balance( from_account, escrow_hbd, -hbd_spent );
+    temp_PIXA_balance escrow_pixa;
+    _db.adjust_balance( from_account, escrow_pixa, -pixa_spent );
+    temp_PXS_balance escrow_pxs;
+    _db.adjust_balance( from_account, escrow_pxs, -pxs_spent );
 
     temp_balance escrow_fee( o.fee.symbol );
-    if( o.fee.symbol == HIVE_SYMBOL )
-      escrow_fee.transfer_from( escrow_hive, hive_fee );
+    if( o.fee.symbol == PIXA_SYMBOL )
+      escrow_fee.transfer_from( escrow_pixa, pixa_fee );
     else
-      escrow_fee.transfer_from( escrow_hbd, hbd_fee );
+      escrow_fee.transfer_from( escrow_pxs, pxs_fee );
 
     _db.create<escrow_object>( from_account, to_account, agent_account,
-      std::move( escrow_hive ), std::move( escrow_hbd ), std::move( escrow_fee ),
+      std::move( escrow_pixa ), std::move( escrow_pxs ), std::move( escrow_fee ),
       o.ratification_deadline, o.escrow_expiration, o.escrow_id );
     _db.modify( from_account, []( account_object& a )
     {
@@ -209,11 +209,11 @@ void escrow_release_evaluator::do_apply( const escrow_release_operation& o )
     const auto& from_account = _db.get_account( o.from );
 
     const auto& e = _db.get_escrow( o.from, o.escrow_id );
-    HIVE_asset o_hive_amount = o.get_hive_amount();
-    HBD_asset o_hbd_amount = o.get_hbd_amount();
+    PIXA_asset o_pixa_amount = o.get_pixa_amount();
+    PXS_asset o_pxs_amount = o.get_pxs_amount();
 
-    HIVE_CHAIN_BALANCE_ASSERT( e.get_hive_balance() >= o_hive_amount, o.from, "Release amount exceeds escrow balance. Amount: ${a}, Balance: ${b}", ("a", o_hive_amount)("b", e.get_hive_balance()) );
-    HIVE_CHAIN_BALANCE_ASSERT( e.get_hbd_balance() >= o_hbd_amount, o.from, "Release amount exceeds escrow balance. Amount: ${a}, Balance: ${b}", ("a", o_hbd_amount)("b", e.get_hbd_balance()) );
+    HIVE_CHAIN_BALANCE_ASSERT( e.get_pixa_balance() >= o_pixa_amount, o.from, "Release amount exceeds escrow balance. Amount: ${a}, Balance: ${b}", ("a", o_pixa_amount)("b", e.get_pixa_balance()) );
+    HIVE_CHAIN_BALANCE_ASSERT( e.get_pxs_balance() >= o_pxs_amount, o.from, "Release amount exceeds escrow balance. Amount: ${a}, Balance: ${b}", ("a", o_pxs_amount)("b", e.get_pxs_balance()) );
     HIVE_CHAIN_STATE_ASSERT( e.get_to() == o.to && "release", o.to, "Operation 'to' (${o}) does not match escrow 'to' (${e}).", ("o", o.to)("e", e.get_to()) );
     HIVE_CHAIN_STATE_ASSERT( e.get_agent() == o.agent && "release", o.agent, "Operation 'agent' (${a}) does not match escrow 'agent' (${e}).", ("o", o.agent)("e", e.get_agent()) );
     HIVE_CHAIN_PERMISSION_ASSERT( o.receiver == e.get_from() || o.receiver == e.get_to(), o.receiver, "Funds must be released to 'from' (${f}) or 'to' (${t})", ("f", e.get_from())("t", e.get_to()) );
@@ -243,18 +243,18 @@ void escrow_release_evaluator::do_apply( const escrow_release_operation& o )
     }
     // If escrow expires and there is no dispute, either party can release funds to either party.
 
-    temp_HIVE_balance hive_released;
-    temp_HBD_balance hbd_released;
+    temp_PIXA_balance pixa_released;
+    temp_PXS_balance pxs_released;
     _db.modify( e, [&]( escrow_object& esc )
     {
-      esc.access_hive_balance().transfer_to( hive_released, o_hive_amount );
-      esc.access_hbd_balance().transfer_to( hbd_released, o_hbd_amount );
+      esc.access_pixa_balance().transfer_to( pixa_released, o_pixa_amount );
+      esc.access_pxs_balance().transfer_to( pxs_released, o_pxs_amount );
     } );
 
-    _db.adjust_balance( o.receiver, hive_released, hive_released.as_asset() );
-    _db.adjust_balance( o.receiver, hbd_released, hbd_released.as_asset() );
+    _db.adjust_balance( o.receiver, pixa_released, pixa_released.as_asset() );
+    _db.adjust_balance( o.receiver, pxs_released, pxs_released.as_asset() );
 
-    if( e.get_hive_balance().amount == 0 && e.get_hbd_balance().amount == 0 )
+    if( e.get_pixa_balance().amount == 0 && e.get_pxs_balance().amount == 0 )
     {
       _db.modify( from_account, []( account_object& a )
       {
@@ -271,23 +271,23 @@ void transfer_evaluator::do_apply( const transfer_operation& o )
   if ( is_pixa_ico( o.from ) && (o.amount.symbol != VESTS_SYMBOL) )
     pixa_only_vests_transfer_assert("(liquid transfer not allowed)");
 
-  if( _db.has_hardfork( HIVE_HARDFORK_1_24 ) && o.amount.symbol == HIVE_SYMBOL && _db.is_treasury( o.to ) )
+  if( _db.has_hardfork( HIVE_HARDFORK_1_24 ) && o.amount.symbol == PIXA_SYMBOL && _db.is_treasury( o.to ) )
   {
-    const auto& exchange_rate = _db.get_hbd_price();
+    const auto& exchange_rate = _db.get_pxs_price();
 
-    validate_price_feed_available( exchange_rate, "send HIVE to treasury" );
+    validate_price_feed_available( exchange_rate, "send PIXA to treasury" );
 
-    HIVE_asset o_amount( o.amount );
+    PIXA_asset o_amount( o.amount );
     auto amount_to_transfer = o_amount * exchange_rate;
 
-    temp_HIVE_balance hive_balance;
-    _db.adjust_balance( o.from, hive_balance, -o_amount );
-    temp_HBD_balance converted_hbd_balance;
+    temp_PIXA_balance pixa_balance;
+    _db.adjust_balance( o.from, pixa_balance, -o_amount );
+    temp_PXS_balance converted_pxs_balance;
     _db.modify( _db.get_dynamic_global_properties(), [&]( dynamic_global_property_object& dgpo )
     {
-      converted_hbd_balance = dgpo.convert_HIVE_to_HBD( hive_balance, exchange_rate, amount_to_transfer.amount > 0 );
+      converted_pxs_balance = dgpo.convert_PIXA_to_PXS( pixa_balance, exchange_rate, amount_to_transfer.amount > 0 );
     } );
-    _db.adjust_balance( o.to, converted_hbd_balance, converted_hbd_balance.as_asset() );
+    _db.adjust_balance( o.to, converted_pxs_balance, converted_pxs_balance.as_asset() );
 
     // o.to will always be the treasury so no need to call _db.get_treasury
     push_virtual_operation( _db, dhf_conversion_operation( o.to, o_amount, amount_to_transfer ) );
@@ -352,7 +352,7 @@ void transfer_evaluator::do_apply( const transfer_operation& o )
   }
   else if( _db.has_hardfork( HIVE_HARDFORK_0_21__3343 ) )
   {
-    HIVE_CHAIN_TREASURY_ASSERT( o.amount.symbol == HBD_SYMBOL || !_db.is_treasury( o.to ), o.to, "Can only transfer HBD or HIVE to ${s}", ( "s", o.to ) );
+    HIVE_CHAIN_TREASURY_ASSERT( o.amount.symbol == PXS_SYMBOL || !_db.is_treasury( o.to ), o.to, "Can only transfer PXS or PIXA to ${s}", ( "s", o.to ) );
   }
 
   temp_balance transfer( o.amount.symbol );
@@ -371,8 +371,8 @@ void transfer_to_vesting_evaluator::do_apply( const transfer_to_vesting_operatio
   if( _db.has_hardfork( HIVE_HARDFORK_0_21__3343 ) )
     HIVE_CHAIN_TREASURY_ASSERT( !_db.is_treasury( o.to ), o.to, "Cannot vest on behalf of ${s}", ("s", o.to ) );
 
-  HIVE_asset o_amount( o.get_amount() );
-  temp_HIVE_balance vesting_funds;
+  PIXA_asset o_amount( o.get_amount() );
+  temp_PIXA_balance vesting_funds;
   _db.adjust_balance( from_account, vesting_funds, -o_amount );
 
   VEST_asset amount_vested;
@@ -417,8 +417,8 @@ void withdraw_vesting_evaluator::do_apply( const withdraw_vesting_operation& o )
     return;
   }
 
-  HIVE_CHAIN_BALANCE_ASSERT( account.get_vesting() >= VEST_asset( 0 ), o.account, "Account does not have sufficient Hive Power for withdraw." );
-  HIVE_CHAIN_BALANCE_ASSERT( account.get_vesting() - account.get_delegated_vesting() >= o_vesting_shares, o.account, "Account does not have sufficient Hive Power for withdraw." );
+  HIVE_CHAIN_BALANCE_ASSERT( account.get_vesting() >= VEST_asset( 0 ), o.account, "Account does not have sufficient Pixa Power for withdraw." );
+  HIVE_CHAIN_BALANCE_ASSERT( account.get_vesting() - account.get_delegated_vesting() >= o_vesting_shares, o.account, "Account does not have sufficient Pixa Power for withdraw." );
 
   if( _db.has_hardfork( HIVE_HARDFORK_0_20 ) )
     _db.rc().regenerate_rc_mana( account, now );
@@ -535,12 +535,12 @@ void set_withdraw_vesting_route_evaluator::do_apply( const set_withdraw_vesting_
 void convert_evaluator::do_apply( const convert_operation& o )
 {
   const auto& owner = _db.get_account( o.owner );
-  HBD_asset o_amount = o.get_amount();
-  temp_HBD_balance convert_amount;
+  PXS_asset o_amount = o.get_amount();
+  temp_PXS_balance convert_amount;
   _db.adjust_balance( owner, convert_amount, -o_amount );
 
-  const auto& exchange_rate = _db.get_hbd_price();
-  validate_price_feed_available( exchange_rate, "convert HBD" );
+  const auto& exchange_rate = _db.get_pxs_price();
+  validate_price_feed_available( exchange_rate, "convert PXS" );
 
   auto hive_conversion_delay = HIVE_CONVERSION_DELAY_PRE_HF_16;
   if( _db.has_hardfork( HIVE_HARDFORK_0_16__551) )
@@ -555,43 +555,43 @@ void collateralized_convert_evaluator::do_apply( const collateralized_convert_op
   HIVE_CHAIN_HARDFORK_ASSERT( _db.has_hardfork( HIVE_HARDFORK_1_25 ) && "Operation not available until HF25", "" );
 
   const auto& owner = _db.get_account( o.owner );
-  HIVE_asset o_amount = o.get_amount();
-  temp_HIVE_balance collateral;
+  PIXA_asset o_amount = o.get_amount();
+  temp_PIXA_balance collateral;
   _db.adjust_balance( owner, collateral, -o_amount );
 
   const auto& fhistory = _db.get_feed_history();
-  validate_price_feed_available( fhistory.current_median_history, "convert HIVE" );
+  validate_price_feed_available( fhistory.current_median_history, "convert PIXA" );
   const auto& dgpo = _db.get_dynamic_global_properties();
-  HIVE_CHAIN_STATE_ASSERT( dgpo.get_hbd_print_rate() > 0, dgpo.get_hbd_print_rate(), "Creation of new HBD blocked at this time due to global limit." );
+  HIVE_CHAIN_STATE_ASSERT( dgpo.get_pxs_print_rate() > 0, dgpo.get_pxs_print_rate(), "Creation of new PXS blocked at this time due to global limit." );
     //note that feed and therefore print rate is updated once per hour, so without above check there could be
-    //enough room for new HBD, but there is a chance the official price would still be artificial (artificial
+    //enough room for new PXS, but there is a chance the official price would still be artificial (artificial
     //price is not used in this conversion, but users might think it is - better to stop them from making mistake)
 
-  //if you change something here take a look at wallet_api::estimate_hive_collateral as well
+  //if you change something here take a look at wallet_api::estimate_pixa_collateral as well
 
   //cut amount by collateral ratio
   uint128_t _amount = ( uint128_t( o_amount.amount.value ) * HIVE_100_PERCENT ) / HIVE_CONVERSION_COLLATERAL_RATIO;
-  HIVE_asset for_immediate_conversion = HIVE_asset( fc::uint128_to_uint64( _amount ) );
+  PIXA_asset for_immediate_conversion = PIXA_asset( fc::uint128_to_uint64( _amount ) );
 
-  //immediately create HBD - apply fee to current rolling minimum price
-  HBD_asset converted_amount = multiply_with_fee< HIVE_ASSET_NUM_HIVE >( for_immediate_conversion,
+  //immediately create PXS - apply fee to current rolling minimum price
+  PXS_asset converted_amount = multiply_with_fee< HIVE_ASSET_NUM_PIXA >( for_immediate_conversion,
     fhistory.current_min_history, HIVE_COLLATERALIZED_CONVERSION_FEE );
-  HIVE_CHAIN_ASSET_ASSERT( converted_amount.amount > 0, converted_amount, "Amount of collateral too low - conversion gives no HBD" );
+  HIVE_CHAIN_ASSET_ASSERT( converted_amount.amount > 0, converted_amount, "Amount of collateral too low - conversion gives no PXS" );
 
-  temp_HBD_balance converted;
+  temp_PXS_balance converted;
   _db.modify( dgpo, [&]( dynamic_global_property_object& p )
   {
-    //HIVE supply (and virtual supply in part related to HIVE) will be corrected after actual conversion
-    converted = p.issue_HBD( converted_amount, fhistory.current_median_history );
+    //PIXA supply (and virtual supply in part related to PIXA) will be corrected after actual conversion
+    converted = p.issue_PXS( converted_amount, fhistory.current_median_history );
   } );
-  //note that we created new HBD out of thin air and we will burn the related HIVE when actual conversion takes
+  //note that we created new PXS out of thin air and we will burn the related PIXA when actual conversion takes
   //place; there is alternative approach - we could burn all collateral now and print back excess when we are
   //to return it to the user; the difference slightly changes calculations below, that is, currently we might
-  //allow slightly more HBD to be printed
+  //allow slightly more PXS to be printed
   _db.adjust_balance( owner, converted, converted.as_asset() );
 
-  uint16_t percent_hbd = _db.calculate_HBD_percent();
-  HIVE_CHAIN_LIMIT_ASSERT( percent_hbd <= dgpo.get_hbd_stop_percent(), percent_hbd, "Creation of new ${hbd} violates global limit.", ( "hbd", converted_amount ) );
+  uint16_t percent_pxs = _db.calculate_PXS_percent();
+  HIVE_CHAIN_LIMIT_ASSERT( percent_pxs <= dgpo.get_pxs_stop_percent(), percent_pxs, "Creation of new ${pxs} violates global limit.", ( "pxs", converted_amount ) );
 
   _db.create<collateralized_convert_request_object>( owner, std::move( collateral ), converted_amount,
     _db.head_block_time() + HIVE_COLLATERALIZED_CONVERSION_DELAY, o.requestid );
@@ -607,9 +607,9 @@ void limit_order_create_evaluator::do_apply( const limit_order_create_operation&
   // once HF29 triggers try trimming the check in validate
   if( _db.is_in_control() || _db.has_hardfork( HIVE_HARDFORK_1_31_FIX_LIMIT_ORDER_ASSETS ) )
   {
-    HIVE_PROTOCOL_ASSET_ASSERT( ( is_asset_type( o.amount_to_sell, HIVE_SYMBOL ) && is_asset_type( o.min_to_receive, HBD_SYMBOL ) )
-      || ( is_asset_type( o.amount_to_sell, HBD_SYMBOL ) && is_asset_type( o.min_to_receive, HIVE_SYMBOL ) ),
-      "Limit order must be for the HIVE:HBD market", ("subject", o.amount_to_sell)(o.min_to_receive) );
+    HIVE_PROTOCOL_ASSET_ASSERT( ( is_asset_type( o.amount_to_sell, PIXA_SYMBOL ) && is_asset_type( o.min_to_receive, PXS_SYMBOL ) )
+      || ( is_asset_type( o.amount_to_sell, PXS_SYMBOL ) && is_asset_type( o.min_to_receive, PIXA_SYMBOL ) ),
+      "Limit order must be for the PIXA:PXS market", ("subject", o.amount_to_sell)(o.min_to_receive) );
   }
 
   time_point_sec expiration = o.expiration;
@@ -645,9 +645,9 @@ void limit_order_create2_evaluator::do_apply( const limit_order_create2_operatio
   // once HF29 triggers try trimming the check in validate
   if( _db.is_in_control() || _db.has_hardfork( HIVE_HARDFORK_1_31_FIX_LIMIT_ORDER_ASSETS ) )
   {
-    HIVE_PROTOCOL_ASSET_ASSERT( ( is_asset_type( o.amount_to_sell, HIVE_SYMBOL ) && is_asset_type( o.exchange_rate.quote, HBD_SYMBOL ) )
-      || ( is_asset_type( o.amount_to_sell, HBD_SYMBOL ) && is_asset_type( o.exchange_rate.quote, HIVE_SYMBOL ) ),
-      "Limit order must be for the HIVE:HBD market", ("subject", o.amount_to_sell)(o.exchange_rate) );
+    HIVE_PROTOCOL_ASSET_ASSERT( ( is_asset_type( o.amount_to_sell, PIXA_SYMBOL ) && is_asset_type( o.exchange_rate.quote, PXS_SYMBOL ) )
+      || ( is_asset_type( o.amount_to_sell, PXS_SYMBOL ) && is_asset_type( o.exchange_rate.quote, PIXA_SYMBOL ) ),
+      "Limit order must be for the PIXA:PXS market", ("subject", o.amount_to_sell)(o.exchange_rate) );
   }
 
   time_point_sec expiration = o.expiration;
@@ -700,7 +700,7 @@ void transfer_from_savings_evaluator::do_apply( const transfer_from_savings_oper
 
   HIVE_CHAIN_LIMIT_ASSERT( from.savings_withdraw_requests < HIVE_SAVINGS_WITHDRAW_REQUEST_LIMIT, from.savings_withdraw_requests, "Account has reached limit for pending withdraw requests." );
 
-  HIVE_CHAIN_TREASURY_ASSERT( op.amount.symbol == HBD_SYMBOL || !_db.is_treasury( op.to ), op.to, "Can only transfer HBD to ${s}", ("s", op.to ) );
+  HIVE_CHAIN_TREASURY_ASSERT( op.amount.symbol == PXS_SYMBOL || !_db.is_treasury( op.to ), op.to, "Can only transfer PXS to ${s}", ("s", op.to ) );
 
   HIVE_CHAIN_BALANCE_ASSERT( _db.get_savings_balance( from, op.amount.symbol ) >= op.amount, op.from, "Insufficient savings balance for '${subject}'." );
   temp_balance withdraw_amount( op.amount.symbol );
@@ -744,40 +744,40 @@ void claim_reward_balance_evaluator::do_apply( const claim_reward_balance_operat
   const auto& dgpo = _db.get_dynamic_global_properties();
   auto now = dgpo.get_head_block_time();
 
-  HIVE_asset op_reward_hive = op.get_reward_hive();
-  HBD_asset op_reward_hbd = op.get_reward_hbd();
+  PIXA_asset op_reward_pixa = op.get_reward_pixa();
+  PXS_asset op_reward_pxs = op.get_reward_pxs();
   VEST_asset op_reward_vests = op.get_reward_vests();
 
-  HIVE_CHAIN_BALANCE_ASSERT( op_reward_hive <= acnt.get_hive_rewards(), op.account, "Cannot claim that much HIVE. Claim: ${c} Actual: ${a}",
-    ( "c", op_reward_hive )( "a", acnt.get_hive_rewards() ) );
-  HIVE_CHAIN_BALANCE_ASSERT( op_reward_hbd <= acnt.get_hbd_rewards(), op.account, "Cannot claim that much HBD. Claim: ${c} Actual: ${a}",
-    ( "c", op_reward_hbd )( "a", acnt.get_hbd_rewards() ) );
+  HIVE_CHAIN_BALANCE_ASSERT( op_reward_pixa <= acnt.get_pixa_rewards(), op.account, "Cannot claim that much PIXA. Claim: ${c} Actual: ${a}",
+    ( "c", op_reward_pixa )( "a", acnt.get_pixa_rewards() ) );
+  HIVE_CHAIN_BALANCE_ASSERT( op_reward_pxs <= acnt.get_pxs_rewards(), op.account, "Cannot claim that much PXS. Claim: ${c} Actual: ${a}",
+    ( "c", op_reward_pxs )( "a", acnt.get_pxs_rewards() ) );
   HIVE_CHAIN_BALANCE_ASSERT( op_reward_vests <= acnt.get_vest_rewards(), op.account, "Cannot claim that much VESTS. Claim: ${c} Actual: ${a}",
     ( "c", op_reward_vests )( "a", acnt.get_vest_rewards() ) );
 
-  HIVE_asset reward_vesting_hive_to_move = HIVE_asset( 0 );
+  PIXA_asset reward_vesting_pixa_to_move = PIXA_asset( 0 );
   if( op_reward_vests == acnt.get_vest_rewards() )
-    reward_vesting_hive_to_move = acnt.get_vest_rewards_as_hive();
+    reward_vesting_pixa_to_move = acnt.get_vest_rewards_as_pixa();
   else
-    reward_vesting_hive_to_move = HIVE_asset( fc::uint128_to_uint64( ( uint128_t( op_reward_vests.amount.value ) * uint128_t( acnt.get_vest_rewards_as_hive().amount.value ) )
+    reward_vesting_pixa_to_move = PIXA_asset( fc::uint128_to_uint64( ( uint128_t( op_reward_vests.amount.value ) * uint128_t( acnt.get_vest_rewards_as_pixa().amount.value ) )
       / uint128_t( acnt.get_vest_rewards().amount.value ) ) );
 
-  temp_HIVE_balance hive_reward;
-  _db.adjust_reward_balance( acnt, hive_reward, -op_reward_hive );
-  _db.adjust_balance( acnt, hive_reward, op_reward_hive );
-  temp_HBD_balance hbd_reward;
-  _db.adjust_reward_balance( acnt, hbd_reward, -op_reward_hbd );
-  _db.adjust_balance( acnt, hbd_reward, op_reward_hbd );
+  temp_PIXA_balance pixa_reward;
+  _db.adjust_reward_balance( acnt, pixa_reward, -op_reward_pixa );
+  _db.adjust_balance( acnt, pixa_reward, op_reward_pixa );
+  temp_PXS_balance pxs_reward;
+  _db.adjust_reward_balance( acnt, pxs_reward, -op_reward_pxs );
+  _db.adjust_balance( acnt, pxs_reward, op_reward_pxs );
 
   if( _db.has_hardfork( HIVE_HARDFORK_0_20 ) )
     _db.rc().regenerate_rc_mana( acnt, now );
-  temp_HIVE_balance reward_vesting_hive_balance;
+  temp_PIXA_balance reward_vesting_pixa_balance;
   _db.modify( acnt, [&]( account_object& a )
   {
     if( _db.has_hardfork( HIVE_HARDFORK_0_20 ) )
       util::update_manabar( dgpo, a, op_reward_vests.amount.value );
     a.access_vesting().transfer_from( a.access_vest_rewards(), op_reward_vests );
-    reward_vesting_hive_balance.transfer_from( a.access_vest_rewards_as_hive(), reward_vesting_hive_to_move );
+    reward_vesting_pixa_balance.transfer_from( a.access_vest_rewards_as_pixa(), reward_vesting_pixa_to_move );
   } );
   if( _db.has_hardfork( HIVE_HARDFORK_0_20 ) )
     _db.rc().update_account_after_vest_change( acnt, now );
@@ -785,10 +785,10 @@ void claim_reward_balance_evaluator::do_apply( const claim_reward_balance_operat
   _db.modify( dgpo, [&]( dynamic_global_property_object& gpo )
   {
     gpo.access_total_vesting_shares() += op_reward_vests;
-    gpo.access_total_vesting_fund_hive().transfer_from( reward_vesting_hive_balance );
+    gpo.access_total_vesting_fund_pixa().transfer_from( reward_vesting_pixa_balance );
 
     gpo.access_pending_rewarded_vesting_shares() -= op_reward_vests;
-    gpo.access_pending_rewarded_vesting_hive() -= reward_vesting_hive_to_move;
+    gpo.access_pending_rewarded_vesting_pixa() -= reward_vesting_pixa_to_move;
   } );
 
   _db.adjust_proxied_witness_votes( acnt, op_reward_vests.amount );
@@ -873,7 +873,7 @@ void delegate_vesting_shares_evaluator::do_apply( const delegate_vesting_shares_
   }
 
   // HF 20 increase fee meaning by 30x, reduce these thresholds to compensate.
-  HIVE_asset fee = _db.get_witness_schedule_object().median_props.account_creation_fee;
+  PIXA_asset fee = _db.get_witness_schedule_object().median_props.account_creation_fee;
   VEST_asset min_delegation = _db.has_hardfork( HIVE_HARDFORK_0_20__1761 ) ?
     ( fee / 3 ) * gpo.get_vesting_share_price() : ( fee * 10 ) * gpo.get_vesting_share_price();
   VEST_asset min_update = _db.has_hardfork( HIVE_HARDFORK_0_20__1761 ) ?
@@ -922,7 +922,7 @@ void delegate_vesting_shares_evaluator::do_apply( const delegate_vesting_shares_
   {
     auto delta = op_vesting_shares - delegation->get_vesting();
 
-    HIVE_CHAIN_LIMIT_ASSERT( delta >= min_update && "Wrong increase", delta, "Hive Power increase is not enough of a difference. min_update: ${min}", ("min", min_update) );
+    HIVE_CHAIN_LIMIT_ASSERT( delta >= min_update && "Wrong increase", delta, "Pixa Power increase is not enough of a difference. min_update: ${min}", ("min", min_update) );
     HIVE_CHAIN_BALANCE_ASSERT( available_shares >= delta, op.delegator, "Account ${acc} does not have enough mana to delegate. required: ${r} available: ${a}",
       ( "acc", op.delegator )( "r", delta )( "a", available_shares ) );
     HIVE_CHAIN_BALANCE_ASSERT( available_downvote_shares >= delta, op.delegator, "Account ${acc} does not have enough downvote mana to delegate. required: ${r} available: ${a}",
@@ -968,7 +968,7 @@ void delegate_vesting_shares_evaluator::do_apply( const delegate_vesting_shares_
 
     if( op_vesting_shares.amount > 0 )
     {
-      HIVE_CHAIN_LIMIT_ASSERT( delta >= min_update && "Wrong decrease", delta, "Hive Power decrease is not enough of a difference. min_update: ${min}", ( "min", min_update ) );
+      HIVE_CHAIN_LIMIT_ASSERT( delta >= min_update && "Wrong decrease", delta, "Pixa Power decrease is not enough of a difference. min_update: ${min}", ( "min", min_update ) );
       HIVE_CHAIN_LIMIT_ASSERT( op_vesting_shares >= min_delegation, op_vesting_shares, "Delegation must be removed or leave minimum delegation amount of ${v}", ( "v", min_delegation ) );
     }
     else

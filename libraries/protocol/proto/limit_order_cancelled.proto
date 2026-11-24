@@ -17,6 +17,6 @@ message limit_order_cancelled {
   // @param {number} orderid - id of the order
   required uint32 orderid = 2;
 
-  // @param {asset} amount_back - (HIVE or HBD) remaining funds from original order that were not traded until cancellation
+  // @param {asset} amount_back - (PIXA or PXS) remaining funds from original order that were not traded until cancellation
   required asset  amount_back = 3 [json_name = "amount_back"];
 }

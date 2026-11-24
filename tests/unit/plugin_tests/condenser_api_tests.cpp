@@ -18,7 +18,7 @@ BOOST_AUTO_TEST_CASE( get_witness_schedule_test )
   // to allow other tests using condenser_api_fixture with earlier hardforks.
   {
     db->set_hardfork( HIVE_NUM_HARDFORKS );
-    set_account_creation_fee( HIVE_asset( 3000 ) ); //3.000 HIVE, same as mainnet
+    set_account_creation_fee( PIXA_asset( 3000 ) ); //3.000 PIXA, same as mainnet
     generate_block();
 
     ACTORS( DEFAULT_VESTING, (top1)(top2)(top3)(top4)(top5)(top6)(top7)(top8)(top9)(top10)
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE( get_witness_schedule_test )
     {
       const private_key_type account_key = generate_private_key( witness_name );
       const private_key_type witness_key = generate_private_key( witness_name + "_witness" );
-      witness_create( witness_name, account_key, witness_name + ".com", witness_key.get_public_key(), HIVE_asset( 1000 ) );
+      witness_create( witness_name, account_key, witness_name + ".com", witness_key.get_public_key(), PIXA_asset( 1000 ) );
       witness_plugin->add_signing_key( witness_key );
     };
     for( int i = 1; i <= 20; ++i )
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE( get_witness_schedule_test )
 
     ACTORS( DEFAULT_VESTING, (whale)(voter1)(voter2)(voter3)(voter4)(voter5)(voter6)(voter7)(voter8)(voter9)(voter10) );
 
-    vest( "whale", HIVE_asset( 500'000'000 ) );
+    vest( "whale", PIXA_asset( 500'000'000 ) );
 
     account_witness_vote_operation op;
     op.account = "whale";
@@ -54,8 +54,8 @@ BOOST_AUTO_TEST_CASE( get_witness_schedule_test )
     {
       std::string name = "voter" + std::to_string(i);
       auto key = generate_private_key( name );
-      fund( name, HIVE_asset( 10'000'000 ) );
-      vest( name, "", HIVE_asset( 10'000'000 / i ), key );
+      fund( name, PIXA_asset( 10'000'000 ) );
+      vest( name, "", PIXA_asset( 10'000'000 / i ), key );
       op.account = name;
       for( int v = 1; v <= i; ++v )
       {
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE( get_witness_schedule_test )
   BOOST_REQUIRE_EQUAL( active_schedule_2.witness_pay_normalization_factor, active_schedule_1.witness_pay_normalization_factor );
   BOOST_REQUIRE( active_schedule_2.median_props.account_creation_fee.to_asset() == active_schedule_1.median_props.account_creation_fee.to_asset() );
   BOOST_REQUIRE_EQUAL( active_schedule_2.median_props.maximum_block_size, active_schedule_1.median_props.maximum_block_size );
-  BOOST_REQUIRE_EQUAL( active_schedule_2.median_props.hbd_interest_rate, active_schedule_1.median_props.hbd_interest_rate );
+  BOOST_REQUIRE_EQUAL( active_schedule_2.median_props.pxs_interest_rate, active_schedule_1.median_props.pxs_interest_rate );
   BOOST_REQUIRE_EQUAL( active_schedule_2.median_props.account_subsidy_budget, active_schedule_1.median_props.account_subsidy_budget );
   BOOST_REQUIRE_EQUAL( active_schedule_2.median_props.account_subsidy_decay, active_schedule_1.median_props.account_subsidy_decay );
   BOOST_REQUIRE( active_schedule_2.majority_version == full_schedule_1.future_changes->majority_version.value() );
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE( get_witness_schedule_test )
   {
     db.modify( db.get_future_witness_schedule_object(), [&]( witness_schedule_object& fwso )
     {
-      fwso.median_props.account_creation_fee = HIVE_asset( 3'000 );
+      fwso.median_props.account_creation_fee = PIXA_asset( 3'000 );
     } );
   } );
   auto full_schedule = condenser_api->get_witness_schedule( { true } );
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE( get_witness_schedule_test )
     BOOST_REQUIRE( props_changes.account_creation_fee.valid() == true );
     BOOST_REQUIRE( props_changes.account_creation_fee.value() == ASSET( "3.000 TESTS" ) );
     BOOST_REQUIRE( props_changes.maximum_block_size.valid() == false );
-    BOOST_REQUIRE( props_changes.hbd_interest_rate.valid() == false );
+    BOOST_REQUIRE( props_changes.pxs_interest_rate.valid() == false );
     BOOST_REQUIRE( props_changes.account_subsidy_budget.valid() == false );
     BOOST_REQUIRE( props_changes.account_subsidy_decay.valid() == false );
     BOOST_REQUIRE( changes.majority_version.valid() == false );
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE( get_witness_schedule_test )
   {
     db.modify( db.get_future_witness_schedule_object(), [&]( witness_schedule_object& fwso )
     {
-      fwso.median_props.account_creation_fee = HIVE_asset( active_schedule_2.median_props.account_creation_fee.to_asset() ); //revert previous change
+      fwso.median_props.account_creation_fee = PIXA_asset( active_schedule_2.median_props.account_creation_fee.to_asset() ); //revert previous change
       fwso.majority_version = version( fwso.majority_version.major_v(),
         fwso.majority_version.minor_v() + 1, fwso.majority_version.rev_v() + 10 );
     } );

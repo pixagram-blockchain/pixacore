@@ -15,6 +15,7 @@
 #include <hive/chain/detail/state/decline_voting_rights_request_object.hpp>
 #include <hive/chain/detail/state/reward_fund_object.hpp>
 #include <hive/chain/detail/state/recurrent_transfer_object.hpp>
+#include <hive/chain/detail/state/nft_object_multiindex.hpp>
 #include <hive/chain/detail/state/dhf_objects.hpp>
 #include <hive/chain/detail/state/dhf_objects_multiindex.hpp>
 #include <hive/chain/detail/state/transaction_object.hpp>
@@ -63,8 +64,8 @@ api_escrow_object::api_escrow_object( const escrow_object& o, const database& db
   agent( o.get_agent() ),
   ratification_deadline( o.get_ratification_deadline() ),
   escrow_expiration( o.get_escrow_expiration() ),
-  hbd_balance( o.get_hbd_balance().to_asset() ),
-  hive_balance( o.get_hive_balance().to_asset() ),
+  pxs_balance( o.get_pxs_balance().to_asset() ),
+  pixa_balance( o.get_pixa_balance().to_asset() ),
   pending_fee( o.get_fee() ),
   to_approved( o.is_to_approved() ),
   agent_approved( o.is_agent_approved() ),
@@ -149,25 +150,26 @@ api_dynamic_global_property_object::api_dynamic_global_property_object( const dy
   num_pow_witnesses( o.get_current_pow_witnesses() ),
   virtual_supply( o.get_virtual_supply().to_asset() ),
   current_supply( o.get_current_supply().to_asset() ),
-  init_hbd_supply( o.get_initial_hbd_supply().to_asset() ),
-  current_hbd_supply( o.get_current_hbd_supply().to_asset() ),
-  total_vesting_fund_hive( o.get_total_vesting_fund_hive().to_asset() ),
+  init_pxs_supply( o.get_initial_pxs_supply().to_asset() ),
+  current_pxs_supply( o.get_current_pxs_supply().to_asset() ),
+  total_vesting_fund_pixa( o.get_total_vesting_fund_pixa().to_asset() ),
   total_vesting_shares( o.get_total_vesting_shares().to_asset() ),
   pending_rewarded_vesting_shares( o.get_pending_rewarded_vesting_shares().to_asset() ),
-  pending_rewarded_vesting_hive( o.get_pending_rewarded_vesting_hive().to_asset() ),
-  hbd_interest_rate( o.get_hbd_interest_rate() ),
-  hbd_print_rate( o.get_hbd_print_rate() ),
+  pending_rewarded_vesting_pixa( o.get_pending_rewarded_vesting_pixa().to_asset() ),
+  pxs_interest_rate( o.get_pxs_interest_rate() ),
+  pxs_print_rate( o.get_pxs_print_rate() ),
   maximum_block_size( o.get_maximum_block_size() ),
   current_aslot( o.get_current_aslot() ),
   recent_slots_filled( o.get_recent_slots_filled() ),
   participation_count( o.get_participation_count() ),
   last_irreversible_block_num( db.get_last_irreversible_block_num()),
   vote_power_reserve_rate( o.get_vote_power_reserve_rate() ),
+  voting_mana_regeneration_seconds( o.get_voting_mana_regeneration_seconds() ),
   delegation_return_period( o.get_delegation_return_period() ),
   reverse_auction_seconds( o.get_reverse_auction_seconds() ),
   available_account_subsidies( o.get_available_account_subsidies() ),
-  hbd_stop_percent( o.get_hbd_stop_percent() ),
-  hbd_start_percent( o.get_hbd_start_percent() ),
+  pxs_stop_percent( o.get_pxs_stop_percent() ),
+  pxs_start_percent( o.get_pxs_start_percent() ),
   next_maintenance_time( o.get_next_maintenance_time() ),
   last_budget_time( o.get_last_budget_time() ),
   next_daily_maintenance_time( o.get_next_daily_maintenance_time() ),
@@ -209,21 +211,21 @@ api_account_object::api_account_object( const account_object& a, const database&
   can_vote( a.can_vote ),
   voting_manabar( a.voting_manabar ),
   downvote_manabar( a.downvote_manabar ),
-  balance( a.get_hive_balance().to_asset() ),
-  savings_balance( a.get_hive_savings().to_asset() ),
-  hbd_balance( a.get_hbd_balance().to_asset() ),
-  hbd_seconds( a.hbd_seconds ),
-  hbd_seconds_last_update( a.hbd_seconds_last_update ),
-  hbd_last_interest_payment( a.hbd_last_interest_payment ),
-  savings_hbd_balance( a.get_hbd_savings().to_asset() ),
-  savings_hbd_seconds( a.savings_hbd_seconds ),
-  savings_hbd_seconds_last_update( a.savings_hbd_seconds_last_update ),
-  savings_hbd_last_interest_payment( a.savings_hbd_last_interest_payment ),
+  balance( a.get_pixa_balance().to_asset() ),
+  savings_balance( a.get_pixa_savings().to_asset() ),
+  pxs_balance( a.get_pxs_balance().to_asset() ),
+  pxs_seconds( a.pxs_seconds ),
+  pxs_seconds_last_update( a.pxs_seconds_last_update ),
+  pxs_last_interest_payment( a.pxs_last_interest_payment ),
+  savings_pxs_balance( a.get_pxs_savings().to_asset() ),
+  savings_pxs_seconds( a.savings_pxs_seconds ),
+  savings_pxs_seconds_last_update( a.savings_pxs_seconds_last_update ),
+  savings_pxs_last_interest_payment( a.savings_pxs_last_interest_payment ),
   savings_withdraw_requests( a.savings_withdraw_requests ),
-  reward_hbd_balance( a.get_hbd_rewards().to_asset() ),
-  reward_hive_balance( a.get_hive_rewards().to_asset() ),
+  reward_pxs_balance( a.get_pxs_rewards().to_asset() ),
+  reward_pixa_balance( a.get_pixa_rewards().to_asset() ),
   reward_vesting_balance( a.get_vest_rewards().to_asset() ),
-  reward_vesting_hive( a.get_vest_rewards_as_hive().to_asset() ),
+  reward_vesting_pixa( a.get_vest_rewards_as_pixa().to_asset() ),
   curation_rewards( a.curation_rewards.amount ),
   posting_rewards( a.posting_rewards.amount ),
   vesting_shares( a.get_vesting().to_asset() ),
@@ -330,8 +332,8 @@ api_witness_object::api_witness_object( const witness_object& w, const database&
   pow_worker( w.pow_worker ),
   signing_key( w.signing_key ),
   props( w.props ),
-  hbd_exchange_rate( w.get_hbd_exchange_rate() ),
-  last_hbd_exchange_update( w.get_last_hbd_exchange_update() ),
+  pxs_exchange_rate( w.get_pxs_exchange_rate() ),
+  last_pxs_exchange_update( w.get_last_pxs_exchange_update() ),
   votes( w.votes ),
   virtual_last_update( w.virtual_last_update ),
   virtual_position( w.virtual_position ),
@@ -451,5 +453,55 @@ api_recurrent_transfer_object::api_recurrent_transfer_object( const recurrent_tr
   remaining_executions( o.remaining_executions ),
   pair_id( o.pair_id )
 {}
+
+// api_nft_object constructor
+api_nft_object::api_nft_object( const nft_object& o, const database& db ):
+  id( o.get_id() ),
+  author( db.get_account( o.get_creator() ).get_name() ),
+  permlink( to_string( o.get_permlink() ) ),
+  mint_time( o.get_mint_time() ),
+  editions( o.get_editions() ),
+  royalty( o.get_royalty() ),
+  license_size( o.get_license_size() ),
+  license_sha256( o.get_license_sha256() ),
+  reserve( o.get_reserve() ),
+  reserve_next( db.find_nft_reserve_copy( o ) ),
+  reserve_listed( o.is_reserve_listed( db.head_block_time() ) ),
+  reserve_price( o.get_reserve_price() ),
+  reserve_expiration( o.get_reserve_expiration() )
+{
+  nft_id = "@" + std::string( author ) + "/" + permlink + "/0";
+}
+
+// api_nft_edition_object constructor
+api_nft_edition_object::api_nft_edition_object( const nft_edition_object& o, const database& db ):
+  nft( o.get_nft() ),
+  edition( o.get_edition() ),
+  owner( db.get_account( o.get_owner() ).get_name() ),
+  acquired( o.get_acquired() ),
+  listed( o.is_listed( db.head_block_time() ) ),
+  price( o.get_price() ),
+  expiration( o.get_expiration() )
+{
+  const nft_object& minted = db.get< nft_object, by_id >( o.get_nft() );
+  author = db.get_account( minted.get_creator() ).get_name();
+  permlink = to_string( minted.get_permlink() );
+  nft_id = "@" + std::string( author ) + "/" + permlink + "/" + std::to_string( edition );
+  burned = owner == HIVE_NULL_ACCOUNT;
+}
+
+// api_nft_edition_object constructor for a copy without object: its creator's, unoffered, since the mint
+api_nft_edition_object::api_nft_edition_object( const nft_object& o, uint16_t _edition, const database& db ):
+  nft( o.get_id() ),
+  author( db.get_account( o.get_creator() ).get_name() ),
+  permlink( to_string( o.get_permlink() ) ),
+  edition( _edition ),
+  owner( author ),
+  acquired( o.get_mint_time() ),
+  listed( false ),
+  price( asset( 0, PXS_SYMBOL ) )
+{
+  nft_id = "@" + std::string( author ) + "/" + permlink + "/" + std::to_string( edition );
+}
 
 } } } // hive::plugins::database_api

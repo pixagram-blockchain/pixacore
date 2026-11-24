@@ -3,7 +3,7 @@
   "info": {
     "title": "Hive Wallet API",
     "version": "0.0.0-dev",
-    "description": "**Introduction to Hive Wallet API**\n\nThe Hive Wallet API provides a comprehensive interface for managing Hive blockchain wallets, including key management, account operations, and transaction signing. This wallet is designed to interact with the Hive blockchain through a high-bandwidth, low-latency connection.\n\n**Important Security Notes:**\n- The wallet stores private keys encrypted with a password\n- Always backup your wallet file and private keys securely\n- Keep your wallet locked when not in use\n- Never share your private keys or wallet password\n\n**API Protocol**\n\nAll API endpoints follow the JSON-RPC 2.0 protocol. Each request is transformed from a simple JSON object to the full JSON-RPC format.\n\n_Example:_\n\nA body of `info` with parameters `{}` is transformed to:\n```json\n{\"jsonrpc\":\"2.0\",\"method\":\"info\",\"id\":1,\"params\":{}}\n```\n\n**Key Features:**\n\n- **Wallet Management:** Create, lock, unlock, and manage wallet files with encrypted key storage\n- **Key Operations:** Import, export, and manage private keys with WIF format support\n- **Account Operations:** Create accounts, update authorities, and manage account properties\n- **Transaction Signing:** Sign and broadcast transactions to the Hive blockchain\n- **Vesting Operations:** Power up/down HIVE, delegate Hive Power, and manage vesting routes\n- **Transfer Operations:** Send HIVE/HBD, manage savings, and create recurrent transfers\n- **Content Operations:** Post, comment, and vote on blockchain content\n- **Witness Operations:** Manage witness nodes and publish price feeds\n- **Market Operations:** Create and manage limit orders on the internal market\n- **Proposal Operations:** Create and vote on decentralized fund proposals\n- **Resource Credits:** Delegate and manage resource credits for fee-less transactions\n\n**Wallet States:**\n\n- **New:** Wallet has just been created with no keys\n- **Locked:** Wallet is encrypted, keys are not accessible\n- **Unlocked:** Wallet is decrypted, operations can be performed\n\n**Authority Levels:**\n\nHive accounts have three authority levels:\n- **Owner:** Full control, can change all keys (use sparingly)\n- **Active:** Most operations including transfers and power operations\n- **Posting:** Content operations only (posts, comments, votes)\n\n**Broadcasting:**\n\nMost transaction methods include a `broadcast` parameter:\n- `true`: Sign and broadcast the transaction to the blockchain\n- `false`: Sign the transaction but don't broadcast (returns signed transaction)\n\n**Asset Format:**\n\nAssets are specified as strings with amount and symbol:\n- HIVE: `\"100.000 HIVE\"` (3 decimal places)\n- HBD: `\"50.000 HBD\"` (3 decimal places)\n- VESTS: `\"1000000000 VESTS\"` (6 decimal places)\n\n**Memo Encryption:**\n\nMemos starting with '#' are automatically encrypted using the recipient's memo key. Both sender and recipient memo private keys must be in the wallet to encrypt/decrypt.\n\n**Connection:**\n\nThe wallet connects to a Hive node via WebSocket. Default: `ws://localhost:8090`\n\n**Offline Mode:**\n\nThe wallet supports offline operation for signing transactions without network access."
+    "description": "**Introduction to Hive Wallet API**\n\nThe Hive Wallet API provides a comprehensive interface for managing Hive blockchain wallets, including key management, account operations, and transaction signing. This wallet is designed to interact with the Hive blockchain through a high-bandwidth, low-latency connection.\n\n**Important Security Notes:**\n- The wallet stores private keys encrypted with a password\n- Always backup your wallet file and private keys securely\n- Keep your wallet locked when not in use\n- Never share your private keys or wallet password\n\n**API Protocol**\n\nAll API endpoints follow the JSON-RPC 2.0 protocol. Each request is transformed from a simple JSON object to the full JSON-RPC format.\n\n_Example:_\n\nA body of `info` with parameters `{}` is transformed to:\n```json\n{\"jsonrpc\":\"2.0\",\"method\":\"info\",\"id\":1,\"params\":{}}\n```\n\n**Key Features:**\n\n- **Wallet Management:** Create, lock, unlock, and manage wallet files with encrypted key storage\n- **Key Operations:** Import, export, and manage private keys with WIF format support\n- **Account Operations:** Create accounts, update authorities, and manage account properties\n- **Transaction Signing:** Sign and broadcast transactions to the Hive blockchain\n- **Vesting Operations:** Power up/down HIVE, delegate Hive Power, and manage vesting routes\n- **Transfer Operations:** Send HIVE/PXS, manage savings, and create recurrent transfers\n- **Content Operations:** Post, comment, and vote on blockchain content\n- **Witness Operations:** Manage witness nodes and publish price feeds\n- **Market Operations:** Create and manage limit orders on the internal market\n- **Proposal Operations:** Create and vote on decentralized fund proposals\n- **Resource Credits:** Delegate and manage resource credits for fee-less transactions\n\n**Wallet States:**\n\n- **New:** Wallet has just been created with no keys\n- **Locked:** Wallet is encrypted, keys are not accessible\n- **Unlocked:** Wallet is decrypted, operations can be performed\n\n**Authority Levels:**\n\nHive accounts have three authority levels:\n- **Owner:** Full control, can change all keys (use sparingly)\n- **Active:** Most operations including transfers and power operations\n- **Posting:** Content operations only (posts, comments, votes)\n\n**Broadcasting:**\n\nMost transaction methods include a `broadcast` parameter:\n- `true`: Sign and broadcast the transaction to the blockchain\n- `false`: Sign the transaction but don't broadcast (returns signed transaction)\n\n**Asset Format:**\n\nAssets are specified as strings with amount and symbol:\n- HIVE: `\"100.000 HIVE\"` (3 decimal places)\n- PXS: `\"50.000 PXS\"` (3 decimal places)\n- VESTS: `\"1000000000 VESTS\"` (6 decimal places)\n\n**Memo Encryption:**\n\nMemos starting with '#' are automatically encrypted using the recipient's memo key. Both sender and recipient memo private keys must be in the wallet to encrypt/decrypt.\n\n**Connection:**\n\nThe wallet connects to a Hive node via WebSocket. Default: `ws://localhost:8090`\n\n**Offline Mode:**\n\nThe wallet supports offline operation for signing transactions without network access."
   },
   "servers": [
     {
@@ -38,7 +38,7 @@
     },
     {
       "name": "transfer_operations",
-      "description": "Transfer HIVE/HBD tokens, manage savings, and create recurrent transfers"
+      "description": "Transfer HIVE/PXS tokens, manage savings, and create recurrent transfers"
     },
     {
       "name": "escrow_operations",
@@ -46,7 +46,7 @@
     },
     {
       "name": "conversion_operations",
-      "description": "Convert between HBD and HIVE using blockchain conversion mechanisms"
+      "description": "Convert between PXS and HIVE using blockchain conversion mechanisms"
     },
     {
       "name": "witness_operations",
@@ -54,7 +54,7 @@
     },
     {
       "name": "market_operations",
-      "description": "Create and manage limit orders on the HIVE:HBD internal market"
+      "description": "Create and manage limit orders on the HIVE:PXS internal market"
     },
     {
       "name": "content_operations",
@@ -974,8 +974,8 @@
         "tags": [
           "query_operations"
         ],
-        "summary": "Get HBD conversion requests",
-        "description": "Returns all active HBD to HIVE conversion requests for an account.",
+        "summary": "Get PXS conversion requests",
+        "description": "Returns all active PXS to HIVE conversion requests for an account.",
         "operationId": "get_conversion_requests",
         "requestBody": {
           "required": true,
@@ -1021,7 +1021,7 @@
           "query_operations"
         ],
         "summary": "Get collateralized conversion requests",
-        "description": "Returns all active collateralized HIVE to HBD conversion requests for an account.",
+        "description": "Returns all active collateralized HIVE to PXS conversion requests for an account.",
         "operationId": "get_collateralized_conversion_requests",
         "requestBody": {
           "required": true,
@@ -1307,7 +1307,7 @@
           "account_creation"
         ],
         "summary": "Create funded account with keys",
-        "description": "Creates a new account with provided keys and an initial HIVE/HBD transfer.",
+        "description": "Creates a new account with provided keys and an initial HIVE/PXS transfer.",
         "operationId": "create_funded_account_with_keys",
         "requestBody": {
           "required": true,
@@ -1353,7 +1353,7 @@
                 ],
                 "minItems": 10,
                 "maxItems": 10,
-                "description": "Parameters: [creator, new_account_name, hive_amount, hbd_amount, json_meta, owner, active, posting, memo, broadcast]",
+                "description": "Parameters: [creator, new_account_name, pixa_amount, pxs_amount, json_meta, owner, active, posting, memo, broadcast]",
                 "example": [
                   "initminer",
                   "alice",
@@ -1428,7 +1428,7 @@
                 ],
                 "minItems": 6,
                 "maxItems": 6,
-                "description": "Parameters: [creator, hive_fee, delegated_vests, new_account_name, json_meta, broadcast]",
+                "description": "Parameters: [creator, pixa_fee, delegated_vests, new_account_name, json_meta, broadcast]",
                 "example": [
                   "initminer",
                   {
@@ -1515,7 +1515,7 @@
                 ],
                 "minItems": 10,
                 "maxItems": 10,
-                "description": "Parameters: [creator, hive_fee, delegated_vests, new_account_name, json_meta, owner, active, posting, memo, broadcast]",
+                "description": "Parameters: [creator, pixa_fee, delegated_vests, new_account_name, json_meta, owner, active, posting, memo, broadcast]",
                 "example": [
                   "initminer",
                   {
@@ -2208,7 +2208,7 @@
                       "nai": "@@000000021"
                     },
                     "maximum_block_size": 131072,
-                    "hbd_interest_rate": 1000
+                    "pxs_interest_rate": 1000
                   },
                   true
                 ]
@@ -2401,8 +2401,8 @@
         "tags": [
           "transfer_operations"
         ],
-        "summary": "Transfer HIVE or HBD (blocking)",
-        "description": "Transfers HIVE or HBD to another account. Memo starting with '#' will be encrypted.",
+        "summary": "Transfer HIVE or PXS (blocking)",
+        "description": "Transfers HIVE or PXS to another account. Memo starting with '#' will be encrypted.",
         "operationId": "transfer",
         "requestBody": {
           "required": true,
@@ -2464,8 +2464,8 @@
         "tags": [
           "transfer_operations"
         ],
-        "summary": "Transfer HIVE or HBD (non-blocking)",
-        "description": "Transfers HIVE or HBD without waiting for confirmation.",
+        "summary": "Transfer HIVE or PXS (non-blocking)",
+        "description": "Transfers HIVE or PXS without waiting for confirmation.",
         "operationId": "transfer_nonblocking",
         "requestBody": {
           "required": true,
@@ -2575,7 +2575,7 @@
                 ],
                 "minItems": 11,
                 "maxItems": 11,
-                "description": "Parameters: [from, to, agent, escrow_id, hbd_amount, hive_amount, fee, ratification_deadline, escrow_expiration, json_meta, broadcast]",
+                "description": "Parameters: [from, to, agent, escrow_id, pxs_amount, pixa_amount, fee, ratification_deadline, escrow_expiration, json_meta, broadcast]",
                 "example": [
                   "initminer",
                   "alice",
@@ -2794,7 +2794,7 @@
                 ],
                 "minItems": 9,
                 "maxItems": 9,
-                "description": "Parameters: [from, to, agent, who, receiver, escrow_id, hbd_amount, hive_amount, broadcast]",
+                "description": "Parameters: [from, to, agent, who, receiver, escrow_id, pxs_amount, pixa_amount, broadcast]",
                 "example": [
                   "initminer",
                   "alice",
@@ -3064,14 +3064,14 @@
         }
       }
     },
-    "convert_hbd": {
+    "convert_pxs": {
       "post": {
         "tags": [
           "conversion_operations"
         ],
-        "summary": "Convert HBD to HIVE",
-        "description": "Converts HBD to HIVE using the median price feed. Takes 3.5 days to complete.",
-        "operationId": "convert_hbd",
+        "summary": "Convert PXS to HIVE",
+        "description": "Converts PXS to HIVE using the median price feed. Takes 3.5 days to complete.",
+        "operationId": "convert_pxs",
         "requestBody": {
           "required": true,
           "content": {
@@ -3119,14 +3119,14 @@
         }
       }
     },
-    "convert_hive_with_collateral": {
+    "convert_pixa_with_collateral": {
       "post": {
         "tags": [
           "conversion_operations"
         ],
-        "summary": "Convert HIVE to HBD with collateral",
-        "description": "Converts HIVE to HBD instantly (with 5% extra collateral) plus delayed conversion. Collateral returns after 3.5 days.",
-        "operationId": "convert_hive_with_collateral",
+        "summary": "Convert HIVE to PXS with collateral",
+        "description": "Converts HIVE to PXS instantly (with 5% extra collateral) plus delayed conversion. Collateral returns after 3.5 days.",
+        "operationId": "convert_pixa_with_collateral",
         "requestBody": {
           "required": true,
           "content": {
@@ -3174,14 +3174,14 @@
         }
       }
     },
-    "estimate_hive_collateral": {
+    "estimate_pixa_collateral": {
       "post": {
         "tags": [
           "conversion_operations"
         ],
         "summary": "Estimate HIVE collateral needed",
-        "description": "Estimates the amount of HIVE collateral needed to get a specific amount of HBD.",
-        "operationId": "estimate_hive_collateral",
+        "description": "Estimates the amount of HIVE collateral needed to get a specific amount of PXS.",
+        "operationId": "estimate_pixa_collateral",
         "requestBody": {
           "required": true,
           "content": {
@@ -3195,7 +3195,7 @@
                 ],
                 "minItems": 1,
                 "maxItems": 1,
-                "description": "Parameters: [hbd_amount_to_get]",
+                "description": "Parameters: [pxs_amount_to_get]",
                 "example": [
                   {
                     "amount": "10000",
@@ -3227,7 +3227,7 @@
           "witness_operations"
         ],
         "summary": "Publish price feed",
-        "description": "Publishes a price feed for the HBD:HIVE exchange rate. Witnesses only.",
+        "description": "Publishes a price feed for the PXS:HIVE exchange rate. Witnesses only.",
         "operationId": "publish_feed",
         "requestBody": {
           "required": true,
@@ -3289,7 +3289,7 @@
           "market_operations"
         ],
         "summary": "Create limit order",
-        "description": "Creates a limit order on the internal HIVE:HBD market. Order ID must be unique per account.",
+        "description": "Creates a limit order on the internal HIVE:PXS market. Order ID must be unique per account.",
         "operationId": "create_order",
         "requestBody": {
           "required": true,
@@ -3776,7 +3776,7 @@
           "transfer_operations"
         ],
         "summary": "Transfer to savings",
-        "description": "Transfers HIVE or HBD to savings. Funds are immediately moved to savings.",
+        "description": "Transfers HIVE or PXS to savings. Funds are immediately moved to savings.",
         "operationId": "transfer_to_savings",
         "requestBody": {
           "required": true,
@@ -3839,7 +3839,7 @@
           "transfer_operations"
         ],
         "summary": "Transfer from savings",
-        "description": "Transfers HIVE or HBD from savings. Funds become available after 72 hours.",
+        "description": "Transfers HIVE or PXS from savings. Funds become available after 72 hours.",
         "operationId": "transfer_from_savings",
         "requestBody": {
           "required": true,
@@ -4104,7 +4104,7 @@
           "rewards_operations"
         ],
         "summary": "Claim reward balance",
-        "description": "Claims pending HIVE, HBD, and VESTS rewards from content curation and authoring.",
+        "description": "Claims pending HIVE, PXS, and VESTS rewards from content curation and authoring.",
         "operationId": "claim_reward_balance",
         "requestBody": {
           "required": true,
@@ -4131,7 +4131,7 @@
                 ],
                 "minItems": 5,
                 "maxItems": 5,
-                "description": "Parameters: [account, reward_hive, reward_hbd, reward_vests, broadcast]",
+                "description": "Parameters: [account, reward_pixa, reward_pxs, reward_vests, broadcast]",
                 "example": [
                   "alice",
                   {
@@ -5174,7 +5174,7 @@
                   "precision": 3,
                   "nai": "@@000000021"
                 },
-                "memo": "Here is 1 HBD"
+                "memo": "Here is 1 PXS"
               }
             ]
           },
@@ -5254,7 +5254,7 @@
             "type": "integer",
             "example": 65536
           },
-          "hbd_interest_rate": {
+          "pxs_interest_rate": {
             "type": "integer",
             "example": 1000
           }
@@ -5262,7 +5262,7 @@
         "required": [
           "account_creation_fee",
           "maximum_block_size",
-          "hbd_interest_rate"
+          "pxs_interest_rate"
         ]
       },
       "signed_transaction": {
@@ -5296,7 +5296,7 @@
                   "precision": 3,
                   "nai": "@@000000021"
                 },
-                "memo": "Here is 1 HBD"
+                "memo": "Here is 1 PXS"
               }
             ]
           },
@@ -5341,7 +5341,7 @@
                 "precision": 3,
                 "nai": "@@000000021"
               },
-              "memo": "Here is 1 HBD"
+              "memo": "Here is 1 PXS"
             }
           }
         },
@@ -5372,7 +5372,7 @@
               "precision": 3,
               "nai": "@@000000021"
             },
-            "memo": "Here is 1 HBD"
+            "memo": "Here is 1 PXS"
           }
         ]
       },
@@ -5480,7 +5480,7 @@
             },
             "amount": {
               "$ref": "#/components/schemas/hive_asset",
-              "example": "1000.000 HBD",
+              "example": "1000.000 PXS",
               "description": "Converted amount."
             }
         },
@@ -5539,15 +5539,15 @@
             "$ref": "#/components/schemas/hive_asset",
             "description": "Current supply of HIVE"
           },
-          "init_hbd_supply": {
+          "init_pxs_supply": {
             "$ref": "#/components/schemas/hive_asset",
-            "description": "Initial HBD supply"
+            "description": "Initial PXS supply"
           },
-          "current_hbd_supply": {
+          "current_pxs_supply": {
             "$ref": "#/components/schemas/hive_asset",
-            "description": "Current HBD supply"
+            "description": "Current PXS supply"
           },
-          "total_vesting_fund_hive": {
+          "total_vesting_fund_pixa": {
             "$ref": "#/components/schemas/hive_asset",
             "description": "Total HIVE in the vesting fund"
           },
@@ -5559,19 +5559,19 @@
             "$ref": "#/components/schemas/hive_asset",
             "description": "Pending rewarded vesting shares"
           },
-          "pending_rewarded_vesting_hive": {
+          "pending_rewarded_vesting_pixa": {
             "$ref": "#/components/schemas/hive_asset",
             "description": "Pending rewarded vesting HIVE"
           },
-          "hbd_interest_rate": {
+          "pxs_interest_rate": {
             "type": "integer",
             "example": 1000,
-            "description": "HBD interest rate in basis points (e.g., 1000 = 10%)"
+            "description": "PXS interest rate in basis points (e.g., 1000 = 10%)"
           },
-          "hbd_print_rate": {
+          "pxs_print_rate": {
             "type": "integer",
             "example": 10000,
-            "description": "HBD print rate"
+            "description": "PXS print rate"
           },
           "maximum_block_size": {
             "type": "integer",
@@ -5609,6 +5609,11 @@
             "example": 40,
             "description": "Vote power reserve rate"
           },
+          "voting_mana_regeneration_seconds": {
+            "type": "integer",
+            "example": 576000,
+            "description": "Seconds an empty voting bar takes to refill (432000 until hardfork 32, 576000 after)"
+          },
           "delegation_return_period": {
             "type": "integer",
             "example": 604800,
@@ -5624,15 +5629,15 @@
             "example": 1000,
             "description": "Available account subsidies"
           },
-          "hbd_stop_percent": {
+          "pxs_stop_percent": {
             "type": "integer",
             "example": 2000,
-            "description": "HBD stop percent threshold"
+            "description": "PXS stop percent threshold"
           },
-          "hbd_start_percent": {
+          "pxs_start_percent": {
             "type": "integer",
             "example": 1500,
-            "description": "HBD start percent threshold"
+            "description": "PXS start percent threshold"
           },
           "next_maintenance_time": {
             "type": "string",
@@ -5686,9 +5691,9 @@
             "example": "1.27.0",
             "description": "Current hardfork version (e.g., '1.27.0')"
           },
-          "median_hbd_price": {
+          "median_pxs_price": {
             "$ref": "#/components/schemas/price",
-            "description": "Median HBD price feed"
+            "description": "Median PXS price feed"
           },
           "account_creation_fee": {
             "$ref": "#/components/schemas/hive_asset",
@@ -5715,7 +5720,7 @@
           "participation",
           "witness_majority_version",
           "hardfork_version",
-          "median_hbd_price",
+          "median_pxs_price",
           "account_creation_fee"
         ]
       },

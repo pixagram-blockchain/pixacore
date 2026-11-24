@@ -50,6 +50,8 @@ namespace hive { namespace chain {
   class proposal_object;
   class proposal_vote_object;
   class recurrent_transfer_object;
+  class nft_object;
+  class nft_edition_object;
   class full_block_type;
   class full_transaction_type;
 
@@ -98,8 +100,8 @@ struct api_escrow_object
   account_name_type agent;
   time_point_sec    ratification_deadline;
   time_point_sec    escrow_expiration;
-  asset             hbd_balance;
-  asset             hive_balance;
+  asset             pxs_balance;
+  asset             pixa_balance;
   asset             pending_fee;
   bool              to_approved;
   bool              agent_approved;
@@ -201,25 +203,26 @@ struct api_dynamic_global_property_object
   uint32_t                        num_pow_witnesses                   = 0;
   asset                           virtual_supply;
   asset                           current_supply;
-  asset                           init_hbd_supply;
-  asset                           current_hbd_supply;
-  asset                           total_vesting_fund_hive;
+  asset                           init_pxs_supply;
+  asset                           current_pxs_supply;
+  asset                           total_vesting_fund_pixa;
   asset                           total_vesting_shares;
   asset                           pending_rewarded_vesting_shares;
-  asset                           pending_rewarded_vesting_hive;
-  uint16_t                        hbd_interest_rate                   = 0;
-  uint16_t                        hbd_print_rate                      = 0;
+  asset                           pending_rewarded_vesting_pixa;
+  uint16_t                        pxs_interest_rate                   = 0;
+  uint16_t                        pxs_print_rate                      = 0;
   uint32_t                        maximum_block_size                  = 0;
   uint64_t                        current_aslot                       = 0;
   fc::uint128_t                   recent_slots_filled                 = 0;
   uint8_t                         participation_count                 = 0;
   uint32_t                        last_irreversible_block_num         = 0;
   uint32_t                        vote_power_reserve_rate             = 0;
+  uint32_t                        voting_mana_regeneration_seconds    = 0; //refill time of the voting bar (HF32)
   uint32_t                        delegation_return_period            = 0;
   uint64_t                        reverse_auction_seconds             = 0;
   int64_t                         available_account_subsidies         = 0;
-  uint16_t                        hbd_stop_percent                    = 0;
-  uint16_t                        hbd_start_percent                   = 0;
+  uint16_t                        pxs_stop_percent                    = 0;
+  uint16_t                        pxs_start_percent                   = 0;
   time_point_sec                  next_maintenance_time;
   time_point_sec                  last_budget_time;
   time_point_sec                  next_daily_maintenance_time;
@@ -268,7 +271,7 @@ struct api_commment_cashout_info
   time_point_sec cashout_time;
   time_point_sec max_cashout_time;
 
-  uint16_t       percent_hbd = 0;
+  uint16_t       percent_pxs = 0;
   uint16_t       reward_weight = 0;
   bool           allow_replies = false;
   bool           allow_votes = false;
@@ -312,22 +315,22 @@ struct api_account_object
   asset             balance;
   asset             savings_balance;
 
-  asset             hbd_balance;
-  uint128_t         hbd_seconds = 0;
-  time_point_sec    hbd_seconds_last_update;
-  time_point_sec    hbd_last_interest_payment;
+  asset             pxs_balance;
+  uint128_t         pxs_seconds = 0;
+  time_point_sec    pxs_seconds_last_update;
+  time_point_sec    pxs_last_interest_payment;
 
-  asset             savings_hbd_balance;
-  uint128_t         savings_hbd_seconds = 0;
-  time_point_sec    savings_hbd_seconds_last_update;
-  time_point_sec    savings_hbd_last_interest_payment;
+  asset             savings_pxs_balance;
+  uint128_t         savings_pxs_seconds = 0;
+  time_point_sec    savings_pxs_seconds_last_update;
+  time_point_sec    savings_pxs_last_interest_payment;
 
   uint8_t           savings_withdraw_requests = 0;
 
-  asset             reward_hbd_balance;
-  asset             reward_hive_balance;
+  asset             reward_pxs_balance;
+  asset             reward_pixa_balance;
   asset             reward_vesting_balance;
-  asset             reward_vesting_hive;
+  asset             reward_vesting_pixa;
 
   share_type        curation_rewards;
   share_type        posting_rewards;
@@ -434,8 +437,8 @@ struct api_witness_object
   uint64_t          pow_worker = 0;
   public_key_type   signing_key;
   chain_properties  props;
-  price             hbd_exchange_rate;
-  time_point_sec    last_hbd_exchange_update;
+  price             pxs_exchange_rate;
+  time_point_sec    last_pxs_exchange_update;
   share_type        votes;
   fc::uint128       virtual_last_update = 0;
   fc::uint128       virtual_position = 0;
@@ -454,9 +457,9 @@ struct future_chain_properties
 
   bool fill( const chain_properties& active, const chain_properties& future );
 
-  fc::optional<HIVE_asset> account_creation_fee;
+  fc::optional<PIXA_asset> account_creation_fee;
   fc::optional<uint32_t>   maximum_block_size;
-  fc::optional<uint16_t>   hbd_interest_rate;
+  fc::optional<uint16_t>   pxs_interest_rate;
   fc::optional<int32_t>    account_subsidy_budget;
   fc::optional<uint32_t>   account_subsidy_decay;
 };
@@ -602,12 +605,56 @@ struct api_recurrent_transfer_object
 };
 
 
+/// A minted post: the terms fixed at mint, which never change, and the reserve of its creator.
+struct api_nft_object
+{
+  api_nft_object() = default;
+  api_nft_object( const nft_object& o, const database& db );
+
+  nft_id_type       id;
+  string            nft_id; //"@author/permlink/0"
+  account_name_type author; //creator of the NFT (author of the minted post)
+  string            permlink;
+  time_point_sec    mint_time;
+  uint16_t          editions = 0; //number of copies, numbered from 1
+  uint16_t          royalty = 0; //basis points of a sale price paid to the author
+  uint32_t          license_size = 0; //bytes of the license text, which the mint operation carries
+  fc::sha256        license_sha256; //SHA-256 of that text
+  uint16_t          reserve = 0; //copies still with the author since the mint, without an offer of their own
+  uint16_t          reserve_next = 0; //the copy a buyer of copy 0 gets now; 0 when the reserve is empty
+  bool              reserve_listed = false; //true when copy 0 can be bought at head block time
+  asset             reserve_price; //the author's price for one copy of the reserve; meaningful only when listed
+  time_point_sec    reserve_expiration; //the reserve offer ends at this time; meaningful only when listed
+};
+
+/// One copy of a minted post: who owns it now and whether it can be bought.
+struct api_nft_edition_object
+{
+  api_nft_edition_object() = default;
+  api_nft_edition_object( const nft_edition_object& o, const database& db );
+  /// a copy that has no object: never offered nor moved, so still its creator's since the mint
+  api_nft_edition_object( const nft_object& nft, uint16_t edition, const database& db );
+
+  string            nft_id; //"@author/permlink/N"
+  nft_id_type       nft;
+  account_name_type author;
+  string            permlink;
+  uint16_t          edition = 0;
+  account_name_type owner; //"null" once the copy is burned
+  bool              burned = false; //the copy was given to the null account
+  time_point_sec    acquired; //when the owner got the edition
+  bool              listed = false; //true when it can be bought at head block time
+  asset             price; //asking price; meaningful only when listed
+  time_point_sec    expiration; //the offer ends at this time; meaningful only when listed
+};
+
+
 struct order
 {
   price                order_price;
-  double               real_price; // dollars per HIVE
-  share_type           hive;
-  share_type           hbd;
+  double               real_price; // dollars per PIXA
+  share_type           pixa;
+  share_type           pxs;
   fc::time_point_sec   created;
 };
 
@@ -637,7 +684,7 @@ FC_REFLECT(hive::plugins::database_api::api_commment_cashout_info,
   (cashout_time)
   (max_cashout_time)
 
-  (percent_hbd)
+  (percent_pxs)
   (reward_weight)
   (allow_replies)
   (allow_votes)
@@ -657,7 +704,7 @@ FC_REFLECT( hive::plugins::database_api::api_witness_vote_object,
 
 FC_REFLECT( hive::plugins::database_api::api_escrow_object,
           (id)(escrow_id)(from)(to)(agent)(ratification_deadline)(escrow_expiration)
-          (hbd_balance)(hive_balance)(pending_fee)(to_approved)(agent_approved)(disputed)
+          (pxs_balance)(pixa_balance)(pending_fee)(to_approved)(agent_approved)(disputed)
         )
 
 FC_REFLECT( hive::plugins::database_api::api_withdraw_vesting_route_object,
@@ -690,12 +737,12 @@ FC_REFLECT( hive::plugins::database_api::api_limit_order_object,
 
 FC_REFLECT( hive::plugins::database_api::api_dynamic_global_property_object,
           (id)(head_block_number)(head_block_id)(time)(current_witness)(total_pow)
-          (num_pow_witnesses)(virtual_supply)(current_supply)(init_hbd_supply)(current_hbd_supply)
-          (total_vesting_fund_hive)(total_vesting_shares)(pending_rewarded_vesting_shares)(pending_rewarded_vesting_hive)
-          (hbd_interest_rate)(hbd_print_rate)(maximum_block_size)
+          (num_pow_witnesses)(virtual_supply)(current_supply)(init_pxs_supply)(current_pxs_supply)
+          (total_vesting_fund_pixa)(total_vesting_shares)(pending_rewarded_vesting_shares)(pending_rewarded_vesting_pixa)
+          (pxs_interest_rate)(pxs_print_rate)(maximum_block_size)
           (current_aslot)(recent_slots_filled)(participation_count)(last_irreversible_block_num)
-          (vote_power_reserve_rate)(delegation_return_period)(reverse_auction_seconds)
-          (available_account_subsidies)(hbd_stop_percent)(hbd_start_percent)(next_maintenance_time)
+          (vote_power_reserve_rate)(voting_mana_regeneration_seconds)(delegation_return_period)(reverse_auction_seconds)
+          (available_account_subsidies)(pxs_stop_percent)(pxs_start_percent)(next_maintenance_time)
           (last_budget_time)(next_daily_maintenance_time)(content_reward_percent)(vesting_reward_percent)(proposal_fund_percent)
           (dhf_interval_ledger)(downvote_pool_percent)(current_remove_threshold)(early_voting_seconds)(mid_voting_seconds)
           (max_consecutive_recurrent_transfer_failures)(max_recurrent_transfer_end_date)(min_recurrent_transfers_recurrence)
@@ -713,9 +760,9 @@ FC_REFLECT( hive::plugins::database_api::api_account_object,
           (comment_count)(lifetime_vote_count)(post_count)(can_vote)(voting_manabar)(downvote_manabar)
           (balance)
           (savings_balance)
-          (hbd_balance)(hbd_seconds)(hbd_seconds_last_update)(hbd_last_interest_payment)
-          (savings_hbd_balance)(savings_hbd_seconds)(savings_hbd_seconds_last_update)(savings_hbd_last_interest_payment)(savings_withdraw_requests)
-          (reward_hbd_balance)(reward_hive_balance)(reward_vesting_balance)(reward_vesting_hive)
+          (pxs_balance)(pxs_seconds)(pxs_seconds_last_update)(pxs_last_interest_payment)
+          (savings_pxs_balance)(savings_pxs_seconds)(savings_pxs_seconds_last_update)(savings_pxs_last_interest_payment)(savings_withdraw_requests)
+          (reward_pxs_balance)(reward_pixa_balance)(reward_vesting_balance)(reward_vesting_pixa)
           (vesting_shares)(delegated_vesting_shares)(received_vesting_shares)(vesting_withdraw_rate)(post_voting_power)(next_vesting_withdrawal)(withdrawn)(to_withdraw)(withdraw_routes)
           (pending_transfers)(curation_rewards)
           (posting_rewards)
@@ -767,7 +814,7 @@ FC_REFLECT( hive::plugins::database_api::api_witness_object,
           (url)(votes)(virtual_last_update)(virtual_position)(virtual_scheduled_time)(total_missed)
           (last_aslot)(last_confirmed_block_num)(pow_worker)(signing_key)
           (props)
-          (hbd_exchange_rate)(last_hbd_exchange_update)
+          (pxs_exchange_rate)(last_pxs_exchange_update)
           (last_work)
           (running_version)
           (hardfork_version_vote)(hardfork_time_vote)
@@ -777,7 +824,7 @@ FC_REFLECT( hive::plugins::database_api::api_witness_object,
 FC_REFLECT( hive::plugins::database_api::future_chain_properties,
           (account_creation_fee)
           (maximum_block_size)
-          (hbd_interest_rate)
+          (pxs_interest_rate)
           (account_subsidy_budget)
           (account_subsidy_decay)
         )
@@ -865,7 +912,14 @@ FC_REFLECT( hive::plugins::database_api::api_proposal_vote_object,
         (proposal)
         )
 
-FC_REFLECT( hive::plugins::database_api::order, (order_price)(real_price)(hive)(hbd)(created) );
+FC_REFLECT( hive::plugins::database_api::order, (order_price)(real_price)(pixa)(pxs)(created) );
 
 FC_REFLECT( hive::plugins::database_api::order_book, (asks)(bids) );
 FC_REFLECT(hive::plugins::database_api::api_recurrent_transfer_object, (id)(trigger_date)(from)(to)(amount)(memo)(recurrence)(consecutive_failures)(remaining_executions)(pair_id))
+
+FC_REFLECT( hive::plugins::database_api::api_nft_object,
+          (id)(nft_id)(author)(permlink)(mint_time)(editions)(royalty)(license_size)(license_sha256)
+          (reserve)(reserve_next)(reserve_listed)(reserve_price)(reserve_expiration) )
+
+FC_REFLECT( hive::plugins::database_api::api_nft_edition_object,
+          (nft_id)(nft)(author)(permlink)(edition)(owner)(burned)(acquired)(listed)(price)(expiration) )

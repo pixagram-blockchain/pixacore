@@ -19,19 +19,19 @@ namespace hive { namespace chain { namespace util {
  * treasury receives the exact share on average. It needs no stored remainder and depends only on
  * the block number, so every node computes the same amount.
  */
-inline protocol::HBD_asset dhf_funding_without_truncation( const protocol::HIVE_asset& funds,
-  const protocol::HBD_price& median, uint32_t block_num )
+inline protocol::PXS_asset dhf_funding_without_truncation( const protocol::PIXA_asset& funds,
+  const protocol::PXS_price& median, uint32_t block_num )
 {
   if( funds.get_amount() <= 0 || median.is_null() )
-    return protocol::HBD_asset( 0 );
+    return protocol::PXS_asset( 0 );
 
-  // HBD_price is PXS (base) per PIXA (quote): PIXA -> PXS multiplies by base and divides by quote.
+  // PXS_price is PXS (base) per PIXA (quote): PIXA -> PXS multiplies by base and divides by quote.
   const fc::uint128_t pxs_side  = median.get_base().get_amount();
   const fc::uint128_t pixa_side = median.get_quote().get_amount();
   const fc::uint128_t per_block = fc::uint128_t( funds.get_amount() ) * pxs_side; // milli-PXS * pixa_side
   const fc::uint128_t n = block_num;
   const fc::uint128_t amount = ( ( n + 1 ) * per_block ) / pixa_side - ( n * per_block ) / pixa_side;
-  return protocol::HBD_asset( fc::uint128_to_uint64( amount ) );
+  return protocol::PXS_asset( fc::uint128_to_uint64( amount ) );
 }
 
 } } } // hive::chain::util

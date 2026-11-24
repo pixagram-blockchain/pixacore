@@ -11,10 +11,10 @@
 
 namespace hive { namespace protocol {
 
-class legacy_hive_asset_symbol_type
+class legacy_pixa_asset_symbol_type
 {
   public:
-    legacy_hive_asset_symbol_type() {}
+    legacy_pixa_asset_symbol_type() {}
 
     bool is_canon()const
     {   return ( ser == OBSOLETE_SYMBOL_SER );    }
@@ -22,36 +22,36 @@ class legacy_hive_asset_symbol_type
     uint64_t ser = OBSOLETE_SYMBOL_SER;
 };
 
-struct legacy_hive_asset
+struct legacy_pixa_asset
 {
   public:
-    legacy_hive_asset() {}
+    legacy_pixa_asset() {}
 
     template< bool force_canon >
     asset to_asset()const
     {
       if( force_canon )
       {
-        HIVE_PROTOCOL_ASSET_ASSERT( symbol.is_canon(), "Must use canonical HIVE symbol serialization", ("subject", symbol.ser) );
+        HIVE_PROTOCOL_ASSET_ASSERT( symbol.is_canon(), "Must use canonical PIXA symbol serialization", ("subject", symbol.ser) );
       }
-      return asset( amount, HIVE_SYMBOL );
+      return asset( amount, PIXA_SYMBOL );
     }
 
-    static legacy_hive_asset from_amount( share_type amount )
+    static legacy_pixa_asset from_amount( share_type amount )
     {
-      legacy_hive_asset leg;
+      legacy_pixa_asset leg;
       leg.amount = amount;
       return leg;
     }
 
-    static legacy_hive_asset from_asset( const asset& a )
+    static legacy_pixa_asset from_asset( const asset& a )
     {
-      validate_asset_type(a, HIVE_SYMBOL, "conversion from asset to legacy_hive_asset failed", a);
+      validate_asset_type(a, PIXA_SYMBOL, "conversion from asset to legacy_pixa_asset failed", a);
       return from_amount( a.amount );
     }
 
     share_type                       amount;
-    legacy_hive_asset_symbol_type   symbol;
+    legacy_pixa_asset_symbol_type   symbol;
 };
 
 } }
@@ -59,7 +59,7 @@ struct legacy_hive_asset
 namespace fc { namespace raw {
 
 template< typename Stream >
-inline void pack( Stream& s, const hive::protocol::legacy_hive_asset_symbol_type& sym )
+inline void pack( Stream& s, const hive::protocol::legacy_pixa_asset_symbol_type& sym )
 {
   if( sym.ser == OBSOLETE_SYMBOL_LEGACY_SER_1 ||
       sym.ser == OBSOLETE_SYMBOL_LEGACY_SER_2 ||
@@ -77,24 +77,24 @@ inline void pack( Stream& s, const hive::protocol::legacy_hive_asset_symbol_type
   if( hive::protocol::serialization_mode_controller::get_current_pack() == hive::protocol::pack_type::legacy )
     pack( s, sym.ser );
   else
-    pack( s, HIVE_ASSET_NUM_HIVE );
+    pack( s, HIVE_ASSET_NUM_PIXA );
 }
 
 template< typename Stream >
-inline void unpack( Stream& s, hive::protocol::legacy_hive_asset_symbol_type& sym, uint32_t, bool )
+inline void unpack( Stream& s, hive::protocol::legacy_pixa_asset_symbol_type& sym, uint32_t, bool )
 {
-  //  994240:        "account_creation_fee": "0.1 HIVE"
-  // 1021529:        "account_creation_fee": "10.0 HIVE"
-  // 3143833:        "account_creation_fee": "3.00000 HIVE"
-  // 3208405:        "account_creation_fee": "2.00000 HIVE"
-  // 3695672:        "account_creation_fee": "3.00 HIVE"
+  //  994240:        "account_creation_fee": "0.1 PIXA"
+  // 1021529:        "account_creation_fee": "10.0 PIXA"
+  // 3143833:        "account_creation_fee": "3.00000 PIXA"
+  // 3208405:        "account_creation_fee": "2.00000 PIXA"
+  // 3695672:        "account_creation_fee": "3.00 PIXA"
   // 4338089:        "account_creation_fee": "0.001 0.001"
   // 4626205:        "account_creation_fee": "6.000 6.000"
   // 4632595:        "account_creation_fee": "6.000 6.000"
   uint64_t ser = 0;
   s.read( (char*) &ser, 4 );
 
-  if( ser == HIVE_ASSET_NUM_HIVE )
+  if( ser == HIVE_ASSET_NUM_PIXA )
   {
     sym.ser = OBSOLETE_SYMBOL_SER;
     return;
@@ -117,30 +117,30 @@ inline void unpack( Stream& s, hive::protocol::legacy_hive_asset_symbol_type& sy
 
 } // fc::raw
 
-inline void to_variant( const hive::protocol::legacy_hive_asset& leg, fc::variant& v )
+inline void to_variant( const hive::protocol::legacy_pixa_asset& leg, fc::variant& v )
 {
   to_variant( leg.to_asset<false>(), v );
 }
 
-inline void from_variant( const fc::variant& v, hive::protocol::legacy_hive_asset& leg )
+inline void from_variant( const fc::variant& v, hive::protocol::legacy_pixa_asset& leg )
 {
   hive::protocol::asset a;
   from_variant( v, a );
-  leg = hive::protocol::legacy_hive_asset::from_asset( a );
+  leg = hive::protocol::legacy_pixa_asset::from_asset( a );
 }
 
 template<>
-struct get_typename< hive::protocol::legacy_hive_asset_symbol_type >
+struct get_typename< hive::protocol::legacy_pixa_asset_symbol_type >
 {
   static const char* name()
   {
-    return "hive::protocol::legacy_hive_asset_symbol_type";
+    return "hive::protocol::legacy_pixa_asset_symbol_type";
   }
 };
 
 } // fc
 
-FC_REFLECT( hive::protocol::legacy_hive_asset,
+FC_REFLECT( hive::protocol::legacy_pixa_asset,
   (amount)
   (symbol)
   )

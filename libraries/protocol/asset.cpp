@@ -141,16 +141,16 @@ uint32_t asset_symbol_type::asset_num_from_nai( uint32_t nai, uint8_t decimal_pl
 
   switch( nai_data_digits )
   {
-    case HIVE_NAI_HIVE:
-      HIVE_PROTOCOL_ASSET_ASSERT( decimal_places == HIVE_PRECISION_HIVE, "Invalid decimal places in HIVE asset",
-        ("subject", decimal_places)("expected", HIVE_PRECISION_HIVE)(nai)
+    case HIVE_NAI_PIXA:
+      HIVE_PROTOCOL_ASSET_ASSERT( decimal_places == HIVE_PRECISION_PIXA, "Invalid decimal places in PIXA asset",
+        ("subject", decimal_places)("expected", HIVE_PRECISION_PIXA)(nai)
       );
-      return HIVE_ASSET_NUM_HIVE;
-    case HIVE_NAI_HBD:
-      HIVE_PROTOCOL_ASSET_ASSERT( decimal_places == HIVE_PRECISION_HBD, "Invalid decimal places in HBD asset",
-        ("subject", decimal_places)("expected", HIVE_PRECISION_HBD)(nai)
+      return HIVE_ASSET_NUM_PIXA;
+    case HIVE_NAI_PXS:
+      HIVE_PROTOCOL_ASSET_ASSERT( decimal_places == HIVE_PRECISION_PXS, "Invalid decimal places in PXS asset",
+        ("subject", decimal_places)("expected", HIVE_PRECISION_PXS)(nai)
       );
-      return HIVE_ASSET_NUM_HBD;
+      return HIVE_ASSET_NUM_PXS;
     case HIVE_NAI_VESTS:
       HIVE_PROTOCOL_ASSET_ASSERT( decimal_places == HIVE_PRECISION_VESTS, "Invalid decimal places in VESTS asset",
         ("subject", decimal_places)("expected", HIVE_PRECISION_VESTS)(nai)
@@ -171,11 +171,11 @@ uint32_t asset_symbol_type::to_nai()const
   // Can be replaced with some clever bitshifting
   switch( asset_num )
   {
-    case HIVE_ASSET_NUM_HIVE:
-      nai_data_digits = HIVE_NAI_HIVE;
+    case HIVE_ASSET_NUM_PIXA:
+      nai_data_digits = HIVE_NAI_PIXA;
       break;
-    case HIVE_ASSET_NUM_HBD:
-      nai_data_digits = HIVE_NAI_HBD;
+    case HIVE_ASSET_NUM_PXS:
+      nai_data_digits = HIVE_NAI_PXS;
       break;
     case HIVE_ASSET_NUM_VESTS:
       nai_data_digits = HIVE_NAI_VESTS;
@@ -199,8 +199,8 @@ bool asset_symbol_type::is_vesting() const
     }
     else
     {
-      HIVE_PROTOCOL_ASSET_ASSERT( asset_num == HIVE_ASSET_NUM_HIVE || asset_num == HIVE_ASSET_NUM_HBD,
-        "Unknown asset symbol", ("subject", asset_num)(HIVE_ASSET_NUM_HIVE)(HIVE_ASSET_NUM_HBD) 
+      HIVE_PROTOCOL_ASSET_ASSERT( asset_num == HIVE_ASSET_NUM_PIXA || asset_num == HIVE_ASSET_NUM_PXS,
+        "Unknown asset symbol", ("subject", asset_num)(HIVE_ASSET_NUM_PIXA)(HIVE_ASSET_NUM_PXS) 
       );
       return false;
     }
@@ -218,18 +218,18 @@ asset_symbol_type asset_symbol_type::get_paired_symbol() const
 {
   if( space() == legacy_space )
   {
-    if( asset_num == HIVE_ASSET_NUM_HIVE )
+    if( asset_num == HIVE_ASSET_NUM_PIXA )
     {
       return from_asset_num( HIVE_ASSET_NUM_VESTS );
     }
-    else if( asset_num == HIVE_ASSET_NUM_HBD )
+    else if( asset_num == HIVE_ASSET_NUM_PXS )
     {
       return *this;
     }
     else
     {
       HIVE_PROTOCOL_ASSET_ASSERT( asset_num == HIVE_ASSET_NUM_VESTS, "Unknown asset symbol, should be VESTS", ("subject", asset_num)(HIVE_ASSET_NUM_VESTS) );
-      return from_asset_num( HIVE_ASSET_NUM_HIVE );
+      return from_asset_num( HIVE_ASSET_NUM_PIXA );
     }
   }
   else
@@ -247,8 +247,8 @@ asset_symbol_type::asset_symbol_space asset_symbol_type::space()const
   asset_symbol_type::asset_symbol_space s = legacy_space;
   switch( asset_num )
   {
-    case HIVE_ASSET_NUM_HIVE:
-    case HIVE_ASSET_NUM_HBD:
+    case HIVE_ASSET_NUM_PIXA:
+    case HIVE_ASSET_NUM_PXS:
     case HIVE_ASSET_NUM_VESTS:
       s = legacy_space;
       break;
@@ -262,8 +262,8 @@ void asset_symbol_type::validate()const
 {
   switch( asset_num )
   {
-    case HIVE_ASSET_NUM_HIVE:
-    case HIVE_ASSET_NUM_HBD:
+    case HIVE_ASSET_NUM_PIXA:
+    case HIVE_ASSET_NUM_PXS:
     case HIVE_ASSET_NUM_VESTS:
       break;
     default:
@@ -417,9 +417,9 @@ tiny_asset< _QUOTE_SYMBOL > multiply_with_fee( const tiny_asset< _BASE_SYMBOL >&
 }
 
 // Explicit instantiations for type combinations used in the codebase
-// (collateralized conversions: HBD<->HIVE with fee applied to HIVE)
-template HIVE_asset multiply_with_fee< HIVE_ASSET_NUM_HIVE >( const HBD_asset&, const HBD_price&, uint16_t );
-template HBD_asset multiply_with_fee< HIVE_ASSET_NUM_HIVE >( const HIVE_asset&, const HBD_price&, uint16_t );
+// (collateralized conversions: PXS<->PIXA with fee applied to PIXA)
+template PIXA_asset multiply_with_fee< HIVE_ASSET_NUM_PIXA >( const PXS_asset&, const PXS_price&, uint16_t );
+template PXS_asset multiply_with_fee< HIVE_ASSET_NUM_PIXA >( const PIXA_asset&, const PXS_price&, uint16_t );
 
 uint32_t string_to_asset_num( const char* p, uint8_t decimals )
 {
@@ -461,15 +461,15 @@ uint32_t string_to_asset_num( const char* p, uint8_t decimals )
       }
       switch( name_u64 )
       {
-        // OBSOLETE_SYMBOL_U64 / OBD_SYMBOL_U64 are aliases of HIVE_SYMBOL_U64 /
-        // HBD_SYMBOL_U64 on both testnet and mainnet; no separate case needed.
-        case HIVE_SYMBOL_U64:
-          HIVE_PROTOCOL_ASSET_ASSERT( decimals == 3 && "HIVE", "Incorrect decimal places for HIVE asset", (decimals)("subject",  p) );
-          asset_num = HIVE_ASSET_NUM_HIVE;
+        // OBSOLETE_SYMBOL_U64 / OBD_SYMBOL_U64 are aliases of PIXA_SYMBOL_U64 /
+        // PXS_SYMBOL_U64 on both testnet and mainnet; no separate case needed.
+        case PIXA_SYMBOL_U64:
+          HIVE_PROTOCOL_ASSET_ASSERT( decimals == 3 && "PIXA", "Incorrect decimal places for PIXA asset", (decimals)("subject",  p) );
+          asset_num = HIVE_ASSET_NUM_PIXA;
           break;
-        case HBD_SYMBOL_U64:
-          HIVE_PROTOCOL_ASSET_ASSERT( decimals == 3 && "HBD", "Incorrect decimal places for HBD asset", (decimals)("subject",  p) );
-          asset_num = HIVE_ASSET_NUM_HBD;
+        case PXS_SYMBOL_U64:
+          HIVE_PROTOCOL_ASSET_ASSERT( decimals == 3 && "PXS", "Incorrect decimal places for PXS asset", (decimals)("subject",  p) );
+          asset_num = HIVE_ASSET_NUM_PXS;
           break;
         case VESTS_SYMBOL_U64:
           HIVE_PROTOCOL_ASSET_ASSERT( decimals == 6, "Incorrect decimal places for VESTS asset", (decimals)("subject",  p) );
@@ -507,14 +507,14 @@ std::string legacy_asset::asset_num_to_string() const
   switch( symbol.asset_num )
   {
 #ifdef IS_TEST_NET
-    case HIVE_ASSET_NUM_HIVE:
+    case HIVE_ASSET_NUM_PIXA:
       return "TESTS";
-    case HIVE_ASSET_NUM_HBD:
+    case HIVE_ASSET_NUM_PXS:
       return "TBD";
 #else
-    case HIVE_ASSET_NUM_HIVE:
+    case HIVE_ASSET_NUM_PIXA:
       return "PIXA";
-    case HIVE_ASSET_NUM_HBD:
+    case HIVE_ASSET_NUM_PXS:
       return "PXS";
 #endif
     case HIVE_ASSET_NUM_VESTS:
@@ -579,7 +579,7 @@ legacy_asset legacy_asset::from_string( const string& from )
 
       int64_t prec = precision( result.symbol );
 
-      //Max amount = 9223372036854775.807 HIVE/HBD
+      //Max amount = 9223372036854775.807 PIXA/PXS
       //`inpart` * `prec` can cause overflow, better is to emulate multiplication using additional zeros
       auto _prec = std::to_string( prec );
       if( !_prec.empty() )

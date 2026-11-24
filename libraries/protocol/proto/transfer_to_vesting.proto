@@ -21,6 +21,6 @@ message transfer_to_vesting {
   // @param {string} to_account - The account the funds are going to. If null, then the same as 'from_account'.
   required string to_account = 2 [json_name = "to"];
 
-  // @param {asset} amount - Must be HIVE, amount > 0.
+  // @param {asset} amount - Must be PIXA, amount > 0.
   required asset  amount = 3;
 }

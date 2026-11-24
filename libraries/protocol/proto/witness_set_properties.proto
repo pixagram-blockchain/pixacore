@@ -17,7 +17,7 @@ message witness_set_properties {
 
   // @param {map<string, string>} props - There are the following properties available in the {props}: 
   //                                      account_creation_fee, account_subsidy_budget, account_subsidy_decay,
-  //                                      maximum_block_size, hbd_interest_rate. hbd_exchange_rate, url and new_signing_key.
+  //                                      maximum_block_size, pxs_interest_rate. pxs_exchange_rate, url and new_signing_key.
   map<string, string>        props = 2;
 
   // @param {future_extensions} extensions

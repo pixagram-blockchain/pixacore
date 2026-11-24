@@ -11,17 +11,17 @@ package hive.protocol.buffers;
  * @see comment_benefactor_reward_operation
  */
 message author_reward {
-  // @param {string} author - author of the comment (receiver of hbd_payout, hive_payout, vesting_payout)
+  // @param {string} author - author of the comment (receiver of pxs_payout, pixa_payout, vesting_payout)
   required string author = 1;
 
   // @param {string} permlink - permlink of the comment
   required string permlink = 2;
 
-  // @param {asset} hbd_payout - (HBD) part of reward 
-  required asset  hbd_payout = 3 [json_name = "hbd_payout"];
+  // @param {asset} pxs_payout - (PXS) part of reward 
+  required asset  pxs_payout = 3 [json_name = "pxs_payout"];
 
-  // @param {asset} hive_payout - (HIVE) part of reward
-  required asset  hive_payout = 4 [json_name = "hive_payout"];
+  // @param {asset} pixa_payout - (PIXA) part of reward
+  required asset  pixa_payout = 4 [json_name = "pixa_payout"];
 
   // @param {asset} vesting_payout - (VESTS) part of reward
   required asset  vesting_payout = 5 [json_name = "vesting_payout"];

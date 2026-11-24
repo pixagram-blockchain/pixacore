@@ -8,15 +8,19 @@ namespace hive { namespace protocol {
   template< uint32_t _SYMBOL >
   struct tiny_asset;
 
-  using HBD_asset = tiny_asset< HIVE_ASSET_NUM_HBD >;
-  using HIVE_asset = tiny_asset< HIVE_ASSET_NUM_HIVE >;
+  using PXS_asset = tiny_asset< HIVE_ASSET_NUM_PXS >;
+  using PIXA_asset = tiny_asset< HIVE_ASSET_NUM_PIXA >;
   using VEST_asset = tiny_asset< HIVE_ASSET_NUM_VESTS >;
+
+  // Hive's names of the two types above, kept for code built on the node (HAF's sql_serializer)
+  using HBD_asset = PXS_asset;
+  using HIVE_asset = PIXA_asset;
 
   template< uint32_t _BASE_SYMBOL, uint32_t _QUOTE_SYMBOL >
   class tiny_price;
 
-  using HBD_price = tiny_price< HIVE_ASSET_NUM_HBD, HIVE_ASSET_NUM_HIVE >;
-  using VEST_price = tiny_price< HIVE_ASSET_NUM_VESTS, HIVE_ASSET_NUM_HIVE >;
+  using PXS_price = tiny_price< HIVE_ASSET_NUM_PXS, HIVE_ASSET_NUM_PIXA >;
+  using VEST_price = tiny_price< HIVE_ASSET_NUM_VESTS, HIVE_ASSET_NUM_PIXA >;
 
   struct asset
   {
@@ -27,7 +31,7 @@ namespace hive { namespace protocol {
       : amount( a ), symbol( id ) {}
 
     asset()
-      : amount( 0 ), symbol( HIVE_SYMBOL ) {}
+      : amount( 0 ), symbol( PIXA_SYMBOL ) {}
 
     int64_t get_amount() const { return amount.value; }
     asset_symbol_type get_symbol() const { return symbol; }
@@ -123,7 +127,7 @@ namespace hive { namespace protocol {
     static legacy_asset from_string( const string& from );
 
     share_type                       amount;
-    asset_symbol_type                symbol = HIVE_SYMBOL;
+    asset_symbol_type                symbol = PIXA_SYMBOL;
   };
 
   /** Represents quotation of the relative value of asset against another asset.
@@ -421,9 +425,9 @@ FC_REFLECT( hive::protocol::asset, (amount)(symbol) )
 FC_REFLECT( hive::protocol::legacy_asset, (amount)(symbol) )
 FC_REFLECT( hive::protocol::price, (base)(quote) )
 
-FC_REFLECT( hive::protocol::HBD_asset, (amount) )
-FC_REFLECT( hive::protocol::HIVE_asset, (amount) )
+FC_REFLECT( hive::protocol::PXS_asset, (amount) )
+FC_REFLECT( hive::protocol::PIXA_asset, (amount) )
 FC_REFLECT( hive::protocol::VEST_asset, (amount) )
 
-FC_REFLECT( hive::protocol::HBD_price, (base)(quote) )
+FC_REFLECT( hive::protocol::PXS_price, (base)(quote) )
 FC_REFLECT( hive::protocol::VEST_price, (base)(quote) )

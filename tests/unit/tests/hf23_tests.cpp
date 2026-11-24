@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE( restore_accounts_02 )
     ACTORS( DEFAULT_VESTING, (alice0)(alice1)(alice2)(alice3)(alice4)(dude) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     std::set< std::string > accounts{ "alice0", "alice1", "alice2", "alice3", "alice4" };
@@ -84,8 +84,8 @@ BOOST_AUTO_TEST_CASE( restore_accounts_02 )
     {
       std::string name;
 
-      HIVE_asset  balance;
-      HBD_asset   hbd_balance;
+      PIXA_asset  balance;
+      PXS_asset   pxs_balance;
     };
     auto cmp = []( const tmp_data& a, const tmp_data& b )
     {
@@ -96,15 +96,15 @@ BOOST_AUTO_TEST_CASE( restore_accounts_02 )
     uint32_t cnt = 1;
     for( auto& account : accounts )
     {
-      ISSUE_FUNDS( account, HIVE_asset( cnt * 1000 ) );
-      ISSUE_FUNDS( account, HBD_asset( cnt * 1000 + 1 ) );
+      ISSUE_FUNDS( account, PIXA_asset( cnt * 1000 ) );
+      ISSUE_FUNDS( account, PXS_asset( cnt * 1000 + 1 ) );
       ++cnt;
 
-      old_balances.emplace( tmp_data{ account, get_hive_balance( account ), get_hbd_balance( account ) } );
+      old_balances.emplace( tmp_data{ account, get_pixa_balance( account ), get_pxs_balance( account ) } );
     }
     {
-      ISSUE_FUNDS( "dude", HIVE_asset( 68 ) );
-      ISSUE_FUNDS( "dude", HBD_asset( 78 ) );
+      ISSUE_FUNDS( "dude", PIXA_asset( 68 ) );
+      ISSUE_FUNDS( "dude", PXS_asset( 78 ) );
       generate_block();
     }
     {
@@ -114,13 +114,13 @@ BOOST_AUTO_TEST_CASE( restore_accounts_02 )
       {
         auto& _acc = db->get_account( account );
 
-        idump(( _acc.get_hive_balance() ));
-        idump(( _acc.get_hbd_balance() ));
-        BOOST_REQUIRE_EQUAL( _acc.get_hive_balance(), HIVE_asset( 0 ) );
-        BOOST_REQUIRE_EQUAL( _acc.get_hbd_balance(), HBD_asset( 0 ) );
+        idump(( _acc.get_pixa_balance() ));
+        idump(( _acc.get_pxs_balance() ));
+        BOOST_REQUIRE_EQUAL( _acc.get_pixa_balance(), PIXA_asset( 0 ) );
+        BOOST_REQUIRE_EQUAL( _acc.get_pxs_balance(), PXS_asset( 0 ) );
       }
-      BOOST_REQUIRE_EQUAL( get_hive_balance( "dude" ), HIVE_asset( 68 ) );
-      BOOST_REQUIRE_EQUAL( get_hbd_balance( "dude" ), HBD_asset( 78 ) );
+      BOOST_REQUIRE_EQUAL( get_pixa_balance( "dude" ), PIXA_asset( 68 ) );
+      BOOST_REQUIRE_EQUAL( get_pxs_balance( "dude" ), PXS_asset( 78 ) );
     }
     {
       auto accounts_ex = accounts;
@@ -135,13 +135,13 @@ BOOST_AUTO_TEST_CASE( restore_accounts_02 )
         auto& _acc = db->get_account( account );
 
         BOOST_REQUIRE_EQUAL( account, itr_old_balances->name );
-        BOOST_REQUIRE_EQUAL( _acc.get_hive_balance(), itr_old_balances->balance );
-        BOOST_REQUIRE_EQUAL( _acc.get_hbd_balance(), itr_old_balances->hbd_balance );
+        BOOST_REQUIRE_EQUAL( _acc.get_pixa_balance(), itr_old_balances->balance );
+        BOOST_REQUIRE_EQUAL( _acc.get_pxs_balance(), itr_old_balances->pxs_balance );
 
         ++itr_old_balances;
       }
-      BOOST_REQUIRE_EQUAL( get_hive_balance( "dude" ), HIVE_asset( 68 ) );
-      BOOST_REQUIRE_EQUAL( get_hbd_balance( "dude" ), HBD_asset( 78 ) );
+      BOOST_REQUIRE_EQUAL( get_pixa_balance( "dude" ), PIXA_asset( 68 ) );
+      BOOST_REQUIRE_EQUAL( get_pxs_balance( "dude" ), PXS_asset( 78 ) );
     }
 
     database_fixture::validate_database();
@@ -158,15 +158,15 @@ BOOST_AUTO_TEST_CASE( restore_accounts_01 )
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
-    ISSUE_FUNDS( "alice", HIVE_asset( 1'000'000 ) );
-    ISSUE_FUNDS( "alice", HBD_asset( 20'000 ) );
-    ISSUE_FUNDS( "bob", HIVE_asset( 900'000 ) );
-    ISSUE_FUNDS( "bob", HBD_asset( 10'000 ) );
-    ISSUE_FUNDS( "carol", HIVE_asset( 3'600'000 ) );
-    ISSUE_FUNDS( "carol", HBD_asset( 3'500'000 ) );
+    ISSUE_FUNDS( "alice", PIXA_asset( 1'000'000 ) );
+    ISSUE_FUNDS( "alice", PXS_asset( 20'000 ) );
+    ISSUE_FUNDS( "bob", PIXA_asset( 900'000 ) );
+    ISSUE_FUNDS( "bob", PXS_asset( 10'000 ) );
+    ISSUE_FUNDS( "carol", PIXA_asset( 3'600'000 ) );
+    ISSUE_FUNDS( "carol", PXS_asset( 3'500'000 ) );
 
     const std::set< std::string > accounts{ "alice", "bob" };
 
@@ -174,86 +174,86 @@ BOOST_AUTO_TEST_CASE( restore_accounts_01 )
       auto& _alice   = db->get_account( "alice" );
       auto& _bob     = db->get_account( "bob" );
 
-      auto alice_balance      = _alice.get_hive_balance();
-      auto alice_hbd_balance  = _alice.get_hbd_balance();
-      auto bob_balance        = _bob.get_hive_balance();
-      auto bob_hbd_balance    = _bob.get_hbd_balance();
+      auto alice_balance      = _alice.get_pixa_balance();
+      auto alice_pxs_balance  = _alice.get_pxs_balance();
+      auto bob_balance        = _bob.get_pixa_balance();
+      auto bob_pxs_balance    = _bob.get_pxs_balance();
 
       {
-        db->gather_balance( _alice.get_name(), _alice.get_hive_balance(), _alice.get_hbd_balance() );
-        temp_HIVE_balance hive_transfer;
-        db->adjust_balance( "alice", hive_transfer, -_alice.get_hive_balance() );
-        db->adjust_balance( db->get_treasury_name(), hive_transfer, hive_transfer.as_asset() );
-        temp_HBD_balance hbd_transfer;
-        db->adjust_balance( "alice", hbd_transfer, -_alice.get_hbd_balance() );
-        db->adjust_balance( db->get_treasury_name(), hbd_transfer, hbd_transfer.as_asset() );
+        db->gather_balance( _alice.get_name(), _alice.get_pixa_balance(), _alice.get_pxs_balance() );
+        temp_PIXA_balance pixa_transfer;
+        db->adjust_balance( "alice", pixa_transfer, -_alice.get_pixa_balance() );
+        db->adjust_balance( db->get_treasury_name(), pixa_transfer, pixa_transfer.as_asset() );
+        temp_PXS_balance pxs_transfer;
+        db->adjust_balance( "alice", pxs_transfer, -_alice.get_pxs_balance() );
+        db->adjust_balance( db->get_treasury_name(), pxs_transfer, pxs_transfer.as_asset() );
       }
       {
-        db->gather_balance( _bob.get_name(), _bob.get_hive_balance(), _bob.get_hbd_balance() );
-        temp_HIVE_balance hive_transfer;
-        db->adjust_balance( "bob", hive_transfer, -_bob.get_hive_balance() );
-        db->adjust_balance( db->get_treasury_name(), hive_transfer, hive_transfer.as_asset() );
-        temp_HBD_balance hbd_transfer;
-        db->adjust_balance( "bob", hbd_transfer, -_bob.get_hbd_balance() );
-        db->adjust_balance( db->get_treasury_name(), hbd_transfer, hbd_transfer.as_asset() );
+        db->gather_balance( _bob.get_name(), _bob.get_pixa_balance(), _bob.get_pxs_balance() );
+        temp_PIXA_balance pixa_transfer;
+        db->adjust_balance( "bob", pixa_transfer, -_bob.get_pixa_balance() );
+        db->adjust_balance( db->get_treasury_name(), pixa_transfer, pixa_transfer.as_asset() );
+        temp_PXS_balance pxs_transfer;
+        db->adjust_balance( "bob", pxs_transfer, -_bob.get_pxs_balance() );
+        db->adjust_balance( db->get_treasury_name(), pxs_transfer, pxs_transfer.as_asset() );
       }
 
-      HIVE_asset _2000( 2'000'000 );
-      HBD_asset _10( 10'000 );
-      HIVE_asset _800( 800'000 );
-      HBD_asset _70( 70'000 );
-      HIVE_asset _5000( 5'000'000 );
-      HBD_asset _4000( 4'000'000 );
+      PIXA_asset _2000( 2'000'000 );
+      PXS_asset _10( 10'000 );
+      PIXA_asset _800( 800'000 );
+      PXS_asset _70( 70'000 );
+      PIXA_asset _5000( 5'000'000 );
+      PXS_asset _4000( 4'000'000 );
 
       {
         //Create another balances for `alice`
-        temp_HIVE_balance hive_transfer;
-        db->adjust_balance( "carol", hive_transfer, -_2000 );
-        db->adjust_balance( "alice", hive_transfer, _2000 );
-        temp_HBD_balance hbd_transfer;
-        db->adjust_balance( "carol", hbd_transfer, -_10 );
-        db->adjust_balance( "alice", hbd_transfer, _10 );
+        temp_PIXA_balance pixa_transfer;
+        db->adjust_balance( "carol", pixa_transfer, -_2000 );
+        db->adjust_balance( "alice", pixa_transfer, _2000 );
+        temp_PXS_balance pxs_transfer;
+        db->adjust_balance( "carol", pxs_transfer, -_10 );
+        db->adjust_balance( "alice", pxs_transfer, _10 );
 
         generate_block();
 
-        BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), _2000 );
-        BOOST_REQUIRE_EQUAL( get_hbd_balance( "alice" ), _10 );
+        BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), _2000 );
+        BOOST_REQUIRE_EQUAL( get_pxs_balance( "alice" ), _10 );
       }
       {
         //Create another balances for `bob`
-        temp_HIVE_balance hive_transfer;
-        db->adjust_balance( "carol", hive_transfer, -_800 );
-        db->adjust_balance( "bob", hive_transfer, _800 );
-        temp_HBD_balance hbd_transfer;
-        db->adjust_balance( "carol", hbd_transfer, -_70 );
-        db->adjust_balance( "bob", hbd_transfer, _70 );
+        temp_PIXA_balance pixa_transfer;
+        db->adjust_balance( "carol", pixa_transfer, -_800 );
+        db->adjust_balance( "bob", pixa_transfer, _800 );
+        temp_PXS_balance pxs_transfer;
+        db->adjust_balance( "carol", pxs_transfer, -_70 );
+        db->adjust_balance( "bob", pxs_transfer, _70 );
 
         generate_block();
 
-        BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), _800 );
-        BOOST_REQUIRE_EQUAL( get_hbd_balance( "bob" ), _70 );
+        BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), _800 );
+        BOOST_REQUIRE_EQUAL( get_pxs_balance( "bob" ), _70 );
       }
 
       std::set< std::string > restored_accounts = { "bob", "alice", "carol" };
 
-      auto treasury_balance_start      = db->get_treasury().get_hive_balance();
-      auto treasury_hbd_balance_start  = db->get_treasury().get_hbd_balance();
+      auto treasury_balance_start      = db->get_treasury().get_pixa_balance();
+      auto treasury_pxs_balance_start  = db->get_treasury().get_pxs_balance();
 
       {
-        auto last_supply = db->get_dynamic_global_properties().get_current_hbd_supply();
+        auto last_supply = db->get_dynamic_global_properties().get_current_pxs_supply();
 
         ISSUE_FUNDS( db->get_treasury_name(), _5000 );
         ISSUE_FUNDS( db->get_treasury_name(), _4000 );
 
         generate_block();
 
-        auto interest = db->get_dynamic_global_properties().get_current_hbd_supply() - last_supply - _4000;
+        auto interest = db->get_dynamic_global_properties().get_current_pxs_supply() - last_supply - _4000;
 
-        BOOST_REQUIRE_EQUAL( db->get_treasury().get_hive_balance(), _5000 + treasury_balance_start );
-        BOOST_REQUIRE_EQUAL( db->get_treasury().get_hbd_balance(), _4000 + treasury_hbd_balance_start + interest );
+        BOOST_REQUIRE_EQUAL( db->get_treasury().get_pixa_balance(), _5000 + treasury_balance_start );
+        BOOST_REQUIRE_EQUAL( db->get_treasury().get_pxs_balance(), _4000 + treasury_pxs_balance_start + interest );
 
         treasury_balance_start     += _5000;
-        treasury_hbd_balance_start += _4000 + interest;
+        treasury_pxs_balance_start += _4000 + interest;
       }
 
       database_fixture::validate_database();
@@ -264,13 +264,13 @@ BOOST_AUTO_TEST_CASE( restore_accounts_01 )
       auto& _bob2             = db->get_account( "bob" );
       const auto& _treasury2 = db->get_treasury();
 
-      BOOST_REQUIRE_EQUAL( _alice2.get_hive_balance(), _2000 + alice_balance );
-      BOOST_REQUIRE_EQUAL( _alice2.get_hbd_balance(), _10 + alice_hbd_balance );
-      BOOST_REQUIRE_EQUAL( _bob2.get_hive_balance(), _800 + bob_balance );
-      BOOST_REQUIRE_EQUAL( _bob2.get_hbd_balance(), _70 + bob_hbd_balance );
+      BOOST_REQUIRE_EQUAL( _alice2.get_pixa_balance(), _2000 + alice_balance );
+      BOOST_REQUIRE_EQUAL( _alice2.get_pxs_balance(), _10 + alice_pxs_balance );
+      BOOST_REQUIRE_EQUAL( _bob2.get_pixa_balance(), _800 + bob_balance );
+      BOOST_REQUIRE_EQUAL( _bob2.get_pxs_balance(), _70 + bob_pxs_balance );
 
-      BOOST_REQUIRE_EQUAL( _treasury2.get_hive_balance(), treasury_balance_start - ( alice_balance + bob_balance ) );
-      BOOST_REQUIRE_EQUAL( _treasury2.get_hbd_balance(), treasury_hbd_balance_start - ( alice_hbd_balance + bob_hbd_balance ) );
+      BOOST_REQUIRE_EQUAL( _treasury2.get_pixa_balance(), treasury_balance_start - ( alice_balance + bob_balance ) );
+      BOOST_REQUIRE_EQUAL( _treasury2.get_pxs_balance(), treasury_pxs_balance_start - ( alice_pxs_balance + bob_pxs_balance ) );
     }
 
     database_fixture::validate_database();
@@ -280,12 +280,12 @@ BOOST_AUTO_TEST_CASE( restore_accounts_01 )
 
 hive::chain::hf23_item get_balances( const account_object& obj )
 {
-  return hive::chain::hf23_item{ obj.get_hive_balance(), obj.get_hbd_balance() };
+  return hive::chain::hf23_item{ obj.get_pixa_balance(), obj.get_pxs_balance() };
 }
 
 bool cmp_hf23_item( const hive::chain::hf23_item& a, const hive::chain::hf23_item& b )
 {
-  return a.hive_balance == b.hive_balance && a.hbd_balance == b.hbd_balance;
+  return a.pixa_balance == b.pixa_balance && a.pxs_balance == b.pxs_balance;
 }
 
 BOOST_AUTO_TEST_CASE( save_test_02 )
@@ -297,16 +297,16 @@ BOOST_AUTO_TEST_CASE( save_test_02 )
     ACTORS( DEFAULT_VESTING, (alice) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
-    ISSUE_FUNDS( "alice", HIVE_asset( 1'000'000 ) );
-    ISSUE_FUNDS( "alice", HBD_asset( 20'000 ) );
+    ISSUE_FUNDS( "alice", PIXA_asset( 1'000'000 ) );
+    ISSUE_FUNDS( "alice", PXS_asset( 20'000 ) );
 
     const std::set< std::string > accounts{ "alice", "bob" };
 
     {
-      db->gather_balance( "alice", get_hive_balance( "alice" ), get_hbd_balance( "alice" ) );
+      db->gather_balance( "alice", get_pixa_balance( "alice" ), get_pxs_balance( "alice" ) );
       //there is also "steem" - genesis account that is affected by HF23
     }
     {
@@ -332,22 +332,22 @@ BOOST_AUTO_TEST_CASE( save_test_01 )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
-    ISSUE_FUNDS( "alice", HIVE_asset( 1'000'000 ) );
-    ISSUE_FUNDS( "bob", HIVE_asset( 2'000'000 ) );
+    ISSUE_FUNDS( "alice", PIXA_asset( 1'000'000 ) );
+    ISSUE_FUNDS( "bob", PIXA_asset( 2'000'000 ) );
 
-    ISSUE_FUNDS( "alice", HBD_asset( 20'000 ) );
+    ISSUE_FUNDS( "alice", PXS_asset( 20'000 ) );
 
     const std::set< std::string > accounts{ "alice", "bob" };
 
     {
-      vest( "alice", "alice", HIVE_asset( 10'000 ), alice_private_key );
-      vest( "bob", "bob", HIVE_asset( 10'000 ), bob_private_key );
+      vest( "alice", "alice", PIXA_asset( 10'000 ), alice_private_key );
+      vest( "bob", "bob", PIXA_asset( 10'000 ), bob_private_key );
 
-      db->gather_balance( "alice", get_hive_balance( "alice" ), get_hbd_balance( "alice" ) );
-      db->gather_balance( "bob", get_hive_balance( "bob" ), get_hbd_balance( "bob" ) );
+      db->gather_balance( "alice", get_pixa_balance( "alice" ), get_pxs_balance( "alice" ) );
+      db->gather_balance( "bob", get_pixa_balance( "bob" ), get_pxs_balance( "bob" ) );
       //there is also "steem" - genesis account that is affected by HF23
     }
     {
@@ -377,16 +377,16 @@ BOOST_AUTO_TEST_CASE( basic_test_06 )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
-    set_account_creation_fee( HIVE_asset( 1 ) ); // turn off minimum limit on delegation size
+    set_price_feed( PXS_price( 1000, 1000 ) );
+    set_account_creation_fee( PIXA_asset( 1 ) ); // turn off minimum limit on delegation size
     generate_block();
 
-    HIVE_asset _10( 10'000 );
-    HIVE_asset _20( 20'000 );
+    PIXA_asset _10( 10'000 );
+    PIXA_asset _20( 20'000 );
     VEST_asset _1v( 1'000000 );
     VEST_asset _2v( 2'000000 );
     VEST_asset _3v( 3'000000 );
-    HIVE_asset _1000( 1'000'000 );
+    PIXA_asset _1000( 1'000'000 );
 
     ISSUE_FUNDS( "alice", _1000 );
     ISSUE_FUNDS( "bob", _1000 );
@@ -455,16 +455,16 @@ BOOST_AUTO_TEST_CASE( basic_test_05 )
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
-    set_account_creation_fee( HIVE_asset( 1 ) ); // turn off minimum delegation limit
+    set_price_feed( PXS_price( 1000, 1000 ) );
+    set_account_creation_fee( PIXA_asset( 1 ) ); // turn off minimum delegation limit
     generate_block();
 
-    HIVE_asset _10( 10'000 );
-    HIVE_asset _20( 20'000 );
+    PIXA_asset _10( 10'000 );
+    PIXA_asset _20( 20'000 );
     VEST_asset _1v( 1.000000 );
     VEST_asset _2v( 2.000000 );
     VEST_asset _3v( 3.000000 );
-    HIVE_asset _1000( 1000'000 );
+    PIXA_asset _1000( 1000'000 );
 
     ISSUE_FUNDS( "alice", _1000 );
     ISSUE_FUNDS( "bob", _1000 );
@@ -546,15 +546,15 @@ BOOST_AUTO_TEST_CASE( basic_test_04 )
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
-    set_account_creation_fee( HIVE_asset( 1 ) ); // turn off minimum delegation limit
+    set_price_feed( PXS_price( 1000, 1000 ) );
+    set_account_creation_fee( PIXA_asset( 1 ) ); // turn off minimum delegation limit
     generate_block();
 
-    HIVE_asset _10( 10'000 );
-    HIVE_asset _20( 20'000 );
+    PIXA_asset _10( 10'000 );
+    PIXA_asset _20( 20'000 );
     VEST_asset _1v( 1'000000 );
     VEST_asset _2v( 2'000000 );
-    HIVE_asset _1000( 1'000'000 );
+    PIXA_asset _1000( 1'000'000 );
 
     ISSUE_FUNDS( "alice", _1000 );
     ISSUE_FUNDS( "bob", _1000 );
@@ -626,13 +626,13 @@ BOOST_AUTO_TEST_CASE( basic_test_03 )
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
-    HIVE_asset _1( 1'000 );
-    HIVE_asset _2( 2'000 );
-    HIVE_asset _3( 3'000 );
-    HIVE_asset _1000( 1'000'000 );
+    PIXA_asset _1( 1'000 );
+    PIXA_asset _2( 2'000 );
+    PIXA_asset _3( 3'000 );
+    PIXA_asset _1000( 1'000'000 );
 
     ISSUE_FUNDS( "alice", _1000 );
     ISSUE_FUNDS( "bob", _1000 );
@@ -688,11 +688,11 @@ BOOST_AUTO_TEST_CASE( basic_test_02 )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
-    HIVE_asset _1( 1'000 );
-    HIVE_asset _1000( 1'000'000 );
+    PIXA_asset _1( 1'000 );
+    PIXA_asset _1000( 1'000'000 );
 
     ISSUE_FUNDS( "alice", _1000 );
     ISSUE_FUNDS( "bob", _1000 );
@@ -767,11 +767,11 @@ BOOST_AUTO_TEST_CASE( escrow_cleanup_test )
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
     generate_block();
 
-    issue_funds( "alice", HIVE_asset( 10'000 ) ); //<- note! extra 0.1 is in form of vests
-    issue_funds( "alice", HBD_asset( 10'100 ) ); //<- note! treasury will get extras from interest and proposal-fund/inflation
+    issue_funds( "alice", PIXA_asset( 10'000 ) ); //<- note! extra 0.1 is in form of vests
+    issue_funds( "alice", PXS_asset( 10'100 ) ); //<- note! treasury will get extras from interest and proposal-fund/inflation
     generate_block();
-    REQUIRE_BALANCE( 10'000, 0, 0, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 10'100, 0, 0, 1422, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 10'000, 0, 0, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 10'100, 0, 0, 1422, get_pxs_balance, PXS_asset );
 
     signed_transaction tx;
     tx.set_expiration( db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
@@ -780,8 +780,8 @@ BOOST_AUTO_TEST_CASE( escrow_cleanup_test )
       op.from = "alice";
       op.to = "bob";
       op.agent = "carol";
-      op.hive_amount = ASSET( "10.000 TESTS" );
-      op.hbd_amount = ASSET( "10.000 TBD" );
+      op.pixa_amount = ASSET( "10.000 TESTS" );
+      op.pxs_amount = ASSET( "10.000 TBD" );
       op.fee = ASSET( "0.100 TBD" );
       op.json_meta = "";
       op.ratification_deadline = db->head_block_time() + fc::seconds( HIVE_BLOCK_INTERVAL * 10 );
@@ -791,16 +791,16 @@ BOOST_AUTO_TEST_CASE( escrow_cleanup_test )
     }
     tx.clear();
 
-    REQUIRE_BALANCE( 0, 0, 0, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 0, 0, 1422, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 0, 0, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 0, 0, 1422, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) != nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 1 );
     generate_block();
 
     //escrow transfer requested but neither receiver nor agent approved yet
     CLEAR( "alice" );
-    REQUIRE_BALANCE( 0, 0, 0, 10'100, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 0, 0, 11996, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 0, 0, 10'100, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 0, 0, 11996, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) == nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 0 );
     UNDO_CLEAR;
@@ -816,16 +816,16 @@ BOOST_AUTO_TEST_CASE( escrow_cleanup_test )
     }
     tx.clear();
 
-    REQUIRE_BALANCE( 0, 0, 0, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 0, 0, 1896, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 0, 0, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 0, 0, 1896, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) != nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 1 );
     generate_block();
 
     //escrow transfer approved by agent but not by receiver
     CLEAR( "alice" );
-    REQUIRE_BALANCE( 0, 0, 0, 10'100, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 0, 0, 12470, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 0, 0, 10'100, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 0, 0, 12470, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) == nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 0 );
     UNDO_CLEAR;
@@ -841,16 +841,16 @@ BOOST_AUTO_TEST_CASE( escrow_cleanup_test )
     }
     tx.clear();
 
-    REQUIRE_BALANCE( 0, 0, 0, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 0, 100, 2370, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 0, 0, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 0, 100, 2370, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) != nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 1 );
     generate_block();
 
     //escrow transfer approved by all parties (agent got fee) but the transfer itself wasn't released yet
     CLEAR( "alice" );
-    REQUIRE_BALANCE( 0, 0, 0, 10'100, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 0, 100, 12844, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 0, 0, 10'100, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 0, 100, 12844, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) == nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 0 );
     UNDO_CLEAR;
@@ -862,23 +862,23 @@ BOOST_AUTO_TEST_CASE( escrow_cleanup_test )
       op.agent = "carol";
       op.who = "alice";
       op.receiver = "bob";
-      op.hive_amount = ASSET( "2.000 TESTS" );
-      op.hbd_amount = ASSET( "3.000 TBD" );
+      op.pixa_amount = ASSET( "2.000 TESTS" );
+      op.pxs_amount = ASSET( "3.000 TBD" );
       tx.operations.push_back( op );
       push_transaction( tx, alice_private_key );
     }
     tx.clear();
 
-    REQUIRE_BALANCE( 0, 2'000, 0, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 3'000, 100, 2844, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 2'000, 0, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 3'000, 100, 2844, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) != nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 1 );
     generate_block();
 
     //escrow transfer released partially by sender prior to escrow expiration
     CLEAR( "alice" );
-    REQUIRE_BALANCE( 0, 2'000, 0, 8'100, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 3'000, 100, 10318, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 2'000, 0, 8'100, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 3'000, 100, 10318, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) == nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 0 );
     UNDO_CLEAR;
@@ -890,23 +890,23 @@ BOOST_AUTO_TEST_CASE( escrow_cleanup_test )
       op.agent = "carol";
       op.who = "bob";
       op.receiver = "alice";
-      op.hive_amount = ASSET( "2.000 TESTS" );
-      op.hbd_amount = ASSET( "3.000 TBD" );
+      op.pixa_amount = ASSET( "2.000 TESTS" );
+      op.pxs_amount = ASSET( "3.000 TBD" );
       tx.operations.push_back( op );
       push_transaction( tx, bob_private_key );
     }
     tx.clear();
 
-    REQUIRE_BALANCE( 2'000, 2'000, 0, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 3'000, 3'000, 100, 3318, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 2'000, 2'000, 0, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 3'000, 3'000, 100, 3318, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) != nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 1 );
     generate_block();
 
     //escrow transfer released partially by receiver prior to escrow expiration
     CLEAR( "alice" );
-    REQUIRE_BALANCE( 0, 2'000, 0, 8'100, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 3'000, 100, 10792, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 2'000, 0, 8'100, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 3'000, 100, 10792, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) == nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 0 );
     UNDO_CLEAR;
@@ -924,16 +924,16 @@ BOOST_AUTO_TEST_CASE( escrow_cleanup_test )
     }
     tx.clear();
 
-    REQUIRE_BALANCE( 2'000, 2'000, 0, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 3'000, 3'000, 100, 3792, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 2'000, 2'000, 0, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 3'000, 3'000, 100, 3792, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) != nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 1 );
     generate_block();
 
     //escrow transfer disputed by sender
     CLEAR( "alice" );
-    REQUIRE_BALANCE( 0, 2'000, 0, 8'100, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 3'000, 100, 11266, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 2'000, 0, 8'100, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 3'000, 100, 11266, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) == nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 0 );
     UNDO_CLEAR;
@@ -947,8 +947,8 @@ BOOST_AUTO_TEST_CASE( escrow_cleanup_test )
       op.agent = "carol";
       op.who = "carol";
       op.receiver = "bob";
-      op.hive_amount = ASSET( "2.000 TESTS" );
-      op.hbd_amount = ASSET( "3.000 TBD" );
+      op.pixa_amount = ASSET( "2.000 TESTS" );
+      op.pxs_amount = ASSET( "3.000 TBD" );
       tx.operations.push_back( op );
 
       op.from = "alice";
@@ -956,24 +956,24 @@ BOOST_AUTO_TEST_CASE( escrow_cleanup_test )
       op.agent = "carol";
       op.who = "carol";
       op.receiver = "alice";
-      op.hive_amount = ASSET( "2.000 TESTS" );
-      op.hbd_amount = ASSET( "1.000 TBD" );
+      op.pixa_amount = ASSET( "2.000 TESTS" );
+      op.pxs_amount = ASSET( "1.000 TBD" );
       tx.operations.push_back( op );
 
       push_transaction( tx, carol_private_key );
     }
     tx.clear();
 
-    REQUIRE_BALANCE( 4'000, 4'000, 0, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 4'000, 6'000, 100, 4266, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 4'000, 4'000, 0, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 4'000, 6'000, 100, 4266, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) != nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 1 );
     generate_block();
 
     //escrow transfer released partially by agent to sender and partially to receiver
     CLEAR( "alice" );
-    REQUIRE_BALANCE( 0, 4'000, 0, 6'100, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 6'000, 100, 8740, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 4'000, 0, 6'100, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 6'000, 100, 8740, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) == nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 0 );
     UNDO_CLEAR;
@@ -985,23 +985,23 @@ BOOST_AUTO_TEST_CASE( escrow_cleanup_test )
       op.agent = "carol";
       op.who = "carol";
       op.receiver = "bob";
-      op.hive_amount = ASSET( "2.000 TESTS" );
-      op.hbd_amount = ASSET( "0.000 TBD" );
+      op.pixa_amount = ASSET( "2.000 TESTS" );
+      op.pxs_amount = ASSET( "0.000 TBD" );
       tx.operations.push_back( op );
       push_transaction( tx, carol_private_key );
     }
     tx.clear();
 
-    REQUIRE_BALANCE( 4'000, 6'000, 0, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 4'000, 6'000, 100, 4740, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 4'000, 6'000, 0, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 4'000, 6'000, 100, 4740, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) == nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 0 );
     generate_block();
 
     //escrow transfer released by agent to receiver and finished (transfer fully executed)
     CLEAR( "alice" );
-    REQUIRE_BALANCE( 0, 6'000, 0, 4'100, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 6'000, 100, 9214, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 6'000, 0, 4'100, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 6'000, 100, 9214, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_escrow( "alice", 30 ) == nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).pending_escrow_transfers, 0 );
     UNDO_CLEAR;
@@ -1026,11 +1026,11 @@ BOOST_AUTO_TEST_CASE( limit_order_cleanup_test )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    issue_funds( "alice", HIVE_asset( 10'000 ) ); //<- note! extra 0.1 is in form of vests
-    issue_funds( "bob", HBD_asset( 5'000 ) ); //<- note! treasury will get extras from interest and proposal-fund/inflation
+    issue_funds( "alice", PIXA_asset( 10'000 ) ); //<- note! extra 0.1 is in form of vests
+    issue_funds( "bob", PXS_asset( 5'000 ) ); //<- note! treasury will get extras from interest and proposal-fund/inflation
     generate_block();
-    REQUIRE_BALANCE( 10'000, 0, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 5'000, 1422, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 10'000, 0, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 5'000, 1422, get_pxs_balance, PXS_asset );
 
     signed_transaction tx;
     tx.set_expiration( db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
@@ -1045,15 +1045,15 @@ BOOST_AUTO_TEST_CASE( limit_order_cleanup_test )
     }
     tx.clear();
 
-    REQUIRE_BALANCE( 0, 0, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 5'000, 1422, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 0, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 5'000, 1422, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_limit_order( "alice", 0 ) != nullptr );
     generate_block();
 
     //limit order set but not matched yet
     CLEAR( "alice" );
-    REQUIRE_BALANCE( 0, 0, 10'100, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 5'000, 1896, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 0, 10'100, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 5'000, 1896, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_limit_order( "alice", 0 ) == nullptr );
     UNDO_CLEAR;
 
@@ -1069,15 +1069,15 @@ BOOST_AUTO_TEST_CASE( limit_order_cleanup_test )
     }
     tx.clear();
 
-    REQUIRE_BALANCE( 0, 4'000, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 2'000, 3'000, 1896, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 4'000, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 2'000, 3'000, 1896, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_limit_order( "alice", 0 ) != nullptr );
     generate_block();
 
     //limit order partially matched
     CLEAR( "alice" );
-    REQUIRE_BALANCE( 0, 4'000, 6'100, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 3'000, 4370, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 4'000, 6'100, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 3'000, 4370, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_limit_order( "alice", 0 ) == nullptr );
     UNDO_CLEAR;
 
@@ -1093,15 +1093,15 @@ BOOST_AUTO_TEST_CASE( limit_order_cleanup_test )
     }
     tx.clear();
 
-    REQUIRE_BALANCE( 0, 4'000, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 2'000, 3'000, 2370, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 4'000, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 2'000, 3'000, 2370, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_limit_order( "alice", 0 ) != nullptr );
     generate_block();
 
     //limit order partially matched after counter-order in fill_or_kill mode that failed (no change)
     CLEAR( "alice" );
-    REQUIRE_BALANCE( 0, 4'000, 6'100, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 3'000, 4844, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 4'000, 6'100, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 3'000, 4844, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_limit_order( "alice", 0 ) == nullptr );
     UNDO_CLEAR;
 
@@ -1117,15 +1117,15 @@ BOOST_AUTO_TEST_CASE( limit_order_cleanup_test )
     }
     tx.clear();
 
-    REQUIRE_BALANCE( 0, 10'000, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 5'000, 0, 2844, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 10'000, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 5'000, 0, 2844, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_limit_order( "alice", 0 ) == nullptr );
     generate_block();
 
     //limit order fully matched
     CLEAR( "alice" );
-    REQUIRE_BALANCE( 0, 10'000, 100, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 0, 8318, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 10'000, 100, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 0, 8318, get_pxs_balance, PXS_asset );
     BOOST_REQUIRE( db->find_limit_order( "alice", 0 ) == nullptr );
     UNDO_CLEAR;
   }
@@ -1149,10 +1149,10 @@ BOOST_AUTO_TEST_CASE( convert_request_cleanup_test )
     generate_block();
 
     //note! extra 0.1 TESTS is in form of vests
-    issue_funds( "alice", HBD_asset( 5'000 ) ); //<- note! treasury will get extras from interest and proposal-fund/inflation
+    issue_funds( "alice", PXS_asset( 5'000 ) ); //<- note! treasury will get extras from interest and proposal-fund/inflation
     generate_block();
-    REQUIRE_BALANCE( 0, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 5'000, 1422, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 5'000, 1422, get_pxs_balance, PXS_asset );
 
     signed_transaction tx;
     tx.set_expiration( db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
@@ -1165,26 +1165,26 @@ BOOST_AUTO_TEST_CASE( convert_request_cleanup_test )
     }
     tx.clear();
 
-    REQUIRE_BALANCE( 0, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 1422, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 1422, get_pxs_balance, PXS_asset );
     generate_block();
 
     //conversion request created but not executed yet
     CLEAR( "alice" );
-    REQUIRE_BALANCE( 0, 100, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 6896, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 100, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 6896, get_pxs_balance, PXS_asset );
     UNDO_CLEAR;
 
     generate_blocks( db->head_block_time() + HIVE_CONVERSION_DELAY );
 
-    REQUIRE_BALANCE( 5'000, 0, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 2844, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 5'000, 0, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 2844, get_pxs_balance, PXS_asset );
     generate_block();
 
     //conversion request executed
     CLEAR( "alice" );
-    REQUIRE_BALANCE( 0, 5'100, get_hive_balance, HIVE_asset );
-    REQUIRE_BALANCE( 0, 3318, get_hbd_balance, HBD_asset );
+    REQUIRE_BALANCE( 0, 5'100, get_pixa_balance, PIXA_asset );
+    REQUIRE_BALANCE( 0, 3318, get_pxs_balance, PXS_asset );
     UNDO_CLEAR;
 
     tx.set_expiration( db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
@@ -1198,10 +1198,10 @@ BOOST_AUTO_TEST_CASE( convert_request_cleanup_test )
     tx.clear();
 
     //collateralized conversion was not present when account clearing was executed, clear_account is not prepared for it
-    //note that if you decide to handle it, you have to consider that HBD was produced from thin air and was already transfered,
+    //note that if you decide to handle it, you have to consider that PXS was produced from thin air and was already transfered,
     //while collateral that should be partially burned during actual conversion is still in global supply; in other words you
     //should actually finish conversion instead of passing collateral to treasury, because otherwise the temporary state of
-    //having more HIVE than is proper, will become permanent
+    //having more PIXA than is proper, will become permanent
     HIVE_REQUIRE_THROW( db->clear_account( db->get_account( "alice" ) ), fc::exception );
 
     database_fixture::validate_database();
@@ -1212,67 +1212,67 @@ BOOST_AUTO_TEST_CASE( convert_request_cleanup_test )
 
 }
 
-BOOST_AUTO_TEST_CASE( hbd_test_01 )
+BOOST_AUTO_TEST_CASE( pxs_test_01 )
 {
   try
   {
     ACTORS( DEFAULT_VESTING, (alice) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "alice" ), HBD_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "alice" ), PXS_asset( 0 ) );
     db->clear_account( db->get_account( "alice" ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "alice" ), HBD_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "alice" ), PXS_asset( 0 ) );
     database_fixture::validate_database();
 
-    issue_funds( "alice", HBD_asset( 1'000'000 ) );
-    auto alice_hbd = get_hbd_balance( "alice" );
-    BOOST_REQUIRE_EQUAL( alice_hbd, HBD_asset( 1'000'000 ) );
+    issue_funds( "alice", PXS_asset( 1'000'000 ) );
+    auto alice_pxs = get_pxs_balance( "alice" );
+    BOOST_REQUIRE_EQUAL( alice_pxs, PXS_asset( 1'000'000 ) );
     db->clear_account( db->get_account( "alice" ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "alice" ), HBD_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "alice" ), PXS_asset( 0 ) );
     database_fixture::validate_database();
   }
   FC_LOG_AND_RETHROW()
 }
 
-BOOST_AUTO_TEST_CASE( hbd_test_02 )
+BOOST_AUTO_TEST_CASE( pxs_test_02 )
 {
   try
   {
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "alice" ), HBD_asset( 0 ) );
-    issue_funds( "alice", HBD_asset( 1'000'000 ) );
-    auto alice_hbd = get_hbd_balance( "alice" );
-    BOOST_TEST_MESSAGE( "treasury_hbd = " << asset_to_string( db->get_treasury().get_hbd_balance() ) );
-    BOOST_TEST_MESSAGE( "alice_hbd = " << asset_to_string( alice_hbd ) );
-    BOOST_REQUIRE_EQUAL( alice_hbd, HBD_asset( 1'000'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "alice" ), PXS_asset( 0 ) );
+    issue_funds( "alice", PXS_asset( 1'000'000 ) );
+    auto alice_pxs = get_pxs_balance( "alice" );
+    BOOST_TEST_MESSAGE( "treasury_pxs = " << asset_to_string( db->get_treasury().get_pxs_balance() ) );
+    BOOST_TEST_MESSAGE( "alice_pxs = " << asset_to_string( alice_pxs ) );
+    BOOST_REQUIRE_EQUAL( alice_pxs, PXS_asset( 1'000'000 ) );
 
-    generate_blocks( db->head_block_time() + fc::seconds( HIVE_HBD_INTEREST_COMPOUND_INTERVAL_SEC ), true );
+    generate_blocks( db->head_block_time() + fc::seconds( HIVE_PXS_INTEREST_COMPOUND_INTERVAL_SEC ), true );
 
     transfer( "alice", "bob", ASSET( "1.000 TBD" ), "", alice_private_key );
 
     auto& gpo = db->get_dynamic_global_properties();
 
-    BOOST_REQUIRE_EQUAL( gpo.get_hbd_interest_rate(), 0 );
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "alice" ), alice_hbd - HBD_asset( 1'000 ) );
+    BOOST_REQUIRE_EQUAL( gpo.get_pxs_interest_rate(), 0 );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "alice" ), alice_pxs - PXS_asset( 1'000 ) );
 
     database_fixture::validate_database();
 
-    generate_blocks( db->head_block_time() + fc::seconds( HIVE_HBD_INTEREST_COMPOUND_INTERVAL_SEC ), true );
+    generate_blocks( db->head_block_time() + fc::seconds( HIVE_PXS_INTEREST_COMPOUND_INTERVAL_SEC ), true );
 
-    alice_hbd = get_hbd_balance( "alice" );
-    BOOST_TEST_MESSAGE( "alice_hbd = " << asset_to_string( alice_hbd ) );
-    BOOST_TEST_MESSAGE( "bob_hbd = " << asset_to_string( get_hbd_balance( "bob" ) ) );
+    alice_pxs = get_pxs_balance( "alice" );
+    BOOST_TEST_MESSAGE( "alice_pxs = " << asset_to_string( alice_pxs ) );
+    BOOST_TEST_MESSAGE( "bob_pxs = " << asset_to_string( get_pxs_balance( "bob" ) ) );
 
     db->clear_account( db->get_account( "alice" ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "alice" ), HBD_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "alice" ), PXS_asset( 0 ) );
 
     database_fixture::validate_database();
   }
@@ -1286,16 +1286,16 @@ BOOST_AUTO_TEST_CASE( savings_test_01 )
     ACTORS( DEFAULT_VESTING, (alice) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
-    issue_funds( "alice", HBD_asset( 1'000'000 ) );
+    issue_funds( "alice", PXS_asset( 1'000'000 ) );
 
     transfer_to_savings( "alice", "alice", ASSET( "1000.000 TBD" ), "", alice_private_key );
 
-    BOOST_REQUIRE_EQUAL( get_hbd_savings( "alice" ), HBD_asset( 1'000'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_savings( "alice" ), PXS_asset( 1'000'000 ) );
     db->clear_account( db->get_account( "alice" ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_savings( "alice" ), HBD_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_savings( "alice" ), PXS_asset( 0 ) );
     database_fixture::validate_database();
   }
   FC_LOG_AND_RETHROW()
@@ -1308,21 +1308,21 @@ BOOST_AUTO_TEST_CASE( savings_test_02 )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
-    issue_funds( "alice", HBD_asset( 1'000'000 ) );
+    issue_funds( "alice", PXS_asset( 1'000'000 ) );
 
     transfer_to_savings( "alice", "alice", ASSET( "1000.000 TBD" ), "", alice_private_key );
 
-    BOOST_REQUIRE_EQUAL( get_hbd_savings( "alice" ), HBD_asset( 1'000'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_savings( "alice" ), PXS_asset( 1'000'000 ) );
 
-    generate_blocks( db->head_block_time() + fc::seconds( HIVE_HBD_INTEREST_COMPOUND_INTERVAL_SEC ), true );
+    generate_blocks( db->head_block_time() + fc::seconds( HIVE_PXS_INTEREST_COMPOUND_INTERVAL_SEC ), true );
 
-    BOOST_TEST_MESSAGE( "alice_savings_hbd before clear = " << asset_to_string( get_hbd_savings( "alice" ) ) );
+    BOOST_TEST_MESSAGE( "alice_savings_pxs before clear = " << asset_to_string( get_pxs_savings( "alice" ) ) );
     db->clear_account( db->get_account( "alice" ) );
-    BOOST_TEST_MESSAGE( "alice_savings_hbd after clear = " << asset_to_string( get_hbd_savings( "alice" ) ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_savings( "alice" ), HBD_asset( 0 ) );
+    BOOST_TEST_MESSAGE( "alice_savings_pxs after clear = " << asset_to_string( get_pxs_savings( "alice" ) ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_savings( "alice" ), PXS_asset( 0 ) );
     database_fixture::validate_database();
   }
   FC_LOG_AND_RETHROW()
