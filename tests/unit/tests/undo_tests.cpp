@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE( undo_delayed_votes )
   {
     BOOST_TEST_MESSAGE( "--- Testing: undo_delayed_votes" );
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     undo_db udb( *db );
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE( undo_delayed_votes )
 
     ACTOR( NO_VESTING,  alice );
     generate_block();
-    ISSUE_FUNDS( "alice", HIVE_asset( 100'000'000 ) );
+    ISSUE_FUNDS( "alice", PIXA_asset( 100'000'000 ) );
     BOOST_REQUIRE( compare_delayed_vote_count("alice", {}) );
     //BOOST_REQUIRE_EQUAL(index.get_item_additional_allocation(), initial_allocations);
 
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE( undo_delayed_votes )
     udb.undo_begin();
     //BOOST_REQUIRE_EQUAL(index.get_item_additional_allocation(), initial_allocations);
 
-    vest( "alice", "alice", HIVE_asset( 100'000 ), alice_private_key );
+    vest( "alice", "alice", PIXA_asset( 100'000 ), alice_private_key );
     generate_block();
     BOOST_REQUIRE( compare_delayed_vote_count("alice", { static_cast<uint64_t>(get_vesting( "alice" ).amount.value) }) );
     //BOOST_REQUIRE_GT(index.get_item_additional_allocation(), initial_allocations);
@@ -231,7 +231,7 @@ BOOST_AUTO_TEST_CASE( undo_feed_history )
     udb.undo_begin();
 
     // increase size by adding feed entries
-    const auto exchange_rate = HBD_price( 500, 1000 );
+    const auto exchange_rate = PXS_price( 500, 1000 );
     set_price_feed( exchange_rate, true );
     //generate_block();
     //ABW: note that we can't generate block since migrate_irreversible_state() calls
@@ -532,7 +532,7 @@ BOOST_AUTO_TEST_CASE( undo_generate_blocks )
   {
     BOOST_TEST_MESSAGE( "--- Testing: undo_generate_blocks" );
 
-    ACTORS( HIVE_asset( 15'000 ), (alice)(bob)(chuck)(dan) ); // extra RC for comments
+    ACTORS( PIXA_asset( 15'000 ), (alice)(bob)(chuck)(dan) ); // extra RC for comments
 
     struct _data
     {
@@ -1641,7 +1641,7 @@ BOOST_AUTO_TEST_CASE( debug_update_undo_bug )
     generate_block();
 
     const auto& alice_account = db->get_account( "alice" );
-    BOOST_REQUIRE_EQUAL( alice_account.get_hive_balance().amount.value, 0 );
+    BOOST_REQUIRE_EQUAL( alice_account.get_pixa_balance().amount.value, 0 );
 
     db->clear_pending();
     auto revision = db->revision();
@@ -1683,9 +1683,9 @@ BOOST_AUTO_TEST_CASE( debug_update_undo_bug )
     generate_block();
     BOOST_REQUIRE_EQUAL( alice_account.pending_claimed_accounts.value, 2 );
 
-    fund( "alice", HIVE_asset( 1'000 ) ); // this makes sure there is pending session open - normally
+    fund( "alice", PIXA_asset( 1'000 ) ); // this makes sure there is pending session open - normally
       // it could happen that it is open when there are some reapplied transactions, but not in unit tests
-    BOOST_REQUIRE_EQUAL( alice_account.get_hive_balance().amount.value, 1000 );
+    BOOST_REQUIRE_EQUAL( alice_account.get_pixa_balance().amount.value, 1000 );
     revision = db->revision();
     ilog( "Undo revision is ${r}", ( "r", revision ) );
     ilog( "Undo stack contains block and pending tx sessions" );
@@ -1701,13 +1701,13 @@ BOOST_AUTO_TEST_CASE( debug_update_undo_bug )
       } );
     } );
     BOOST_REQUIRE_EQUAL( alice_account.pending_claimed_accounts.value, 3 );
-    BOOST_REQUIRE_EQUAL( alice_account.get_hive_balance().amount.value, 1000 );
+    BOOST_REQUIRE_EQUAL( alice_account.get_pixa_balance().amount.value, 1000 );
     generate_block();
     BOOST_REQUIRE_EQUAL( alice_account.pending_claimed_accounts.value, 3 );
-    BOOST_REQUIRE_EQUAL( alice_account.get_hive_balance().amount.value, 1000 );
+    BOOST_REQUIRE_EQUAL( alice_account.get_pixa_balance().amount.value, 1000 );
 
-    fund( "alice", HIVE_asset( 1'000 ) );
-    BOOST_REQUIRE_EQUAL( alice_account.get_hive_balance().amount.value, 2000 );
+    fund( "alice", PIXA_asset( 1'000 ) );
+    BOOST_REQUIRE_EQUAL( alice_account.get_pixa_balance().amount.value, 2000 );
     revision = db->revision();
     ilog( "Undo revision is ${r}", ( "r", revision ) );
     ilog( "Undo stack contains block and pending tx sessions" );
@@ -1724,13 +1724,13 @@ BOOST_AUTO_TEST_CASE( debug_update_undo_bug )
     } );
     HIVE_REQUIRE_THROW( transfer( "alice", "bob", ASSET( "1.000 TESTS" ), "", alice_private_key ), fc::exception );
     BOOST_REQUIRE_EQUAL( alice_account.pending_claimed_accounts.value, 4 );
-    BOOST_REQUIRE_EQUAL( alice_account.get_hive_balance().amount.value, 2000 );
+    BOOST_REQUIRE_EQUAL( alice_account.get_pixa_balance().amount.value, 2000 );
     generate_block();
     BOOST_REQUIRE_EQUAL( alice_account.pending_claimed_accounts.value, 4 );
-    BOOST_REQUIRE_EQUAL( alice_account.get_hive_balance().amount.value, 2000 );
+    BOOST_REQUIRE_EQUAL( alice_account.get_pixa_balance().amount.value, 2000 );
 
-    fund( "alice", HIVE_asset( 1'000 ) );
-    BOOST_REQUIRE_EQUAL( alice_account.get_hive_balance().amount.value, 3000 );
+    fund( "alice", PIXA_asset( 1'000 ) );
+    BOOST_REQUIRE_EQUAL( alice_account.get_pixa_balance().amount.value, 3000 );
     revision = db->revision();
     ilog( "Undo revision is ${r}", ( "r", revision ) );
     ilog( "Undo stack contains block and pending tx sessions" );
@@ -1747,10 +1747,10 @@ BOOST_AUTO_TEST_CASE( debug_update_undo_bug )
       FC_ASSERT( false );
     } ), fc::exception );
     BOOST_REQUIRE_EQUAL( alice_account.pending_claimed_accounts.value, 4 );
-    BOOST_REQUIRE_EQUAL( alice_account.get_hive_balance().amount.value, 3000 );
+    BOOST_REQUIRE_EQUAL( alice_account.get_pixa_balance().amount.value, 3000 );
     generate_block();
     BOOST_REQUIRE_EQUAL( alice_account.pending_claimed_accounts.value, 4 );
-    BOOST_REQUIRE_EQUAL( alice_account.get_hive_balance().amount.value, 3000 );
+    BOOST_REQUIRE_EQUAL( alice_account.get_pixa_balance().amount.value, 3000 );
   }
   FC_LOG_AND_RETHROW()
 }

@@ -135,7 +135,7 @@ void open_test_database( database& db, block_storage_i& block_storage,
   args.shared_mem_dir = dir;
   args.shared_file_size = TEST_SHARED_MEM_SIZE;
   args.database_cfg = hive::utilities::default_database_configuration();
-  configuration_data.set_initial_asset_supply( HIVE_INITIAL_TEST_SUPPLY, HBD_INITIAL_TEST_SUPPLY, HP_INITIAL_TEST_SUPPLY );
+  configuration_data.set_initial_asset_supply( HIVE_INITIAL_TEST_SUPPLY, PXS_INITIAL_TEST_SUPPLY, HP_INITIAL_TEST_SUPPLY );
   db._log_hardforks = log_hardforks;
   bl_args.data_dir = dir;
   db.pre_open( args );
@@ -812,7 +812,7 @@ BOOST_AUTO_TEST_CASE( duplicate_transactions )
     transfer_operation t;
     t.from = HIVE_INIT_MINER_NAME;
     t.to = "alice";
-    t.amount = asset(500,HIVE_SYMBOL);
+    t.amount = asset(500,PIXA_SYMBOL);
     trx.operations.push_back(t);
     trx.set_expiration( db1.head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
     PUSH_TX( chain_plugin1, trx, init_account_priv_key, skip_sigs );
@@ -825,8 +825,8 @@ BOOST_AUTO_TEST_CASE( duplicate_transactions )
 
     HIVE_CHECK_THROW(PUSH_TX( chain_plugin1, trx, init_account_priv_key, skip_sigs ), fc::exception);
     HIVE_CHECK_THROW(PUSH_TX( chain_plugin2, trx, init_account_priv_key, skip_sigs ), fc::exception);
-    BOOST_CHECK_EQUAL(db1.get_balance( "alice", HIVE_SYMBOL ).amount.value, 500);
-    BOOST_CHECK_EQUAL(db2.get_balance( "alice", HIVE_SYMBOL ).amount.value, 500);
+    BOOST_CHECK_EQUAL(db1.get_balance( "alice", PIXA_SYMBOL ).amount.value, 500);
+    BOOST_CHECK_EQUAL(db2.get_balance( "alice", PIXA_SYMBOL ).amount.value, 500);
   } catch (fc::exception& e) {
     edump((e.to_detail_string()));
     throw;
@@ -871,7 +871,7 @@ BOOST_AUTO_TEST_CASE( tapos )
     transfer_operation t;
     t.from = HIVE_INIT_MINER_NAME;
     t.to = "alice";
-    t.amount = asset(50,HIVE_SYMBOL);
+    t.amount = asset(50,PIXA_SYMBOL);
     trx.operations.push_back(t);
     trx.set_expiration( db.head_block_time() + fc::seconds(2) );
     idump((trx)(db.head_block_time()));
@@ -898,11 +898,11 @@ BOOST_FIXTURE_TEST_CASE( optional_tapos, clean_database_fixture )
 
     BOOST_TEST_MESSAGE( "Create transaction" );
 
-    fund( "alice", HIVE_asset( 1'000'000 ) );
+    fund( "alice", PIXA_asset( 1'000'000 ) );
     transfer_operation op;
     op.from = "alice";
     op.to = "bob";
-    op.amount = asset(1000,HIVE_SYMBOL);
+    op.amount = asset(1000,PIXA_SYMBOL);
     signed_transaction tx;
     tx.operations.push_back( op );
 
@@ -953,7 +953,7 @@ BOOST_FIXTURE_TEST_CASE( double_sign_check, clean_database_fixture )
   transfer_operation t;
   t.from = HIVE_INIT_MINER_NAME;
   t.to = "bob";
-  t.amount = asset(amount,HIVE_SYMBOL);
+  t.amount = asset(amount,PIXA_SYMBOL);
   trx.operations.push_back(t);
   trx.set_expiration( db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
   trx.validate();
@@ -963,7 +963,7 @@ BOOST_FIXTURE_TEST_CASE( double_sign_check, clean_database_fixture )
   trx.operations.clear();
   t.from = "bob";
   t.to = HIVE_INIT_MINER_NAME;
-  t.amount = asset(amount/2,HIVE_SYMBOL);
+  t.amount = asset(amount/2,PIXA_SYMBOL);
   trx.operations.push_back(t);
   trx.validate();
 
@@ -1005,7 +1005,7 @@ BOOST_FIXTURE_TEST_CASE( pop_block_twice, clean_database_fixture )
 
     db->get_account( HIVE_INIT_MINER_NAME );
     // transfer from committee account to Sam account
-    fund( "sam", HIVE_asset( 100'000 ) );
+    fund( "sam", PIXA_asset( 100'000 ) );
 
     generate_block(skip_flags);
 
@@ -1202,7 +1202,7 @@ BOOST_FIXTURE_TEST_CASE( hardfork_test, hived_fixture )
 
     generate_blocks( 2 );
 
-    vest( HIVE_INIT_MINER_NAME, HIVE_asset( 10'000 ) );
+    vest( HIVE_INIT_MINER_NAME, PIXA_asset( 10'000 ) );
 
     // Fill up the rest of the required miners
     for( int i = HIVE_NUM_INIT_MINERS; i < HIVE_MAX_WITNESSES; i++ )
@@ -1312,7 +1312,7 @@ BOOST_FIXTURE_TEST_CASE( generate_block_size, clean_database_fixture )
     transfer_operation op;
     op.from = HIVE_INIT_MINER_NAME;
     op.to = HIVE_TEMP_ACCOUNT;
-    op.amount = asset( 1000, HIVE_SYMBOL );
+    op.amount = asset( 1000, PIXA_SYMBOL );
 
     // tx minus op is 79 bytes
     // op is 33 bytes (32 for op + 1 byte static variant tag)
@@ -1902,7 +1902,7 @@ struct init_supply_database_fixture : public hived_fixture
     {
       // This test assumes the whole initial supply sits liquid on 'initminer', so seed no initial
       // vesting here (otherwise the vested part would be missing from initminer's liquid balance).
-      configuration_data.set_initial_asset_supply( HIVE_INITIAL_TEST_SUPPLY, HBD_INITIAL_TEST_SUPPLY );
+      configuration_data.set_initial_asset_supply( HIVE_INITIAL_TEST_SUPPLY, PXS_INITIAL_TEST_SUPPLY );
       postponed_init( {
         config_line_t( { "shared-file-size", { std::to_string( 1024 * 1024 * shared_file_size_small ) } } )
       } );
@@ -1918,22 +1918,22 @@ struct init_supply_database_fixture : public hived_fixture
   virtual ~init_supply_database_fixture() {}
 };
 
-BOOST_FIXTURE_TEST_CASE( init_hive_hbd_supply, init_supply_database_fixture )
+BOOST_FIXTURE_TEST_CASE( init_pixa_pxs_supply, init_supply_database_fixture )
 {
   try
   {
     BOOST_TEST_MESSAGE( "Testing transfer to null from initial supply" );
 
-    // the test replicates issue #574 on HBD, for completeness it does similar checks on initial HIVE supply
+    // the test replicates issue #574 on PXS, for completeness it does similar checks on initial PIXA supply
 
-    // default configuration for testnet includes some HIVE/HBD, for mainnet the value is 0 - genesis puts that supply on balance of 'initminer'
-    BOOST_CHECK_EQUAL( get_hive_balance( HIVE_INIT_MINER_NAME ).amount.value, HIVE_INIT_SUPPLY );
-    BOOST_CHECK_EQUAL( get_hbd_balance( HIVE_INIT_MINER_NAME ).amount.value, HIVE_HBD_INIT_SUPPLY );
-    // current HBD supply as well as virtual supply must include those values
+    // default configuration for testnet includes some PIXA/PXS, for mainnet the value is 0 - genesis puts that supply on balance of 'initminer'
+    BOOST_CHECK_EQUAL( get_pixa_balance( HIVE_INIT_MINER_NAME ).amount.value, HIVE_INIT_SUPPLY );
+    BOOST_CHECK_EQUAL( get_pxs_balance( HIVE_INIT_MINER_NAME ).amount.value, HIVE_PXS_INIT_SUPPLY );
+    // current PXS supply as well as virtual supply must include those values
     const auto& dgpo = db->get_dynamic_global_properties();
     BOOST_CHECK_EQUAL( dgpo.get_current_supply().amount.value, HIVE_INIT_SUPPLY );
-    BOOST_CHECK_EQUAL( dgpo.get_current_hbd_supply().amount.value, HIVE_HBD_INIT_SUPPLY );
-    BOOST_CHECK_EQUAL( dgpo.get_virtual_supply().amount.value, HIVE_INIT_SUPPLY + HIVE_HBD_INIT_SUPPLY ); //initial HIVE price is 1-1 with HBD
+    BOOST_CHECK_EQUAL( dgpo.get_current_pxs_supply().amount.value, HIVE_PXS_INIT_SUPPLY );
+    BOOST_CHECK_EQUAL( dgpo.get_virtual_supply().amount.value, HIVE_INIT_SUPPLY + HIVE_PXS_INIT_SUPPLY ); //initial PIXA price is 1-1 with PXS
 
     // 'null' account balances are cleared only starting at HF14 and supply checks, that were the assertion
     // raised as result of the, bug are performed since HF20
@@ -1941,18 +1941,18 @@ BOOST_FIXTURE_TEST_CASE( init_hive_hbd_supply, init_supply_database_fixture )
     db->set_hardfork( HIVE_NUM_HARDFORKS );
     generate_block();
 
-    fund( HIVE_NULL_ACCOUNT, HIVE_asset( 100'000 ) );
-    fund( HIVE_NULL_ACCOUNT, HBD_asset( 100'000 ) );
+    fund( HIVE_NULL_ACCOUNT, PIXA_asset( 100'000 ) );
+    fund( HIVE_NULL_ACCOUNT, PXS_asset( 100'000 ) );
 
-    generate_block(); // the bug caused assertion during reapplication of block containing HBD transfer to 'null'
+    generate_block(); // the bug caused assertion during reapplication of block containing PXS transfer to 'null'
 
-    BOOST_CHECK_EQUAL( get_hive_balance( HIVE_INIT_MINER_NAME ).amount.value, HIVE_INIT_SUPPLY - 100'000);
-    BOOST_CHECK_EQUAL( get_hbd_balance( HIVE_INIT_MINER_NAME ).amount.value, HIVE_HBD_INIT_SUPPLY - 100'000 );
-    // application of block burns HIVE/HBD on 'null' balances but block production adds inflation to
-    // HIVE and HBD global balances (HBD goes to treasury)
+    BOOST_CHECK_EQUAL( get_pixa_balance( HIVE_INIT_MINER_NAME ).amount.value, HIVE_INIT_SUPPLY - 100'000);
+    BOOST_CHECK_EQUAL( get_pxs_balance( HIVE_INIT_MINER_NAME ).amount.value, HIVE_PXS_INIT_SUPPLY - 100'000 );
+    // application of block burns PIXA/PXS on 'null' balances but block production adds inflation to
+    // PIXA and PXS global balances (PXS goes to treasury)
     BOOST_CHECK_GT( dgpo.get_current_supply().amount.value, HIVE_INIT_SUPPLY - 100'000 );
-    BOOST_CHECK_GT( dgpo.get_current_hbd_supply().amount.value, HIVE_HBD_INIT_SUPPLY - 100'000 );
-    BOOST_CHECK_GT( dgpo.get_virtual_supply().amount.value, HIVE_INIT_SUPPLY + HIVE_HBD_INIT_SUPPLY - 200'000 );
+    BOOST_CHECK_GT( dgpo.get_current_pxs_supply().amount.value, HIVE_PXS_INIT_SUPPLY - 100'000 );
+    BOOST_CHECK_GT( dgpo.get_virtual_supply().amount.value, HIVE_INIT_SUPPLY + HIVE_PXS_INIT_SUPPLY - 200'000 );
 
     validate_database(); // fix for the bug included change in validate_invariants() called here
   }

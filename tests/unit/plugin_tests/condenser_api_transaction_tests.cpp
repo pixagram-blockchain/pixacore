@@ -66,8 +66,8 @@ BOOST_AUTO_TEST_CASE( get_transaction_signatures )
   BOOST_TEST_MESSAGE( "testing get_transaction with different number of signatures" );
 
   ACTORS( DEFAULT_VESTING, (alice1trx)(bob1trx) );
-  fund( "alice1trx", HIVE_asset( 100'000 ) );
-  fund( "temp", HIVE_asset( 3'333 ) );
+  fund( "alice1trx", PIXA_asset( 100'000 ) );
+  fund( "temp", PIXA_asset( 3'333 ) );
 
   authority multi_authority( 2, bob1trx_public_key, 1, alice1trx_public_key, 1 );
   account_update( "bob1trx", bob1trx_private_key.get_public_key(), "", multi_authority, multi_authority, multi_authority, bob1trx_private_key );
@@ -133,8 +133,8 @@ BOOST_AUTO_TEST_CASE( get_transaction_0234 )
 
   ACTORS( DEFAULT_VESTING, (alice2trx)(bob2trx) );
   generate_block();
-  issue_funds( "alice2trx", HIVE_asset( 300'000 ) );
-  issue_funds( "alice2trx", HBD_asset( 300'000 ) );
+  issue_funds( "alice2trx", PIXA_asset( 300'000 ) );
+  issue_funds( "alice2trx", PXS_asset( 300'000 ) );
   generate_block();
 
   // Check transaction with no operation.

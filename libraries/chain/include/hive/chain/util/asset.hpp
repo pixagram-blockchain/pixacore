@@ -4,22 +4,22 @@
 
 namespace hive { namespace chain { namespace util {
 
-using hive::protocol::HBD_asset;
-using hive::protocol::HIVE_asset;
-using hive::protocol::HBD_price;
+using hive::protocol::PXS_asset;
+using hive::protocol::PIXA_asset;
+using hive::protocol::PXS_price;
 
-inline HBD_asset to_hbd( const HBD_price& p, const HIVE_asset& hive )
+inline PXS_asset to_pxs( const PXS_price& p, const PIXA_asset& pixa )
 {
   if( p.is_null() )
-    return HBD_asset( 0 );
-  return hive * p;
+    return PXS_asset( 0 );
+  return pixa * p;
 }
 
-inline HIVE_asset to_hive( const HBD_price& p, const HBD_asset& hbd )
+inline PIXA_asset to_pixa( const PXS_price& p, const PXS_asset& pxs )
 {
   if( p.is_null() )
-    return HIVE_asset( 0 );
-  return hbd * p;
+    return PIXA_asset( 0 );
+  return pxs * p;
 }
 
 } } }

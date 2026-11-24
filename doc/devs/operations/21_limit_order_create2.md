@@ -4,9 +4,9 @@
 
 This operation creates a limit order and matches it against existing open orders. It is similar to limit\_order\_create except it serializes the price rather than calculating it from other fields.
 
-It allows to sell Hive and buy HBD or sell HBD and buy Hive.
+It allows to sell PIXA and buy PXS or sell PXS and buy PIXA.
 
-It is a way for a user to declare they wants to sell {_amount\_to\_sell}_ Hive/HBD for at least {exchange\_rate}  per HBD/Hive.
+It is a way for a user to declare they wants to sell {_amount\_to\_sell}_ PIXA/PXS for at least {exchange\_rate}  per PXS/Hive.
 
 The global parameters:
 
@@ -34,7 +34,7 @@ Active
 
 You need:
 
-\- your balance in Hive/HBD is equal or higher than the { amount\_to\_sell}.
+\- your balance in PIXA/PXS is equal or higher than the { amount\_to\_sell}.
 
 \- enough Resource Credit (RC) to make an operation.
 

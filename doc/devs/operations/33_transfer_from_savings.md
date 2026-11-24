@@ -16,7 +16,7 @@ The global parameters: 
 | from             | account\_name\_type                                         |         |
 | request\_id = 0; | The number is given by a user. Should be unique for a user. |         |
 | to               | account\_name\_type                                         |         |
-| amount           | The allowed currency: HIVE and HBD, amount >0               |         |
+| amount           | The allowed currency: PIXA and PXS, amount >0               |         |
 | memo             | Have to be UTF8,  must be shorter than 2048                 |         |
 
 
@@ -29,7 +29,7 @@ Active
 
 You need:
 
-\- your balance in Hive or Hive Dollars on a savings account is equal or higher than the operation amount.
+\- your balance in PIXA or PXS on a savings account is equal or higher than the operation amount.
 
 \- enough Resource Credit (RC)  to make an operation.
 

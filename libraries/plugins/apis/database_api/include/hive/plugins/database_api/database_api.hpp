@@ -79,8 +79,10 @@ class database_api
       (find_vesting_delegations)
       (list_vesting_delegation_expirations)
       (find_vesting_delegation_expirations)
-      (list_hbd_conversion_requests)
-      (find_hbd_conversion_requests)
+      (list_pxs_conversion_requests)
+      (find_pxs_conversion_requests)
+      (list_hbd_conversion_requests) // Hive's name of list_pxs_conversion_requests
+      (find_hbd_conversion_requests) // Hive's name of find_pxs_conversion_requests
       (list_collateralized_conversion_requests)
       (find_collateralized_conversion_requests)
       (list_decline_voting_rights_requests)

@@ -17,37 +17,37 @@
 #define SMT_MAX_NAI_POOL_COUNT               10
 #define SMT_MAX_NAI_GENERATION_TRIES         100
 
-#define HIVE_PRECISION_HBD    (3)
-#define HIVE_PRECISION_HIVE   (3)
+#define HIVE_PRECISION_PXS    (3)
+#define HIVE_PRECISION_PIXA   (3)
 #define HIVE_PRECISION_VESTS  (6)
 
 // One's place is used for check digit, which means NAI 0-9 all have NAI data of 0 which is invalid
 // This space is safe to use because it would alwasys result in failure to convert from NAI
-#define HIVE_NAI_HBD    (1)
-#define HIVE_NAI_HIVE   (2)
+#define HIVE_NAI_PXS    (1)
+#define HIVE_NAI_PIXA   (2)
 #define HIVE_NAI_VESTS  (3)
 
-#define HIVE_ASSET_NUM_HBD    (uint32_t(((SMT_MAX_NAI + HIVE_NAI_HBD)   << HIVE_NAI_SHIFT) | HIVE_PRECISION_HBD))
-#define HIVE_ASSET_NUM_HIVE   (uint32_t(((SMT_MAX_NAI + HIVE_NAI_HIVE)  << HIVE_NAI_SHIFT) | HIVE_PRECISION_HIVE))
+#define HIVE_ASSET_NUM_PXS    (uint32_t(((SMT_MAX_NAI + HIVE_NAI_PXS)   << HIVE_NAI_SHIFT) | HIVE_PRECISION_PXS))
+#define HIVE_ASSET_NUM_PIXA   (uint32_t(((SMT_MAX_NAI + HIVE_NAI_PIXA)  << HIVE_NAI_SHIFT) | HIVE_PRECISION_PIXA))
 #define HIVE_ASSET_NUM_VESTS  (uint32_t(((SMT_MAX_NAI + HIVE_NAI_VESTS) << HIVE_NAI_SHIFT) | HIVE_PRECISION_VESTS))
 
 #ifdef IS_TEST_NET
 
 #define VESTS_SYMBOL_U64    (uint64_t('V') | (uint64_t('E') << 8) | (uint64_t('S') << 16) | (uint64_t('T') << 24) | (uint64_t('S') << 32))
 #define OBSOLETE_SYMBOL_U64 (uint64_t('T') | (uint64_t('E') << 8) | (uint64_t('S') << 16) | (uint64_t('T') << 24) | (uint64_t('S') << 32))
-#define HIVE_SYMBOL_U64     OBSOLETE_SYMBOL_U64
+#define PIXA_SYMBOL_U64     OBSOLETE_SYMBOL_U64
 #define OBD_SYMBOL_U64      (uint64_t('T') | (uint64_t('B') << 8) | (uint64_t('D') << 16))
-#define HBD_SYMBOL_U64      OBD_SYMBOL_U64
+#define PXS_SYMBOL_U64      OBD_SYMBOL_U64
 #else
 
 #define VESTS_SYMBOL_U64    (uint64_t('V') | (uint64_t('E') << 8) | (uint64_t('S') << 16) | (uint64_t('T') << 24) | (uint64_t('S') << 32))
-#define HIVE_SYMBOL_U64     (uint64_t('P') | (uint64_t('I') << 8) | (uint64_t('X') << 16) | (uint64_t('A') << 24))
-#define HBD_SYMBOL_U64      (uint64_t('P') | (uint64_t('X') << 8) | (uint64_t('S') << 16))
+#define PIXA_SYMBOL_U64     (uint64_t('P') | (uint64_t('I') << 8) | (uint64_t('X') << 16) | (uint64_t('A') << 24))
+#define PXS_SYMBOL_U64      (uint64_t('P') | (uint64_t('X') << 8) | (uint64_t('S') << 16))
 // Pixagram is not a Steem fork; the legacy wire format uses PIXA / PXS
 // rather than the historical STEEM / SBD bytes. The OBSOLETE_*_U64 aliases
 // are kept so the pack/unpack code below stays untouched.
-#define OBSOLETE_SYMBOL_U64 HIVE_SYMBOL_U64
-#define OBD_SYMBOL_U64      HBD_SYMBOL_U64
+#define OBSOLETE_SYMBOL_U64 PIXA_SYMBOL_U64
+#define OBD_SYMBOL_U64      PXS_SYMBOL_U64
 
 #endif
 
@@ -105,7 +105,7 @@ class asset_symbol_type
     bool is_vesting() const;
     /**Returns vesting symbol when called from liquid one
       * and liquid symbol when called from vesting one.
-      * Returns back the HBD symbol if represents HBD.
+      * Returns back the PXS symbol if represents PXS.
       */
     asset_symbol_type get_paired_symbol() const;
     /**Returns asset_num stripped of precision holding bits.
@@ -140,8 +140,8 @@ class asset_symbol_type
 } } // hive::protocol
 
 #define VESTS_SYMBOL  (hive::protocol::asset_symbol_type::from_asset_num( HIVE_ASSET_NUM_VESTS ) )
-#define HIVE_SYMBOL   (hive::protocol::asset_symbol_type::from_asset_num( HIVE_ASSET_NUM_HIVE ) )
-#define HBD_SYMBOL    (hive::protocol::asset_symbol_type::from_asset_num( HIVE_ASSET_NUM_HBD ) )
+#define PIXA_SYMBOL   (hive::protocol::asset_symbol_type::from_asset_num( HIVE_ASSET_NUM_PIXA ) )
+#define PXS_SYMBOL    (hive::protocol::asset_symbol_type::from_asset_num( HIVE_ASSET_NUM_PXS ) )
 
 FC_REFLECT(hive::protocol::asset_symbol_type, (asset_num))
 
@@ -167,11 +167,11 @@ inline void pack( Stream& s, const hive::protocol::asset_symbol_type& sym )
   if( sym.space() == hive::protocol::asset_symbol_type::legacy_space  && 
       hive::protocol::serialization_mode_controller::get_current_pack() == hive::protocol::pack_type::legacy )
   {
-    if( sym.asset_num == HIVE_ASSET_NUM_HIVE )
+    if( sym.asset_num == HIVE_ASSET_NUM_PIXA )
     {
       pack( s, OBSOLETE_SYMBOL_SER );
     }
-    else if( sym.asset_num == HIVE_ASSET_NUM_HBD )
+    else if( sym.asset_num == HIVE_ASSET_NUM_PXS )
     {
       pack( s, OBD_SYMBOL_SER );
     }
@@ -200,12 +200,12 @@ inline void unpack( Stream& s, hive::protocol::asset_symbol_type& sym, uint32_t,
     case OBSOLETE_SYMBOL_SER & 0xFFFFFFFF:
       s.read( ((char*) &ser)+4, 4 );
       HIVE_PROTOCOL_ASSET_ASSERT( ser == OBSOLETE_SYMBOL_SER, "invalid asset bits", ("subject", sym)("expected", OBSOLETE_SYMBOL_SER) );
-      sym.asset_num = HIVE_ASSET_NUM_HIVE;
+      sym.asset_num = HIVE_ASSET_NUM_PIXA;
       break;
     case OBD_SYMBOL_SER & 0xFFFFFFFF:
       s.read( ((char*) &ser)+4, 4 );
       HIVE_PROTOCOL_ASSET_ASSERT( ser == OBD_SYMBOL_SER, "invalid asset bits", ("subject", sym)("expected", OBD_SYMBOL_SER) );
-      sym.asset_num = HIVE_ASSET_NUM_HBD;
+      sym.asset_num = HIVE_ASSET_NUM_PXS;
       break;
     case VESTS_SYMBOL_SER & 0xFFFFFFFF:
       s.read( ((char*) &ser)+4, 4 );

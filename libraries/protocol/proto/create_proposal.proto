@@ -10,7 +10,7 @@ package hive.protocol.buffers;
  * In order to create a proposal user should create a post first and then marked it as
  * a proposal with the operation create_proposal_operation.
  * User defines when the proposal starts and ends and how many funds need to realize it.
- * The creating proposal costs 10 HBD and additionally 1 HBD for each day over 60 days. The fee goes back to DHF.
+ * The creating proposal costs 10 PXS and additionally 1 PXS for each day over 60 days. The fee goes back to DHF.
  * Every hour all active proposals are processed and taking into consideration a current number of votes payments are done.
  * Accounts can create/remove votes anytime.
  *

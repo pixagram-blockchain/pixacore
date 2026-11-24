@@ -59,14 +59,14 @@ class configuration
   uint16_t hive_owner_update_limit = 6;
 
 #ifdef IS_TEST_NET
-  HIVE_asset init_hive_supply = HIVE_asset( int64_t( 243 ) * int64_t( 1000000 ) * int64_t( 1000 ) );
-  HBD_asset init_hbd_supply = HBD_asset( int64_t( 7 ) * int64_t( 1000000 ) * int64_t( 1000 ) );
-  HIVE_asset initial_vesting;
+  PIXA_asset init_pixa_supply = PIXA_asset( int64_t( 243 ) * int64_t( 1000000 ) * int64_t( 1000 ) );
+  PXS_asset init_pxs_supply = PXS_asset( int64_t( 7 ) * int64_t( 1000000 ) * int64_t( 1000 ) );
+  PIXA_asset initial_vesting;
   VEST_price initial_vesting_price = VEST_price( 1800, 1000 ); // see comment for set_initial_asset_supply
 #else // hive converter build
-  HIVE_asset init_hive_supply;
-  HBD_asset init_hbd_supply;
-  HIVE_asset initial_vesting;
+  PIXA_asset init_pixa_supply;
+  PXS_asset init_pxs_supply;
+  PIXA_asset initial_vesting;
   VEST_price initial_vesting_price;
 #endif
 
@@ -130,9 +130,9 @@ class configuration
     int64_t  get_hive_governance_vote_expiration_period() const { return hive_governance_vote_expiration_period; }
     uint16_t get_hive_owner_update_limit() const { return hive_owner_update_limit; }
 
-    HIVE_asset get_init_hive_supply() const { return init_hive_supply; }
-    HBD_asset get_init_hbd_supply() const { return init_hbd_supply; }
-    HIVE_asset get_initial_vesting() const { return initial_vesting; }
+    PIXA_asset get_init_pixa_supply() const { return init_pixa_supply; }
+    PXS_asset get_init_pxs_supply() const { return init_pxs_supply; }
+    PIXA_asset get_initial_vesting() const { return initial_vesting; }
     const VEST_price& get_initial_vesting_price() const { return initial_vesting_price; }
 
     uint32_t get_hive_proposal_maintenance_period() const { return hive_proposal_maintenance_period; }
@@ -274,16 +274,16 @@ class configuration
     void set_hive_owner_update_limit( uint16_t limit );
 
     /**
-     * Sets initial supply of HIVE and HBD and also allows stabilization of price of VESTS
-     * Amount of HIVE to be vested (on initminer) needs to be less than given supply.
+     * Sets initial supply of PIXA and PXS and also allows stabilization of price of VESTS
+     * Amount of PIXA to be vested (on initminer) needs to be less than given supply.
      *
      * IMPORTANT! price is applied prior to HF1 when vesting share split occurs, so VEST
      * portion of the price will be effectively multiplied by 1000000 when HF1 is executed;
      * caller must take that into account when passing vest_price
      */
-    void set_initial_asset_supply( const HIVE_asset& hive = HIVE_asset( 0 ),
-                                   const HBD_asset& hbd = HBD_asset( 0 ),
-                                   const HIVE_asset& to_vest = HIVE_asset( 0 ),
+    void set_initial_asset_supply( const PIXA_asset& pixa = PIXA_asset( 0 ),
+                                   const PXS_asset& pxs = PXS_asset( 0 ),
+                                   const PIXA_asset& to_vest = PIXA_asset( 0 ),
                                    const VEST_price& vest_price = VEST_price( 1800, 1'000 ) );
 
     fc::microseconds min_root_comment_interval = fc::seconds(60*5);

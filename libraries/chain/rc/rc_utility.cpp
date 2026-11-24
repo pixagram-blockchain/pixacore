@@ -570,12 +570,12 @@ bool resource_credits::use_account_rcs( int64_t rc )
         {
           HIVE_ASSERT( has_mana, not_enough_rc_exception,
             "Account: ${account_name} has ${rc_current} RC, needs ${rc} RC with ${surcharge} flood prevention surcharge. "
-            "Please wait to transact, power up HIVE or ask your witnesses to increase block size to deal with increased traffic.",
+            "Please wait to transact, power up PIXA or ask your witnesses to increase block size to deal with increased traffic.",
             ( account_name )( "rc_current", tx_info.rc )( rc )( surcharge )
           );
         }
         HIVE_ASSERT( has_mana, not_enough_rc_exception,
-          "Account: ${account_name} has ${rc_current} RC, needs ${rc} RC. Please wait to transact or power up HIVE.",
+          "Account: ${account_name} has ${rc_current} RC, needs ${rc} RC. Please wait to transact or power up PIXA.",
           ( account_name )( "rc_current", tx_info.rc )( rc )
         );
       }

@@ -15,7 +15,7 @@ message fill_order {
   // @param {number} current_orderid - id of fresh order
   required uint32 current_orderid = 2 [json_name = "current_orderid"];
 
-  // @param {asset} current_pays - (HIVE or HBD) amount paid to open_owner
+  // @param {asset} current_pays - (PIXA or PXS) amount paid to open_owner
   required asset  current_pays = 3 [json_name = "current_pays"];
 
   // @param {string} open_owner - user that had his order on the market (maker - receiver of current_pays)
@@ -24,6 +24,6 @@ message fill_order {
   // @param {number} open_orderid - id of waiting order
   required uint32 open_orderid = 5 [json_name = "open_orderid"];
 
-  // @param {asset} open_pays - (HBD or HIVE) amount paid to current_owner
+  // @param {asset} open_pays - (PXS or PIXA) amount paid to current_owner
   required asset  open_pays = 6 [json_name = "open_pays"];
 }

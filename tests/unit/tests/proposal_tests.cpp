@@ -126,10 +126,10 @@ BOOST_AUTO_TEST_CASE( inactive_proposals_have_votes )
     BOOST_TEST_MESSAGE( "Testing: proposals before activation can have votes" );
 
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol)(dan) );
-    vest( "alice", HIVE_asset( 50'000 ) ); // alice is creating proposals
+    vest( "alice", PIXA_asset( 50'000 ) ); // alice is creating proposals
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
@@ -141,18 +141,18 @@ BOOST_AUTO_TEST_CASE( inactive_proposals_have_votes )
 
     auto start_date = db->head_block_time();
 
-    auto daily_pay = HBD_asset( 48'000 );
-    auto hourly_pay = HBD_asset( 2'000 );
+    auto daily_pay = PXS_asset( 48'000 );
+    auto hourly_pay = PXS_asset( 2'000 );
 
-    ISSUE_FUNDS( creator, HIVE_asset( 160'000 ) );
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
-    ISSUE_FUNDS( db->get_treasury_name(), HBD_asset( 5'000'000 ) );
+    ISSUE_FUNDS( creator, PIXA_asset( 160'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
+    ISSUE_FUNDS( db->get_treasury_name(), PXS_asset( 5'000'000 ) );
 
     auto voter_00 = "carol";
     auto voter_01 = "dan";
 
-    vest( voter_00, HIVE_asset( 1'000 ) );
-    vest( voter_01, HIVE_asset( 3'100 ) );
+    vest( voter_00, PIXA_asset( 1'000 ) );
+    vest( voter_01, PIXA_asset( 3'100 ) );
 
     //Due to the `delaying votes` algorithm, generate blocks for 30 days in order to activate whole votes' pool ( take a look at `HIVE_DELAYED_VOTING_TOTAL_INTERVAL_SECONDS` )
     start_date += fc::seconds( HIVE_DELAYED_VOTING_TOTAL_INTERVAL_SECONDS );
@@ -209,13 +209,13 @@ BOOST_AUTO_TEST_CASE( inactive_proposals_have_votes )
     }
 
     //skipping interest generating is necessary
-    fund( receiver, HBD_asset( 1 ) );
+    fund( receiver, PXS_asset( 1 ) );
     generate_block();
-    fund( db->get_treasury_name(), HBD_asset( 1 ) );
+    fund( db->get_treasury_name(), PXS_asset( 1 ) );
     generate_block();
 
     const auto& dgpo = db->get_dynamic_global_properties();
-    auto old_hbd_supply = dgpo.get_current_hbd_supply();
+    auto old_pxs_supply = dgpo.get_current_pxs_supply();
 
 
     const account_object& _creator = db->get_account( creator );
@@ -226,25 +226,25 @@ BOOST_AUTO_TEST_CASE( inactive_proposals_have_votes )
     {
       BOOST_TEST_MESSAGE( "---Payment---" );
 
-      auto before_creator_hbd_balance = _creator.get_hbd_balance();
-      auto before_receiver_hbd_balance = _receiver.get_hbd_balance();
-      auto before_voter_01_hbd_balance = _voter_01.get_hbd_balance();
-      auto before_treasury_hbd_balance = _treasury.get_hbd_balance();
+      auto before_creator_pxs_balance = _creator.get_pxs_balance();
+      auto before_receiver_pxs_balance = _receiver.get_pxs_balance();
+      auto before_voter_01_pxs_balance = _voter_01.get_pxs_balance();
+      auto before_treasury_pxs_balance = _treasury.get_pxs_balance();
 
       auto next_block = get_nr_blocks_until_proposal_maintenance_block();
       generate_blocks( next_block - 1 );
       generate_block();
 
-      auto treasury_hbd_inflation = dgpo.get_current_hbd_supply() - old_hbd_supply;
-      auto after_creator_hbd_balance = _creator.get_hbd_balance();
-      auto after_receiver_hbd_balance = _receiver.get_hbd_balance();
-      auto after_voter_01_hbd_balance = _voter_01.get_hbd_balance();
-      auto after_treasury_hbd_balance = _treasury.get_hbd_balance();
+      auto treasury_pxs_inflation = dgpo.get_current_pxs_supply() - old_pxs_supply;
+      auto after_creator_pxs_balance = _creator.get_pxs_balance();
+      auto after_receiver_pxs_balance = _receiver.get_pxs_balance();
+      auto after_voter_01_pxs_balance = _voter_01.get_pxs_balance();
+      auto after_treasury_pxs_balance = _treasury.get_pxs_balance();
 
-      BOOST_REQUIRE_EQUAL( before_creator_hbd_balance, after_creator_hbd_balance );
-      BOOST_REQUIRE_EQUAL( before_receiver_hbd_balance, after_receiver_hbd_balance - hourly_pay );
-      BOOST_REQUIRE_EQUAL( before_voter_01_hbd_balance, after_voter_01_hbd_balance );
-      BOOST_REQUIRE_EQUAL( before_treasury_hbd_balance, after_treasury_hbd_balance - treasury_hbd_inflation + hourly_pay );
+      BOOST_REQUIRE_EQUAL( before_creator_pxs_balance, after_creator_pxs_balance );
+      BOOST_REQUIRE_EQUAL( before_receiver_pxs_balance, after_receiver_pxs_balance - hourly_pay );
+      BOOST_REQUIRE_EQUAL( before_voter_01_pxs_balance, after_voter_01_pxs_balance );
+      BOOST_REQUIRE_EQUAL( before_treasury_pxs_balance, after_treasury_pxs_balance - treasury_pxs_inflation + hourly_pay );
     }
     /*
       Reminder:
@@ -314,26 +314,26 @@ BOOST_AUTO_TEST_CASE( db_remove_expired_governance_votes )
   {
     BOOST_TEST_MESSAGE( "Testing: db_remove_expired_governance_votes" );
     ACTORS( DEFAULT_VESTING, (acc1)(acc2)(acc3)(acc4)(acc5)(acc6)(acc7)(acc8)(accw)(accw2)(accp)(pxy) );
-    vest( "acc1", HIVE_asset( 1'000 ) );
-    vest( "acc2", HIVE_asset( 2'000 ) );
-    vest( "acc3", HIVE_asset( 3'000 ) );
-    vest( "acc4", HIVE_asset( 4'000 ) );
-    vest( "acc5", HIVE_asset( 5'000 ) );
-    vest( "acc6", HIVE_asset( 6'000 ) );
-    vest( "acc7", HIVE_asset( 7'000 ) );
-    vest( "acc8", HIVE_asset( 8'000 ) );
+    vest( "acc1", PIXA_asset( 1'000 ) );
+    vest( "acc2", PIXA_asset( 2'000 ) );
+    vest( "acc3", PIXA_asset( 3'000 ) );
+    vest( "acc4", PIXA_asset( 4'000 ) );
+    vest( "acc5", PIXA_asset( 5'000 ) );
+    vest( "acc6", PIXA_asset( 6'000 ) );
+    vest( "acc7", PIXA_asset( 7'000 ) );
+    vest( "acc8", PIXA_asset( 8'000 ) );
 
     generate_block();
-    vest( "accp", HIVE_asset( 50'000 ) ); // accp is creating proposals
-    vest( "accw", HIVE_asset( 20'000 ) ); // accw becomes a witness
-    vest( "accw2", HIVE_asset( 20'000 ) ); // accw2 becomes a witness
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    vest( "accp", PIXA_asset( 50'000 ) ); // accp is creating proposals
+    vest( "accw", PIXA_asset( 20'000 ) ); // accw becomes a witness
+    vest( "accw2", PIXA_asset( 20'000 ) ); // accw2 becomes a witness
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     const fc::time_point_sec LAST_POSSIBLE_OLD_VOTE_EXPIRE_TS = HARDFORK_1_25_FIRST_GOVERNANCE_VOTE_EXPIRE_TIMESTAMP + HIVE_HARDFORK_1_25_MAX_OLD_GOVERNANCE_VOTE_EXPIRE_SHIFT;
 
     auto proposal_creator = "accp";
-    ISSUE_FUNDS( proposal_creator, HBD_asset( 10'000'000 ) );
+    ISSUE_FUNDS( proposal_creator, PXS_asset( 10'000'000 ) );
 
     auto start_1 = db->head_block_time();
     auto start_2 = db->head_block_time() + fc::seconds(15);
@@ -343,15 +343,15 @@ BOOST_AUTO_TEST_CASE( db_remove_expired_governance_votes )
     auto end_2 = LAST_POSSIBLE_OLD_VOTE_EXPIRE_TS + fc::days((101));
     auto end_3 = LAST_POSSIBLE_OLD_VOTE_EXPIRE_TS + fc::days((102));
 
-    int64_t proposal_1 = create_proposal( proposal_creator, "acc1",  start_1,  end_1, HBD_asset( 100 ), accp_private_key, accp_post_key );
-    int64_t proposal_2 = create_proposal( proposal_creator, "acc2",  start_2,  end_2, HBD_asset( 100 ), accp_private_key, accp_post_key );
-    int64_t proposal_3 = create_proposal( proposal_creator, "acc3",  start_3,  end_3, HBD_asset( 100 ), accp_private_key, accp_post_key );
+    int64_t proposal_1 = create_proposal( proposal_creator, "acc1",  start_1,  end_1, PXS_asset( 100 ), accp_private_key, accp_post_key );
+    int64_t proposal_2 = create_proposal( proposal_creator, "acc2",  start_2,  end_2, PXS_asset( 100 ), accp_private_key, accp_post_key );
+    int64_t proposal_3 = create_proposal( proposal_creator, "acc3",  start_3,  end_3, PXS_asset( 100 ), accp_private_key, accp_post_key );
 
     private_key_type accw_witness_key = generate_private_key( "accw_key" );
-    witness_create( "accw", accw_private_key, "foo.bar", accw_witness_key.get_public_key(), HIVE_asset( 1000 ) );
+    witness_create( "accw", accw_private_key, "foo.bar", accw_witness_key.get_public_key(), PIXA_asset( 1000 ) );
     witness_plugin->add_signing_key( accw_witness_key );
     private_key_type accw_witness2_key = generate_private_key( "accw2_key" );
-    witness_create( "accw2", accw2_private_key, "foo.bar", accw_witness2_key.get_public_key(), HIVE_asset( 1000 ) );
+    witness_create( "accw2", accw2_private_key, "foo.bar", accw_witness2_key.get_public_key(), PIXA_asset( 1000 ) );
     witness_plugin->add_signing_key( accw_witness2_key );
 
     //if we vote before hardfork 25
@@ -675,10 +675,10 @@ BOOST_AUTO_TEST_CASE( db_remove_expired_governance_votes_with_proxy )
 {
   try
   {
-    ACTORS( HIVE_asset( 20'000 ), (witness)(witness2)(propcreator)(propcreator2)(alice)(bobproxy)(carol) );
+    ACTORS( PIXA_asset( 20'000 ), (witness)(witness2)(propcreator)(propcreator2)(alice)(bobproxy)(carol) );
 
     generate_block();
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     proxy( "carol", "bobproxy", carol_private_key );
@@ -688,20 +688,20 @@ BOOST_AUTO_TEST_CASE( db_remove_expired_governance_votes_with_proxy )
 
     generate_blocks( db->head_block_time() + HIVE_DELAYED_VOTING_TOTAL_INTERVAL_SECONDS );
 
-    ISSUE_FUNDS( "propcreator",   HBD_asset( 10'000'000 ) );
-    ISSUE_FUNDS( "propcreator2",  HBD_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "propcreator",   PXS_asset( 10'000'000 ) );
+    ISSUE_FUNDS( "propcreator2",  PXS_asset( 10'000'000 ) );
 
     const auto& _proposal_idx = db->get_index< proposal_index, by_proposal_id >();
 
     auto _start = db->head_block_time();
     auto _end = LAST_POSSIBLE_OLD_VOTE_EXPIRE_TS + fc::days( 100 );
 
-    int64_t _id_proposal_00 = create_proposal( "propcreator", "propcreator", _start, _end, HBD_asset( 100 ), propcreator_private_key, propcreator_post_key );
-    int64_t _id_proposal_01 = create_proposal( "propcreator2", "propcreator2", _start, _end, HBD_asset( 101 ), propcreator2_private_key, propcreator2_post_key );
+    int64_t _id_proposal_00 = create_proposal( "propcreator", "propcreator", _start, _end, PXS_asset( 100 ), propcreator_private_key, propcreator_post_key );
+    int64_t _id_proposal_01 = create_proposal( "propcreator2", "propcreator2", _start, _end, PXS_asset( 101 ), propcreator2_private_key, propcreator2_post_key );
 
-    witness_create( "witness", witness_private_key, "http://something.com", witness_public_key, HIVE_asset( 1000 ) );
+    witness_create( "witness", witness_private_key, "http://something.com", witness_public_key, PIXA_asset( 1000 ) );
     witness_plugin->add_signing_key( witness_private_key );
-    witness_create( "witness2", witness2_private_key, "http://something.com", witness2_public_key, HIVE_asset( 1000 ) );
+    witness_create( "witness2", witness2_private_key, "http://something.com", witness2_public_key, PIXA_asset( 1000 ) );
     witness_plugin->add_signing_key( witness2_private_key );
     generate_block();
 
@@ -778,18 +778,18 @@ BOOST_AUTO_TEST_CASE( proposals_with_decline_voting_rights )
   {
     BOOST_TEST_MESSAGE( "Testing: proposals_with_decline_voting_rights" );
     ACTORS( DEFAULT_VESTING, (acc1)(acc2)(accp)(dwr) );
-    vest( "dwr", HIVE_asset( 1'000 ) );
+    vest( "dwr", PIXA_asset( 1'000 ) );
 
     generate_block();
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     const fc::time_point_sec LAST_POSSIBLE_OLD_VOTE_EXPIRE_TS = HARDFORK_1_25_FIRST_GOVERNANCE_VOTE_EXPIRE_TIMESTAMP + HIVE_HARDFORK_1_25_MAX_OLD_GOVERNANCE_VOTE_EXPIRE_SHIFT;
     const fc::time_point_sec hardfork_25_time( HIVE_HARDFORK_1_25_TIME );
 
-    ISSUE_FUNDS( "accp", HBD_asset( 10'000'000 ) );
-    int64_t proposal_1 = create_proposal( "accp", "acc1", hardfork_25_time - fc::days( 50 ), LAST_POSSIBLE_OLD_VOTE_EXPIRE_TS + fc::days( 50 ), HBD_asset( 100 ), accp_private_key );
-    int64_t proposal_2 = create_proposal( "accp", "acc2", hardfork_25_time - fc::days( 150 ), LAST_POSSIBLE_OLD_VOTE_EXPIRE_TS + fc::days( 150 ), HBD_asset( 100 ), accp_private_key );
+    ISSUE_FUNDS( "accp", PXS_asset( 10'000'000 ) );
+    int64_t proposal_1 = create_proposal( "accp", "acc1", hardfork_25_time - fc::days( 50 ), LAST_POSSIBLE_OLD_VOTE_EXPIRE_TS + fc::days( 50 ), PXS_asset( 100 ), accp_private_key );
+    int64_t proposal_2 = create_proposal( "accp", "acc2", hardfork_25_time - fc::days( 150 ), LAST_POSSIBLE_OLD_VOTE_EXPIRE_TS + fc::days( 150 ), PXS_asset( 100 ), accp_private_key );
     generate_block();
 
     generate_blocks( hardfork_25_time - fc::days( 201 ) );
@@ -839,7 +839,7 @@ BOOST_AUTO_TEST_CASE( db_remove_expired_governance_votes_threshold_exceeded )
   {
     BOOST_TEST_MESSAGE( "Testing: db_remove_expired_governance_votes when threshold stops processing" );
 
-    ACTORS( HIVE_asset( 50'000 ),
+    ACTORS( PIXA_asset( 50'000 ),
     (a00)(a01)(a02)(a03)(a04)(a05)(a06)(a07)(a08)(a09)
     (a10)(a11)(a12)(a13)(a14)(a15)(a16)(a17)(a18)(a19)
     (a20)(a21)(a22)(a23)(a24)(a25)(a26)(a27)(a28)(a29)
@@ -878,7 +878,7 @@ BOOST_AUTO_TEST_CASE( db_remove_expired_governance_votes_threshold_exceeded )
     for (const auto& witness : witnesses)
     {
       private_key_type witness_key = generate_private_key( witness.account + "_key" );
-      witness_create( witness.account, witness.active_key, "foo.bar", witness_key.get_public_key(), HIVE_asset( 1000 ) );
+      witness_create( witness.account, witness.active_key, "foo.bar", witness_key.get_public_key(), PIXA_asset( 1000 ) );
       witness_plugin->add_signing_key( witness_key );
     }
     generate_block();
@@ -898,12 +898,12 @@ BOOST_AUTO_TEST_CASE( db_remove_expired_governance_votes_threshold_exceeded )
 
     for(const auto& user : users )
     {
-      ISSUE_FUNDS( user.account, HBD_asset( 100'000'000 ) );
-      proposals.push_back(create_proposal( user.account, receiver,  proposals_start_time,  proposals_end_time, HBD_asset( 100 ), user.active_key, user.post_key));
+      ISSUE_FUNDS( user.account, PXS_asset( 100'000'000 ) );
+      proposals.push_back(create_proposal( user.account, receiver,  proposals_start_time,  proposals_end_time, PXS_asset( 100 ), user.active_key, user.post_key));
     }
 
     generate_block();
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     fc::time_point_sec expiration_time = db->head_block_time() + HIVE_GOVERNANCE_VOTE_EXPIRATION_PERIOD;
@@ -1074,7 +1074,7 @@ BOOST_AUTO_TEST_CASE( generating_payments )
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
@@ -1083,16 +1083,16 @@ BOOST_AUTO_TEST_CASE( generating_payments )
 
     auto start_date = db->head_block_time();
 
-    auto daily_pay = HBD_asset( 48'000 );
-    auto hourly_pay = HBD_asset( 2'000 );
+    auto daily_pay = PXS_asset( 48'000 );
+    auto hourly_pay = PXS_asset( 2'000 );
 
-    ISSUE_FUNDS( creator, HIVE_asset( 160'000 ) );
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
-    ISSUE_FUNDS( db->get_treasury_name(), HBD_asset( 5'000'000 ) );
+    ISSUE_FUNDS( creator, PIXA_asset( 160'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
+    ISSUE_FUNDS( db->get_treasury_name(), PXS_asset( 5'000'000 ) );
 
     auto voter_01 = "carol";
 
-    vest( voter_01, HIVE_asset( 1'000 ) );
+    vest( voter_01, PIXA_asset( 1'000 ) );
 
     //Due to the `delaying votes` algorithm, generate blocks for 30 days in order to activate whole votes' pool ( take a look at `HIVE_DELAYED_VOTING_TOTAL_INTERVAL_SECONDS` )
     start_date += fc::seconds( HIVE_DELAYED_VOTING_TOTAL_INTERVAL_SECONDS );
@@ -1108,13 +1108,13 @@ BOOST_AUTO_TEST_CASE( generating_payments )
     vote_proposal( voter_01, { id_proposal_00 }, true/*approve*/, carol_private_key );
     generate_blocks( 1 );
     //skipping interest generating is necessary
-    fund( receiver, HBD_asset( 1 ) );
+    fund( receiver, PXS_asset( 1 ) );
     generate_block( 5 );
-    fund( db->get_treasury_name(), HBD_asset( 1 ) );
+    fund( db->get_treasury_name(), PXS_asset( 1 ) );
     generate_block( 5 );
 
     const auto& dgpo = db->get_dynamic_global_properties();
-    auto old_hbd_supply = dgpo.get_current_hbd_supply();
+    auto old_pxs_supply = dgpo.get_current_pxs_supply();
 
 
     const account_object& _creator = db->get_account( creator );
@@ -1125,25 +1125,25 @@ BOOST_AUTO_TEST_CASE( generating_payments )
     {
       BOOST_TEST_MESSAGE( "---Payment---" );
 
-      auto before_creator_hbd_balance = _creator.get_hbd_balance();
-      auto before_receiver_hbd_balance = _receiver.get_hbd_balance();
-      auto before_voter_01_hbd_balance = _voter_01.get_hbd_balance();
-      auto before_treasury_hbd_balance = _treasury.get_hbd_balance();
+      auto before_creator_pxs_balance = _creator.get_pxs_balance();
+      auto before_receiver_pxs_balance = _receiver.get_pxs_balance();
+      auto before_voter_01_pxs_balance = _voter_01.get_pxs_balance();
+      auto before_treasury_pxs_balance = _treasury.get_pxs_balance();
 
       auto next_block = get_nr_blocks_until_proposal_maintenance_block();
       generate_blocks( next_block - 1 );
       generate_blocks( 1 );
 
-      auto treasury_hbd_inflation = dgpo.get_current_hbd_supply() - old_hbd_supply;
-      auto after_creator_hbd_balance = _creator.get_hbd_balance();
-      auto after_receiver_hbd_balance = _receiver.get_hbd_balance();
-      auto after_voter_01_hbd_balance = _voter_01.get_hbd_balance();
-      auto after_treasury_hbd_balance = _treasury.get_hbd_balance();
+      auto treasury_pxs_inflation = dgpo.get_current_pxs_supply() - old_pxs_supply;
+      auto after_creator_pxs_balance = _creator.get_pxs_balance();
+      auto after_receiver_pxs_balance = _receiver.get_pxs_balance();
+      auto after_voter_01_pxs_balance = _voter_01.get_pxs_balance();
+      auto after_treasury_pxs_balance = _treasury.get_pxs_balance();
 
-      BOOST_REQUIRE_EQUAL( before_creator_hbd_balance, after_creator_hbd_balance );
-      BOOST_REQUIRE_EQUAL( before_receiver_hbd_balance, after_receiver_hbd_balance - hourly_pay );
-      BOOST_REQUIRE_EQUAL( before_voter_01_hbd_balance, after_voter_01_hbd_balance );
-      BOOST_REQUIRE_EQUAL( before_treasury_hbd_balance, after_treasury_hbd_balance - treasury_hbd_inflation + hourly_pay );
+      BOOST_REQUIRE_EQUAL( before_creator_pxs_balance, after_creator_pxs_balance );
+      BOOST_REQUIRE_EQUAL( before_receiver_pxs_balance, after_receiver_pxs_balance - hourly_pay );
+      BOOST_REQUIRE_EQUAL( before_voter_01_pxs_balance, after_voter_01_pxs_balance );
+      BOOST_REQUIRE_EQUAL( before_treasury_pxs_balance, after_treasury_pxs_balance - treasury_pxs_inflation + hourly_pay );
     }
 
     validate_database();
@@ -1160,13 +1160,13 @@ BOOST_AUTO_TEST_CASE( generating_payments_01 )
     ACTORS( DEFAULT_VESTING, (tester001)(tester002)(tester003)(tester004)(tester005) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
     const auto nr_proposals = 5;
     std::vector< int64_t > proposals_id;
-    flat_map< std::string, HBD_asset > before_tbds;
+    flat_map< std::string, PXS_asset > before_tbds;
 
     struct initial_data
     {
@@ -1185,9 +1185,9 @@ BOOST_AUTO_TEST_CASE( generating_payments_01 )
 
     for( auto item : inits )
     {
-      ISSUE_FUNDS( item.account, HIVE_asset( 400'000 ) );
-      ISSUE_FUNDS( item.account, HBD_asset( 400'000 ) );
-      vest( item.account, HIVE_asset( 300'000 ) );
+      ISSUE_FUNDS( item.account, PIXA_asset( 400'000 ) );
+      ISSUE_FUNDS( item.account, PXS_asset( 400'000 ) );
+      vest( item.account, PIXA_asset( 300'000 ) );
     }
 
     auto start_date = db->head_block_time();
@@ -1199,10 +1199,10 @@ BOOST_AUTO_TEST_CASE( generating_payments_01 )
 
     auto end_date = start_date + end_time_shift;
 
-    auto daily_pay = HBD_asset( 24'000 );
-    auto paid = HBD_asset( 5'000 );
+    auto daily_pay = PXS_asset( 24'000 );
+    auto paid = PXS_asset( 5'000 );
 
-    ISSUE_FUNDS( db->get_treasury_name(), HBD_asset( 5'000'000'000 ) );
+    ISSUE_FUNDS( db->get_treasury_name(), PXS_asset( 5'000'000'000 ) );
     //=====================preparing=====================
     for( int32_t i = 0; i < nr_proposals; ++i )
     {
@@ -1221,7 +1221,7 @@ BOOST_AUTO_TEST_CASE( generating_payments_01 )
     for( auto item : inits )
     {
       const account_object& account = db->get_account( item.account );
-      before_tbds[ item.account ] = account.get_hbd_balance();
+      before_tbds[ item.account ] = account.get_pxs_balance();
     }
 
     generate_blocks( start_date + end_time_shift + fc::seconds( 10 ), false );
@@ -1229,7 +1229,7 @@ BOOST_AUTO_TEST_CASE( generating_payments_01 )
     for( auto item : inits )
     {
       const account_object& account = db->get_account( item.account );
-      auto after_tbd = account.get_hbd_balance();
+      auto after_tbd = account.get_pxs_balance();
       auto before_tbd = before_tbds[ item.account ];
       BOOST_REQUIRE_EQUAL( before_tbd, after_tbd - paid );
     }
@@ -1254,11 +1254,11 @@ BOOST_AUTO_TEST_CASE( generating_payments_02 )
         );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
-    flat_map< std::string, HBD_asset > before_tbds;
+    flat_map< std::string, PXS_asset > before_tbds;
 
     struct initial_data
     {
@@ -1282,9 +1282,9 @@ BOOST_AUTO_TEST_CASE( generating_payments_02 )
 
     for( auto item : inits )
     {
-      ISSUE_FUNDS( item.account, HIVE_asset( 400'000 ) );
-      ISSUE_FUNDS( item.account, HBD_asset( 400'000 ) );
-      vest( item.account, HIVE_asset( 300'000 ) );
+      ISSUE_FUNDS( item.account, PIXA_asset( 400'000 ) );
+      ISSUE_FUNDS( item.account, PXS_asset( 400'000 ) );
+      vest( item.account, PIXA_asset( 300'000 ) );
     }
 
     const auto& proposal_idx = db->get_index< proposal_index >().indices().get< by_proposal_id >();
@@ -1295,10 +1295,10 @@ BOOST_AUTO_TEST_CASE( generating_payments_02 )
 
     const auto block_interval = fc::seconds( HIVE_BLOCK_INTERVAL );
 
-    ISSUE_FUNDS( db->get_treasury_name(), HBD_asset( 5'000'000'000 ) );
+    ISSUE_FUNDS( db->get_treasury_name(), PXS_asset( 5'000'000'000 ) );
     //=====================preparing=====================
     auto item_creator = inits[ 0 ];
-    create_proposal( item_creator.account, item_creator.account, start_date, end_date, HBD_asset( 24'000 ), item_creator.active_key, item_creator.post_key );
+    create_proposal( item_creator.account, item_creator.account, start_date, end_date, PXS_asset( 24'000 ), item_creator.active_key, item_creator.post_key );
     generate_block();
 
     for( auto item : inits )
@@ -1307,7 +1307,7 @@ BOOST_AUTO_TEST_CASE( generating_payments_02 )
       generate_block();
 
       const account_object& account = db->get_account( item.account );
-      before_tbds[ item.account ] = account.get_hbd_balance();
+      before_tbds[ item.account ] = account.get_pxs_balance();
     }
 
     generate_blocks( start_date, false );
@@ -1340,7 +1340,7 @@ BOOST_AUTO_TEST_CASE( generating_payments_02 )
     for( auto item : inits )
     {
       const account_object& account = db->get_account( item.account );
-      auto after_tbd = account.get_hbd_balance();
+      auto after_tbd = account.get_pxs_balance();
       auto before_tbd = before_tbds[ item.account ];
       BOOST_REQUIRE_EQUAL( before_tbd, after_tbd );
     }
@@ -1363,12 +1363,12 @@ BOOST_AUTO_TEST_CASE( generating_payments_03 )
     ACTORS( DEFAULT_VESTING, (tester00)(tester01)(tester02) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
     std::vector< int64_t > proposals_id;
-    flat_map< std::string, HBD_asset > before_tbds;
+    flat_map< std::string, PXS_asset > before_tbds;
 
     struct initial_data
     {
@@ -1385,15 +1385,15 @@ BOOST_AUTO_TEST_CASE( generating_payments_03 )
     {
       if( item.first == tester02_account )
       {
-        ISSUE_FUNDS( item.first, HIVE_asset( 41'000 ) );
-        ISSUE_FUNDS( item.first, HBD_asset( 41'000 ) );
-        vest( item.first, HIVE_asset( 31'000 ) );
+        ISSUE_FUNDS( item.first, PIXA_asset( 41'000 ) );
+        ISSUE_FUNDS( item.first, PXS_asset( 41'000 ) );
+        vest( item.first, PIXA_asset( 31'000 ) );
       }
       else
       {
-        ISSUE_FUNDS( item.first, HIVE_asset( 40'000 ) );
-        ISSUE_FUNDS( item.first, HBD_asset( 40'000 ) );
-        vest( item.first, HIVE_asset( 30'000 ) );
+        ISSUE_FUNDS( item.first, PIXA_asset( 40'000 ) );
+        ISSUE_FUNDS( item.first, PXS_asset( 40'000 ) );
+        vest( item.first, PIXA_asset( 30'000 ) );
       }
     }
 
@@ -1408,10 +1408,10 @@ BOOST_AUTO_TEST_CASE( generating_payments_03 )
     std::vector< fc::microseconds > end_time_shift = { fc::hours( 1 ), fc::hours( 2 ), fc::hours( 3 ), fc::hours( 4 ) };
     auto end_date = start_date + end_time_shift[ 3 ];
 
-    auto huge_daily_pay = HBD_asset( 50'000'001'000 );
-    auto daily_pay = HBD_asset( 24'000 );
+    auto huge_daily_pay = PXS_asset( 50'000'001'000 );
+    auto daily_pay = PXS_asset( 24'000 );
 
-    ISSUE_FUNDS( db->get_treasury_name(), HBD_asset( 5'000'000'000 ) );
+    ISSUE_FUNDS( db->get_treasury_name(), PXS_asset( 5'000'000'000 ) );
     //=====================preparing=====================
     uint16_t i = 0;
     for( auto item : inits )
@@ -1430,10 +1430,10 @@ BOOST_AUTO_TEST_CASE( generating_payments_03 )
     for( auto item : inits )
     {
       const account_object& account = db->get_account( item.first );
-      before_tbds[ item.first ] = account.get_hbd_balance();
+      before_tbds[ item.first ] = account.get_pxs_balance();
     }
 
-    auto payment_checker = [&]( const std::vector< HBD_asset >& payouts )
+    auto payment_checker = [&]( const std::vector< PXS_asset >& payouts )
     {
       //idump( (inits) );
       idump( (payouts) );
@@ -1441,7 +1441,7 @@ BOOST_AUTO_TEST_CASE( generating_payments_03 )
       for( const auto& item : inits )
       {
         const account_object& account = db->get_account( item.first );
-        auto after_tbd = account.get_hbd_balance();
+        auto after_tbd = account.get_pxs_balance();
         auto before_tbd = before_tbds[ item.first ];
         idump( (before_tbd) );
         idump( (after_tbd) );
@@ -1465,7 +1465,7 @@ BOOST_AUTO_TEST_CASE( generating_payments_03 )
       `tester02` - no payout, because of lack of votes
     */
     ilog("");
-    payment_checker( { HBD_asset( 1'000 ), HBD_asset( 1'000 ), HBD_asset( 0 ) } );
+    payment_checker( { PXS_asset( 1'000 ), PXS_asset( 1'000 ), PXS_asset( 0 ) } );
 
     {
       BOOST_TEST_MESSAGE( "Setting proxy. The account `tester01` don't want to vote. Every decision is made by account `tester00`" );
@@ -1479,7 +1479,7 @@ BOOST_AUTO_TEST_CASE( generating_payments_03 )
       `tester02` - no payout, because of lack of votes
     */
     ilog("");
-    payment_checker( { HBD_asset( 2'000 ), HBD_asset( 1'000 ), HBD_asset( 0 ) } );
+    payment_checker( { PXS_asset( 2'000 ), PXS_asset( 1'000 ), PXS_asset( 0 ) } );
 
     vote_proposal( tester02_account, {2}, true/*approve*/, inits[ tester02_account ].active_key );
     generate_block();
@@ -1491,7 +1491,7 @@ BOOST_AUTO_TEST_CASE( generating_payments_03 )
       `tester02` - got payout, because voted for his proposal
     */
     ilog("");
-    payment_checker( { HBD_asset( 3'000 ), HBD_asset( 1'000 ), HBD_asset( 2'083'236 ) } );
+    payment_checker( { PXS_asset( 3'000 ), PXS_asset( 1'000 ), PXS_asset( 2'083'236 ) } );
 
     {
       BOOST_TEST_MESSAGE( "Proxy doesn't exist. Now proposal with id = 3 has the most votes. This proposal grabs all payouts." );
@@ -1505,7 +1505,7 @@ BOOST_AUTO_TEST_CASE( generating_payments_03 )
       `tester02` - got payout, because voted for his proposal
     */
     ilog("");
-    payment_checker( { HBD_asset( 3'000 ), HBD_asset( 1'000 ), HBD_asset( 4'166'840 ) } );
+    payment_checker( { PXS_asset( 3'000 ), PXS_asset( 1'000 ), PXS_asset( 4'166'840 ) } );
 
     validate_database();
   }
@@ -1521,7 +1521,7 @@ try
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol)(dave) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
@@ -1530,16 +1530,16 @@ try
 
     auto start_date = db->head_block_time();
 
-    auto daily_pay = HBD_asset( 2'378'447 );
-    auto hourly_pay = HBD_asset( 99'101 ); //99.101958(3)
+    auto daily_pay = PXS_asset( 2'378'447 );
+    auto hourly_pay = PXS_asset( 99'101 ); //99.101958(3)
 
-    ISSUE_FUNDS( creator, HIVE_asset( 160'000 ) );
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
-    ISSUE_FUNDS( db->get_treasury_name(), HBD_asset( 500'000'000 ) );
+    ISSUE_FUNDS( creator, PIXA_asset( 160'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
+    ISSUE_FUNDS( db->get_treasury_name(), PXS_asset( 500'000'000 ) );
 
     auto voter_01 = "carol";
 
-    vest( voter_01, HIVE_asset( 1'000 ) );
+    vest( voter_01, PIXA_asset( 1'000 ) );
 
     //Due to the `delaying votes` algorithm, generate blocks for 30 days in order to activate whole votes' pool ( take a look at `HIVE_DELAYED_VOTING_TOTAL_INTERVAL_SECONDS` )
     start_date += fc::seconds( HIVE_DELAYED_VOTING_TOTAL_INTERVAL_SECONDS );
@@ -1556,13 +1556,13 @@ try
     generate_block();
 
     //skipping interest generating is necessary
-    fund( receiver, HBD_asset( 1 ) );
+    fund( receiver, PXS_asset( 1 ) );
     generate_block();
-    fund( db->get_treasury_name(), HBD_asset( 1 ) );
+    fund( db->get_treasury_name(), PXS_asset( 1 ) );
     generate_block();
 
     const auto& dgpo = db->get_dynamic_global_properties();
-    auto old_hbd_supply = dgpo.get_current_hbd_supply();
+    auto old_pxs_supply = dgpo.get_current_pxs_supply();
 
 
     const account_object& _creator = db->get_account( creator );
@@ -1573,26 +1573,26 @@ try
     {
       BOOST_TEST_MESSAGE( "---Payment---" );
 
-      auto before_creator_hbd_balance = _creator.get_hbd_balance();
-      auto before_receiver_hbd_balance = _receiver.get_hbd_balance();
-      auto before_voter_01_hbd_balance = _voter_01.get_hbd_balance();
-      auto before_treasury_hbd_balance = _treasury.get_hbd_balance();
+      auto before_creator_pxs_balance = _creator.get_pxs_balance();
+      auto before_receiver_pxs_balance = _receiver.get_pxs_balance();
+      auto before_voter_01_pxs_balance = _voter_01.get_pxs_balance();
+      auto before_treasury_pxs_balance = _treasury.get_pxs_balance();
 
       auto next_block = get_nr_blocks_until_proposal_maintenance_block();
       generate_blocks( next_block - 1 );
       generate_block();
 
-      auto treasury_hbd_inflation = dgpo.get_current_hbd_supply() - old_hbd_supply;
-      auto after_creator_hbd_balance = _creator.get_hbd_balance();
-      auto after_receiver_hbd_balance = _receiver.get_hbd_balance();
-      auto after_voter_01_hbd_balance = _voter_01.get_hbd_balance();
-      auto after_treasury_hbd_balance = _treasury.get_hbd_balance();
+      auto treasury_pxs_inflation = dgpo.get_current_pxs_supply() - old_pxs_supply;
+      auto after_creator_pxs_balance = _creator.get_pxs_balance();
+      auto after_receiver_pxs_balance = _receiver.get_pxs_balance();
+      auto after_voter_01_pxs_balance = _voter_01.get_pxs_balance();
+      auto after_treasury_pxs_balance = _treasury.get_pxs_balance();
 
-      BOOST_REQUIRE_EQUAL( before_creator_hbd_balance, after_creator_hbd_balance );
+      BOOST_REQUIRE_EQUAL( before_creator_pxs_balance, after_creator_pxs_balance );
 
-      BOOST_REQUIRE_EQUAL( before_receiver_hbd_balance, after_receiver_hbd_balance - hourly_pay );
-      BOOST_REQUIRE_EQUAL( before_voter_01_hbd_balance, after_voter_01_hbd_balance );
-      BOOST_REQUIRE_EQUAL( before_treasury_hbd_balance, after_treasury_hbd_balance - treasury_hbd_inflation + hourly_pay );
+      BOOST_REQUIRE_EQUAL( before_receiver_pxs_balance, after_receiver_pxs_balance - hourly_pay );
+      BOOST_REQUIRE_EQUAL( before_voter_01_pxs_balance, after_voter_01_pxs_balance );
+      BOOST_REQUIRE_EQUAL( before_treasury_pxs_balance, after_treasury_pxs_balance - treasury_pxs_inflation + hourly_pay );
     }
 
     validate_database();
@@ -1609,7 +1609,7 @@ try
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol)(dave) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
@@ -1618,16 +1618,16 @@ try
 
     auto start_date = db->head_block_time();
 
-    auto daily_pay = HBD_asset( 2'378'448 );
-    auto hourly_pay = HBD_asset( 99'102 );
+    auto daily_pay = PXS_asset( 2'378'448 );
+    auto hourly_pay = PXS_asset( 99'102 );
 
-    ISSUE_FUNDS( creator, HIVE_asset( 160'000 ) );
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
-    ISSUE_FUNDS( db->get_treasury_name(), HBD_asset( 500'000'000 ) );
+    ISSUE_FUNDS( creator, PIXA_asset( 160'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
+    ISSUE_FUNDS( db->get_treasury_name(), PXS_asset( 500'000'000 ) );
 
     auto voter_01 = "carol";
 
-    vest( voter_01, HIVE_asset( 1'000 ) );
+    vest( voter_01, PIXA_asset( 1'000 ) );
 
     //Due to the `delaying votes` algorithm, generate blocks for 30 days in order to activate whole votes' pool ( take a look at `HIVE_DELAYED_VOTING_TOTAL_INTERVAL_SECONDS` )
     start_date += fc::seconds( HIVE_DELAYED_VOTING_TOTAL_INTERVAL_SECONDS );
@@ -1644,13 +1644,13 @@ try
     generate_block();
 
     //skipping interest generating is necessary
-    fund( receiver, HBD_asset( 1 ) );
+    fund( receiver, PXS_asset( 1 ) );
     generate_block();
-    fund( db->get_treasury_name(), HBD_asset( 1 ) );
+    fund( db->get_treasury_name(), PXS_asset( 1 ) );
     generate_block();
 
     const auto& dgpo = db->get_dynamic_global_properties();
-    auto old_hbd_supply = dgpo.get_current_hbd_supply();
+    auto old_pxs_supply = dgpo.get_current_pxs_supply();
 
 
     const account_object& _creator = db->get_account( creator );
@@ -1661,25 +1661,25 @@ try
     {
       BOOST_TEST_MESSAGE( "---Payment---" );
 
-      auto before_creator_hbd_balance = _creator.get_hbd_balance();
-      auto before_receiver_hbd_balance = _receiver.get_hbd_balance();
-      auto before_voter_01_hbd_balance = _voter_01.get_hbd_balance();
-      auto before_treasury_hbd_balance = _treasury.get_hbd_balance();
+      auto before_creator_pxs_balance = _creator.get_pxs_balance();
+      auto before_receiver_pxs_balance = _receiver.get_pxs_balance();
+      auto before_voter_01_pxs_balance = _voter_01.get_pxs_balance();
+      auto before_treasury_pxs_balance = _treasury.get_pxs_balance();
 
       auto next_block = get_nr_blocks_until_proposal_maintenance_block();
       generate_blocks( next_block - 1 );
       generate_block();
 
-      auto treasury_hbd_inflation = dgpo.get_current_hbd_supply() - old_hbd_supply;
-      auto after_creator_hbd_balance = _creator.get_hbd_balance();
-      auto after_receiver_hbd_balance = _receiver.get_hbd_balance();
-      auto after_voter_01_hbd_balance = _voter_01.get_hbd_balance();
-      auto after_treasury_hbd_balance = _treasury.get_hbd_balance();
+      auto treasury_pxs_inflation = dgpo.get_current_pxs_supply() - old_pxs_supply;
+      auto after_creator_pxs_balance = _creator.get_pxs_balance();
+      auto after_receiver_pxs_balance = _receiver.get_pxs_balance();
+      auto after_voter_01_pxs_balance = _voter_01.get_pxs_balance();
+      auto after_treasury_pxs_balance = _treasury.get_pxs_balance();
 
-      BOOST_REQUIRE_EQUAL( before_creator_hbd_balance, after_creator_hbd_balance );
-      BOOST_REQUIRE_EQUAL( before_receiver_hbd_balance, after_receiver_hbd_balance - hourly_pay );
-      BOOST_REQUIRE_EQUAL( before_voter_01_hbd_balance, after_voter_01_hbd_balance );
-      BOOST_REQUIRE_EQUAL( before_treasury_hbd_balance, after_treasury_hbd_balance - treasury_hbd_inflation + hourly_pay );
+      BOOST_REQUIRE_EQUAL( before_creator_pxs_balance, after_creator_pxs_balance );
+      BOOST_REQUIRE_EQUAL( before_receiver_pxs_balance, after_receiver_pxs_balance - hourly_pay );
+      BOOST_REQUIRE_EQUAL( before_voter_01_pxs_balance, after_voter_01_pxs_balance );
+      BOOST_REQUIRE_EQUAL( before_treasury_pxs_balance, after_treasury_pxs_balance - treasury_pxs_inflation + hourly_pay );
     }
 
     validate_database();
@@ -1694,10 +1694,10 @@ BOOST_AUTO_TEST_CASE( expired_proposals_forbidden_voting )
     BOOST_TEST_MESSAGE( "Testing: when proposals are expired, then voting on such proposals are not allowed" );
 
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol)(carol1)(carol2) );
-    vest( "alice", HIVE_asset( 50'000 ) ); // alice is creating proposals
+    vest( "alice", PIXA_asset( 50'000 ) ); // alice is creating proposals
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
@@ -1715,9 +1715,9 @@ BOOST_AUTO_TEST_CASE( expired_proposals_forbidden_voting )
     auto start_date_02 = start_time + fc::seconds( 50 );
     auto end_date_02 = start_time + fc::minutes( 200 );
 
-    auto daily_pay = HBD_asset( 100 );
+    auto daily_pay = PXS_asset( 100 );
 
-    ISSUE_FUNDS( creator, HBD_asset( 100'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 100'000 ) );
     //=====================preparing=====================
 
     int64_t id_proposal_00 = create_proposal( creator, receiver, start_date_00, end_date_00, daily_pay, alice_private_key, alice_post_key );
@@ -1774,10 +1774,10 @@ BOOST_AUTO_TEST_CASE( proposals_maintenance )
     BOOST_TEST_MESSAGE( "Testing: removing inactive proposals" );
 
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
-    vest( "alice", HIVE_asset( 50'000 ) ); // alice is creating proposals
+    vest( "alice", PIXA_asset( 50'000 ) ); // alice is creating proposals
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
@@ -1795,9 +1795,9 @@ BOOST_AUTO_TEST_CASE( proposals_maintenance )
     auto start_date_02 = start_time + fc::seconds( 50 );
     auto end_date_02 = start_time + fc::minutes( 20 );
 
-    auto daily_pay = HBD_asset( 100 );
+    auto daily_pay = PXS_asset( 100 );
 
-    ISSUE_FUNDS( creator, HBD_asset( 100'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 100'000 ) );
     //=====================preparing=====================
 
     int64_t id_proposal_00 = create_proposal( creator, receiver, start_date_00, end_date_00, daily_pay, alice_private_key, alice_post_key );
@@ -1864,10 +1864,10 @@ BOOST_AUTO_TEST_CASE( proposal_object_apply )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
-    HBD_asset fee( HIVE_TREASURY_FEE );
+    PXS_asset fee( HIVE_TREASURY_FEE );
 
     auto creator = "alice";
     auto receiver = "bob";
@@ -1875,14 +1875,14 @@ BOOST_AUTO_TEST_CASE( proposal_object_apply )
     auto start_date = db->head_block_time() + fc::days( 1 );
     auto end_date = start_date + fc::days( 20 );
 
-    HBD_asset daily_pay( 100 );
+    PXS_asset daily_pay( 100 );
 
     auto subject = "hello";
     auto permlink = "somethingpermlink";
 
     post_comment_with_block_generation(creator, permlink, "title", "body", "test", alice_post_key);
 
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
 
     signed_transaction tx;
 
@@ -1890,9 +1890,9 @@ BOOST_AUTO_TEST_CASE( proposal_object_apply )
     const account_object& before_alice_account = db->get_account( creator );
     const account_object& before_bob_account = db->get_account( receiver );
 
-    auto before_alice_hbd_balance = before_alice_account.get_hbd_balance();
-    auto before_bob_hbd_balance = before_bob_account.get_hbd_balance();
-    auto before_treasury_balance = before_treasury_account.get_hbd_balance();
+    auto before_alice_pxs_balance = before_alice_account.get_pxs_balance();
+    auto before_bob_pxs_balance = before_bob_account.get_pxs_balance();
+    auto before_treasury_balance = before_treasury_account.get_pxs_balance();
 
     create_proposal_operation op;
 
@@ -1916,9 +1916,9 @@ BOOST_AUTO_TEST_CASE( proposal_object_apply )
     const account_object& after_alice_account = db->get_account( creator );
     const account_object& after_bob_account = db->get_account( receiver );
 
-    auto after_alice_hbd_balance = after_alice_account.get_hbd_balance();
-    auto after_bob_hbd_balance = after_bob_account.get_hbd_balance();
-    auto after_treasury_balance = after_treasury_account.get_hbd_balance();
+    auto after_alice_pxs_balance = after_alice_account.get_pxs_balance();
+    auto after_bob_pxs_balance = after_bob_account.get_pxs_balance();
+    auto after_treasury_balance = after_treasury_account.get_pxs_balance();
 
     generate_block();
 
@@ -1930,8 +1930,8 @@ BOOST_AUTO_TEST_CASE( proposal_object_apply )
       BOOST_REQUIRE_EQUAL( fee_op.fee, fee );
     }
 
-    BOOST_REQUIRE_EQUAL( before_alice_hbd_balance, after_alice_hbd_balance + fee );
-    BOOST_REQUIRE_EQUAL( before_bob_hbd_balance, after_bob_hbd_balance );
+    BOOST_REQUIRE_EQUAL( before_alice_pxs_balance, after_alice_pxs_balance + fee );
+    BOOST_REQUIRE_EQUAL( before_bob_pxs_balance, after_bob_pxs_balance );
     /// Fee shall be paid to treasury account.
     BOOST_REQUIRE_EQUAL( before_treasury_balance, after_treasury_balance - fee );
 
@@ -1961,7 +1961,7 @@ BOOST_AUTO_TEST_CASE( proposal_object_apply_fee_increase )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     auto creator = "alice";
@@ -1971,16 +1971,16 @@ BOOST_AUTO_TEST_CASE( proposal_object_apply_fee_increase )
 
     auto start_date = db->head_block_time() + fc::days( 1 );
     auto end_date = start_date + fc::days( proposal_duration );
-    HBD_asset fee( HIVE_TREASURY_FEE + extra_days * HIVE_PROPOSAL_FEE_INCREASE_AMOUNT );
+    PXS_asset fee( HIVE_TREASURY_FEE + extra_days * HIVE_PROPOSAL_FEE_INCREASE_AMOUNT );
 
-    HBD_asset daily_pay( 100 );
+    PXS_asset daily_pay( 100 );
 
     auto subject = "hello";
     auto permlink = "somethingpermlink";
 
     post_comment_with_block_generation(creator, permlink, "title", "body", "test", alice_post_key);
 
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
 
     signed_transaction tx;
 
@@ -1988,9 +1988,9 @@ BOOST_AUTO_TEST_CASE( proposal_object_apply_fee_increase )
     const account_object& before_alice_account = db->get_account( creator );
     const account_object& before_bob_account = db->get_account( receiver );
 
-    auto before_alice_hbd_balance = before_alice_account.get_hbd_balance();
-    auto before_bob_hbd_balance = before_bob_account.get_hbd_balance();
-    auto before_treasury_balance = before_treasury_account.get_hbd_balance();
+    auto before_alice_pxs_balance = before_alice_account.get_pxs_balance();
+    auto before_bob_pxs_balance = before_bob_account.get_pxs_balance();
+    auto before_treasury_balance = before_treasury_account.get_pxs_balance();
 
     create_proposal_operation op;
 
@@ -2014,9 +2014,9 @@ BOOST_AUTO_TEST_CASE( proposal_object_apply_fee_increase )
     const account_object& after_alice_account = db->get_account( creator );
     const account_object& after_bob_account = db->get_account( receiver );
 
-    auto after_alice_hbd_balance = after_alice_account.get_hbd_balance();
-    auto after_bob_hbd_balance = after_bob_account.get_hbd_balance();
-    auto after_treasury_balance = after_treasury_account.get_hbd_balance();
+    auto after_alice_pxs_balance = after_alice_account.get_pxs_balance();
+    auto after_bob_pxs_balance = after_bob_account.get_pxs_balance();
+    auto after_treasury_balance = after_treasury_account.get_pxs_balance();
 
     generate_block();
 
@@ -2028,8 +2028,8 @@ BOOST_AUTO_TEST_CASE( proposal_object_apply_fee_increase )
       BOOST_REQUIRE_EQUAL( fee_op.fee, fee );
     }
 
-    BOOST_REQUIRE_EQUAL( before_alice_hbd_balance, after_alice_hbd_balance + fee );
-    BOOST_REQUIRE_EQUAL( before_bob_hbd_balance, after_bob_hbd_balance );
+    BOOST_REQUIRE_EQUAL( before_alice_pxs_balance, after_alice_pxs_balance + fee );
+    BOOST_REQUIRE_EQUAL( before_bob_pxs_balance, after_bob_pxs_balance );
     /// Fee shall be paid to treasury account.
     BOOST_REQUIRE_EQUAL( before_treasury_balance, after_treasury_balance - fee );
 
@@ -2059,7 +2059,7 @@ BOOST_AUTO_TEST_CASE( proposal_vote_object_apply )
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol)(dan) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     auto creator = "alice";
@@ -2068,9 +2068,9 @@ BOOST_AUTO_TEST_CASE( proposal_vote_object_apply )
     auto start_date = db->head_block_time() + fc::days( 1 );
     auto end_date = start_date + fc::days( 2 );
 
-    auto daily_pay = HBD_asset( 100 );
+    auto daily_pay = PXS_asset( 100 );
 
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
 
     int64_t id_proposal_00 = create_proposal( creator, receiver, start_date, end_date, daily_pay, alice_private_key, alice_post_key );
 
@@ -2125,10 +2125,10 @@ BOOST_AUTO_TEST_CASE( proposal_vote_object_01_apply )
     BOOST_TEST_MESSAGE( "Testing: proposal_vote_object_operation" );
 
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol)(dan) );
-    vest( "alice", HIVE_asset( 50'000 ) ); // alice is creating proposals
+    vest( "alice", PIXA_asset( 50'000 ) ); // alice is creating proposals
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     auto creator = "alice";
@@ -2137,11 +2137,11 @@ BOOST_AUTO_TEST_CASE( proposal_vote_object_01_apply )
     auto start_date = db->head_block_time() + fc::days( 1 );
     auto end_date = start_date + fc::days( 2 );
 
-    auto daily_pay_00 = HBD_asset( 100 );
-    auto daily_pay_01 = HBD_asset( 101 );
-    auto daily_pay_02 = HBD_asset( 102 );
+    auto daily_pay_00 = PXS_asset( 100 );
+    auto daily_pay_01 = PXS_asset( 101 );
+    auto daily_pay_02 = PXS_asset( 102 );
 
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
 
     int64_t id_proposal_00 = create_proposal( creator, receiver, start_date, end_date, daily_pay_00, alice_private_key, alice_post_key );
     int64_t id_proposal_01 = create_proposal( creator, receiver, start_date, end_date, daily_pay_01, alice_private_key, alice_post_key );
@@ -2369,16 +2369,16 @@ BOOST_AUTO_TEST_CASE( create_proposal_000 )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     auto creator    = "alice";
     auto receiver   = "bob";
     auto start_date = db->head_block_time() + fc::days( 1 );
     auto end_date   = start_date + fc::days( 2 );
-    auto daily_pay  = HBD_asset( 100 );
+    auto daily_pay  = PXS_asset( 100 );
 
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
     {
       int64_t proposal = create_proposal( creator, receiver, start_date, end_date, daily_pay, alice_private_key, alice_post_key );
       BOOST_REQUIRE_GE( proposal, 0 );
@@ -2396,7 +2396,7 @@ BOOST_AUTO_TEST_CASE( create_proposal_001 )
       dhf_database::create_proposal_data cpd(db->head_block_time());
       ACTORS( DEFAULT_VESTING, (alice)(bob) );
       generate_block();
-      ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+      ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
       HIVE_REQUIRE_THROW( create_proposal( "", cpd.receiver, cpd.start_date, cpd.end_date, cpd.daily_pay, alice_private_key, alice_post_key ), fc::exception);
 
     }
@@ -2413,7 +2413,7 @@ BOOST_AUTO_TEST_CASE( create_proposal_002 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     HIVE_REQUIRE_THROW(create_proposal( cpd.creator, "", cpd.start_date, cpd.end_date, cpd.daily_pay, alice_private_key, alice_post_key ), fc::exception);
     validate_database();
   }
@@ -2428,7 +2428,7 @@ BOOST_AUTO_TEST_CASE( create_proposal_003 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     cpd.start_date = cpd.end_date + fc::days(2);
     HIVE_REQUIRE_THROW(create_proposal( cpd.creator, cpd.receiver, cpd.start_date, cpd.end_date, cpd.daily_pay, alice_private_key, alice_post_key ), fc::exception);
     validate_database();
@@ -2444,7 +2444,7 @@ BOOST_AUTO_TEST_CASE( create_proposal_004 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     cpd.end_date = cpd.start_date - fc::days(2);
     HIVE_REQUIRE_THROW(create_proposal( cpd.creator, cpd.receiver, cpd.start_date, cpd.end_date, cpd.daily_pay, alice_private_key, alice_post_key ), fc::exception);
     validate_database();
@@ -2464,10 +2464,10 @@ BOOST_AUTO_TEST_CASE( create_proposal_005 )
     cpo.receiver   = "bob";
     cpo.start_date = db->head_block_time() + fc::days( 1 );
     cpo.end_date   = cpo.start_date + fc::days( 2 );
-    cpo.daily_pay  = asset( 100, HBD_SYMBOL );
+    cpo.daily_pay  = asset( 100, PXS_SYMBOL );
     cpo.subject    = "";
     cpo.permlink        = "http:://something.html";
-    ISSUE_FUNDS( cpo.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpo.creator, PXS_asset( 80'000 ) );
     generate_block();
     signed_transaction tx;
     tx.operations.push_back( cpo );
@@ -2491,10 +2491,10 @@ BOOST_AUTO_TEST_CASE( create_proposal_006 )
     cpo.receiver   = "bob";
     cpo.start_date = db->head_block_time() + fc::days( 1 );
     cpo.end_date   = cpo.start_date + fc::days( 2 );
-    cpo.daily_pay  = asset( 100, HBD_SYMBOL );
+    cpo.daily_pay  = asset( 100, PXS_SYMBOL );
     cpo.subject    = "very very very very very very long long long long long long subject subject subject subject subject subject";
     cpo.permlink        = "http:://something.html";
-    ISSUE_FUNDS( cpo.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpo.creator, PXS_asset( 80'000 ) );
     generate_block();
     signed_transaction tx;
     tx.operations.push_back( cpo );
@@ -2518,7 +2518,7 @@ BOOST_AUTO_TEST_CASE( create_proposal_007 )
     cpo.receiver   = "bob";
     cpo.start_date = db->head_block_time() + fc::days( 1 );
     cpo.end_date   = cpo.start_date + fc::days( 2 );
-    cpo.daily_pay  = asset( 100, HBD_SYMBOL );
+    cpo.daily_pay  = asset( 100, PXS_SYMBOL );
     cpo.subject    = "subject";
     cpo.permlink        = "http:://something.html";
 
@@ -2548,11 +2548,11 @@ BOOST_AUTO_TEST_CASE( create_proposal_008 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
     generate_block();
     cpd.end_date = cpd.start_date + fc::days(20);
-    cpd.daily_pay = HBD_asset( -10 );
+    cpd.daily_pay = PXS_asset( -10 );
     HIVE_REQUIRE_THROW(create_proposal( cpd.creator, cpd.receiver, cpd.start_date, cpd.end_date, cpd.daily_pay, alice_private_key, alice_post_key ), fc::exception);
     validate_database();
   }
@@ -2567,11 +2567,11 @@ BOOST_AUTO_TEST_CASE( create_proposal_009 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 15'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 15'000 ) );
     generate_block();
     generate_block();
     cpd.end_date = cpd.start_date + fc::days(80);
-    cpd.daily_pay = HBD_asset( 10 );
+    cpd.daily_pay = PXS_asset( 10 );
     HIVE_REQUIRE_THROW(create_proposal( cpd.creator, cpd.receiver, cpd.start_date, cpd.end_date, cpd.daily_pay, alice_private_key, alice_post_key ), fc::exception);
     validate_database();
   }
@@ -2586,7 +2586,7 @@ BOOST_AUTO_TEST_CASE( update_proposal_votes_000 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
 
     int64_t proposal_1 = create_proposal( cpd.creator, cpd.receiver, cpd.start_date, cpd.end_date, cpd.daily_pay, alice_private_key, alice_post_key );
@@ -2606,7 +2606,7 @@ BOOST_AUTO_TEST_CASE( update_proposal_votes_001 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
 
     int64_t proposal_1 = create_proposal( cpd.creator, cpd.receiver, cpd.start_date, cpd.end_date, cpd.daily_pay, alice_private_key, alice_post_key );
@@ -2626,7 +2626,7 @@ BOOST_AUTO_TEST_CASE( update_proposal_votes_002 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
 
     int64_t proposal_1 = create_proposal( cpd.creator, cpd.receiver, cpd.start_date, cpd.end_date, cpd.daily_pay, alice_private_key, alice_post_key );
@@ -2646,7 +2646,7 @@ BOOST_AUTO_TEST_CASE( update_proposal_votes_003 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
 
     std::vector< int64_t > proposals = {-1, -2, -3, -4, -5};
@@ -2664,7 +2664,7 @@ BOOST_AUTO_TEST_CASE( update_proposal_votes_004 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
 
     int64_t proposal_1 = create_proposal( cpd.creator, cpd.receiver, cpd.start_date, cpd.end_date, cpd.daily_pay, alice_private_key, alice_post_key );
@@ -2684,7 +2684,7 @@ BOOST_AUTO_TEST_CASE( update_proposal_votes_005 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
 
     std::vector< int64_t > proposals;
@@ -2736,7 +2736,7 @@ BOOST_AUTO_TEST_CASE( remove_proposal_000 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
 
     int64_t proposal_1 = create_proposal( cpd.creator, cpd.receiver, cpd.start_date, cpd.end_date, cpd.daily_pay, alice_private_key, alice_post_key );
@@ -2766,9 +2766,9 @@ BOOST_AUTO_TEST_CASE( remove_proposal_001 )
     BOOST_TEST_MESSAGE( "Testing: remove proposal: basic verification operation - proposal removal (one from many)." );
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
-    vest( "alice", HIVE_asset( 50'000 ) ); // alice is creating proposals
+    vest( "alice", PIXA_asset( 50'000 ) ); // alice is creating proposals
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
 
 
@@ -2819,9 +2819,9 @@ BOOST_AUTO_TEST_CASE( remove_proposal_002 )
     BOOST_TEST_MESSAGE( "Testing: remove proposal: basic verification operation - proposal removal (n from many in two steps)." );
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
-    vest( "alice", HIVE_asset( 50'000 ) ); // alice is creating proposals
+    vest( "alice", PIXA_asset( 50'000 ) ); // alice is creating proposals
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
 
     int64_t proposal = -1;
@@ -2867,9 +2867,9 @@ BOOST_AUTO_TEST_CASE( remove_proposal_003 )
     BOOST_TEST_MESSAGE( "Testing: remove proposal: basic verification operation - proper proposal deletion check (one at time)." );
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
-    vest( "alice", HIVE_asset( 50'000 ) ); // alice is creating proposals
+    vest( "alice", PIXA_asset( 50'000 ) ); // alice is creating proposals
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
 
     int64_t proposal = -1;
@@ -2915,9 +2915,9 @@ BOOST_AUTO_TEST_CASE( remove_proposal_004 )
     BOOST_TEST_MESSAGE( "Testing: remove proposal: basic verification operation - proper proposal deletion check (two at one time)." );
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
-    vest( "alice", HIVE_asset( 50'000 ) ); // alice is creating proposals
+    vest( "alice", PIXA_asset( 50'000 ) ); // alice is creating proposals
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
 
     int64_t proposal = -1;
@@ -2982,7 +2982,7 @@ BOOST_AUTO_TEST_CASE( remove_proposal_005 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
 
     int64_t proposal_1 = create_proposal( cpd.creator, cpd.receiver, cpd.start_date, cpd.end_date, cpd.daily_pay, alice_private_key, alice_post_key );
@@ -3018,9 +3018,9 @@ BOOST_AUTO_TEST_CASE( remove_proposal_006 )
     BOOST_TEST_MESSAGE( "Testing: remove proposal: basic verification operation - remove proposal with votes and one voteless at same time." );
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
-    vest( "alice", HIVE_asset( 50'000 ) ); // alice is creating proposals
+    vest( "alice", PIXA_asset( 50'000 ) ); // alice is creating proposals
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
 
     int64_t proposal_1 = create_proposal( cpd.creator, cpd.receiver, cpd.start_date, cpd.end_date, cpd.daily_pay, alice_private_key, alice_post_key );
@@ -3057,9 +3057,9 @@ BOOST_AUTO_TEST_CASE( remove_proposal_007 )
     BOOST_TEST_MESSAGE( "Testing: remove proposal: basic verification operation - remove proposals with votes at same time." );
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
-    vest( "alice", HIVE_asset( 50'000 ) ); // alice is creating proposals
+    vest( "alice", PIXA_asset( 50'000 ) ); // alice is creating proposals
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
 
     int64_t proposal_1 = create_proposal( cpd.creator, cpd.receiver, cpd.start_date, cpd.end_date, cpd.daily_pay, alice_private_key, alice_post_key );
@@ -3100,7 +3100,7 @@ BOOST_AUTO_TEST_CASE( remove_proposal_008 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
     flat_set<int64_t> proposals = { 0 };
     HIVE_REQUIRE_ASSERT( remove_proposal(cpd.creator, proposals, alice_private_key), "false && \"proposal doesn't exist\"" );
@@ -3117,7 +3117,7 @@ BOOST_AUTO_TEST_CASE( remove_proposal_009 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
     int64_t proposal_1 = create_proposal( cpd.creator, cpd.receiver, cpd.start_date, cpd.end_date, cpd.daily_pay, alice_private_key, alice_post_key );
     flat_set<int64_t> proposals = { proposal_1 };
@@ -3135,7 +3135,7 @@ BOOST_AUTO_TEST_CASE( remove_proposal_010 )
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
     flat_set<int64_t> proposals;
     HIVE_REQUIRE_THROW(remove_proposal(cpd.creator, proposals, bob_private_key), fc::exception);
@@ -3151,9 +3151,9 @@ BOOST_AUTO_TEST_CASE( remove_proposal_011 )
     BOOST_TEST_MESSAGE( "Testing: remove proposal: operation arguments validation - invalid array(array with greater number of digits than allowed)" );
     dhf_database::create_proposal_data cpd(db->head_block_time());
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
-    vest( "alice", HIVE_asset( 50'000 ) ); // alice is creating proposals
+    vest( "alice", PIXA_asset( 50'000 ) ); // alice is creating proposals
     generate_block();
-    ISSUE_FUNDS( cpd.creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( cpd.creator, PXS_asset( 80'000 ) );
     generate_block();
     flat_set<int64_t> proposals;
     for(int i = 0; i <= HIVE_PROPOSAL_MAX_IDS_NUMBER; i++) {
@@ -3200,10 +3200,10 @@ BOOST_AUTO_TEST_CASE( proposals_maintenance_01 )
   {
     BOOST_TEST_MESSAGE( "Testing: removing of old proposals using threshold" );
 
-    ACTORS( HIVE_asset( 100'000 ), (a00)(a01)(a02)(a03)(a04) ); // extra vesting to cover RC costs of proposals
+    ACTORS( PIXA_asset( 100'000 ), (a00)(a01)(a02)(a03)(a04) ); // extra vesting to cover RC costs of proposals
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
@@ -3218,7 +3218,7 @@ BOOST_AUTO_TEST_CASE( proposals_maintenance_01 )
     auto start_date_00 = start_time + start_time_shift;
     auto end_date_00 = start_date_00 + end_time_shift;
 
-    auto daily_pay = HBD_asset( 100 );
+    auto daily_pay = PXS_asset( 100 );
 
     const auto nr_proposals = 200;
     std::vector< int64_t > proposals_id;
@@ -3240,7 +3240,7 @@ BOOST_AUTO_TEST_CASE( proposals_maintenance_01 )
 
     for( auto item : inits )
     {
-      ISSUE_FUNDS( item.account, HBD_asset( 10'000'000 ) );
+      ISSUE_FUNDS( item.account, PXS_asset( 10'000'000 ) );
     }
     //=====================preparing=====================
 
@@ -3291,10 +3291,10 @@ BOOST_AUTO_TEST_CASE( proposals_maintenance_02 )
   {
     BOOST_TEST_MESSAGE( "Testing: removing of old proposals + votes using threshold" );
 
-    ACTORS( HIVE_asset( 50'000 ), (a00)(a01)(a02)(a03)(a04) ); // extra vesting to cover RC costs of proposals
+    ACTORS( PIXA_asset( 50'000 ), (a00)(a01)(a02)(a03)(a04) ); // extra vesting to cover RC costs of proposals
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
@@ -3309,7 +3309,7 @@ BOOST_AUTO_TEST_CASE( proposals_maintenance_02 )
     auto start_date_00 = start_time + start_time_shift;
     auto end_date_00 = start_date_00 + end_time_shift;
 
-    auto daily_pay = HBD_asset( 100 );
+    auto daily_pay = PXS_asset( 100 );
 
     const auto nr_proposals = 10;
     std::vector< int64_t > proposals_id;
@@ -3331,7 +3331,7 @@ BOOST_AUTO_TEST_CASE( proposals_maintenance_02 )
 
     for( auto item : inits )
     {
-      ISSUE_FUNDS( item.account, HBD_asset( 10'000'000 ) );
+      ISSUE_FUNDS( item.account, PXS_asset( 10'000'000 ) );
     }
     //=====================preparing=====================
 
@@ -3401,10 +3401,10 @@ BOOST_AUTO_TEST_CASE( proposals_removing_with_threshold )
     BOOST_TEST_MESSAGE( "Testing: removing of old proposals + votes using threshold" );
 
     ACTORS( DEFAULT_VESTING, (a00)(a01)(a02)(a03)(a04) );
-    vest( "a00", HIVE_asset( 50'000 ) ); // a00 is creating proposals
+    vest( "a00", PIXA_asset( 50'000 ) ); // a00 is creating proposals
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
@@ -3418,7 +3418,7 @@ BOOST_AUTO_TEST_CASE( proposals_removing_with_threshold )
     auto start_date_00 = start_time + start_time_shift;
     auto end_date_00 = start_date_00 + end_time_shift;
 
-    auto daily_pay = HBD_asset( 100 );
+    auto daily_pay = PXS_asset( 100 );
 
     const auto nr_proposals = 5;
     std::vector< int64_t > proposals_id;
@@ -3440,7 +3440,7 @@ BOOST_AUTO_TEST_CASE( proposals_removing_with_threshold )
 
     for( auto item : inits )
     {
-      ISSUE_FUNDS( item.account, HBD_asset( 10'000'000 ) );
+      ISSUE_FUNDS( item.account, PXS_asset( 10'000'000 ) );
     }
     //=====================preparing=====================
 
@@ -3504,10 +3504,10 @@ BOOST_AUTO_TEST_CASE( proposals_removing_with_threshold_01 )
     // which Pixagram carries as hardfork 31.
     inject_hardfork( HIVE_HARDFORK_1_31 );
 
-    ACTORS( HIVE_asset( 50'000 ), (a00)(a01)(a02)(a03)(a04)(a05) ); // extra vesting to cover RC costs of proposals
+    ACTORS( PIXA_asset( 50'000 ), (a00)(a01)(a02)(a03)(a04)(a05) ); // extra vesting to cover RC costs of proposals
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
@@ -3521,7 +3521,7 @@ BOOST_AUTO_TEST_CASE( proposals_removing_with_threshold_01 )
     auto start_date_00 = start_time + start_time_shift;
     auto end_date_00 = start_date_00 + end_time_shift;
 
-    auto daily_pay = HBD_asset( 100 );
+    auto daily_pay = PXS_asset( 100 );
 
     const auto nr_proposals = 10;
     std::vector< int64_t > proposals_id;
@@ -3544,7 +3544,7 @@ BOOST_AUTO_TEST_CASE( proposals_removing_with_threshold_01 )
 
     for( auto item : inits )
     {
-      ISSUE_FUNDS( item.account, HBD_asset( 10'000'000 ) );
+      ISSUE_FUNDS( item.account, PXS_asset( 10'000'000 ) );
     }
     //=====================preparing=====================
 
@@ -3756,10 +3756,10 @@ BOOST_AUTO_TEST_CASE( proposals_removing_with_threshold_02 )
           (a30)(a31)(a32)(a33)(a34)(a35)(a36)(a37)(a38)(a39)
           (a40)(a41)(a42)(a43)(a44)(a45)(a46)(a47)(a48)(a49)
         );
-    vest( "a00", HIVE_asset( 50'000 ) ); // a00 is creating proposals
+    vest( "a00", PIXA_asset( 50'000 ) ); // a00 is creating proposals
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
@@ -3773,7 +3773,7 @@ BOOST_AUTO_TEST_CASE( proposals_removing_with_threshold_02 )
     auto start_date_00 = start_time + start_time_shift;
     auto end_date_00 = start_date_00 + end_time_shift;
 
-    auto daily_pay = HBD_asset( 100 );
+    auto daily_pay = PXS_asset( 100 );
 
     const auto nr_proposals = 5;
     std::vector< int64_t > proposals_id;
@@ -3800,7 +3800,7 @@ BOOST_AUTO_TEST_CASE( proposals_removing_with_threshold_02 )
 
     for( auto item : inits )
     {
-      ISSUE_FUNDS( item.account, HBD_asset( 10'000'000 ) );
+      ISSUE_FUNDS( item.account, PXS_asset( 10'000'000 ) );
     }
     //=====================preparing=====================
 
@@ -4071,10 +4071,10 @@ BOOST_AUTO_TEST_CASE( update_proposal_000 )
     BOOST_TEST_MESSAGE( "Testing: update proposal - update subject" );
 
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
-    vest( "alice", HIVE_asset( 50'000 ) ); // alice is creating proposals
+    vest( "alice", PIXA_asset( 50'000 ) ); // alice is creating proposals
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     auto creator = "alice";
@@ -4083,7 +4083,7 @@ BOOST_AUTO_TEST_CASE( update_proposal_000 )
     auto start_date = db->head_block_time() + fc::days( 1 );
     auto end_date = start_date + fc::days( 2 );
 
-    auto daily_pay = HBD_asset( 100 );
+    auto daily_pay = PXS_asset( 100 );
 
     auto subject = "hello";
     auto permlink = "somethingpermlink";
@@ -4092,7 +4092,7 @@ BOOST_AUTO_TEST_CASE( update_proposal_000 )
     post_comment_with_block_generation(creator, permlink, "title", "body", "test", alice_post_key);
     post_comment_with_block_generation(creator, new_permlink, "title", "body", "test", alice_post_key);
 
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
 
     signed_transaction tx;
 
@@ -4132,7 +4132,7 @@ BOOST_AUTO_TEST_CASE( update_proposal_000 )
 
     time_point_sec new_end_date = end_date - fc::days( 1 );
     auto new_subject = "Other subject";
-    auto new_daily_pay = HBD_asset( 100 );
+    auto new_daily_pay = PXS_asset( 100 );
 
     update_proposal(found->proposal_id, creator, new_daily_pay, new_subject, new_permlink, alice_private_key);
     generate_block();
@@ -4169,18 +4169,18 @@ BOOST_AUTO_TEST_CASE( update_proposal_001 )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     auto creator    = "alice";
     auto receiver   = "bob";
     time_point_sec start_date = db->head_block_time() + fc::days( 1 );
     auto end_date   = start_date + fc::days( 2 );
-    auto daily_pay  = HBD_asset( 100 );
+    auto daily_pay  = PXS_asset( 100 );
     auto subject = "hello";
     auto permlink = "somethingpermlink";
 
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
 
     signed_transaction tx;
 
@@ -4215,18 +4215,18 @@ BOOST_AUTO_TEST_CASE( update_proposal_002 )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     auto creator    = "alice";
     auto receiver   = "bob";
     auto start_date = db->head_block_time() + fc::days( 1 );
     auto end_date   = start_date + fc::days( 2 );
-    auto daily_pay  = HBD_asset( 100 );
+    auto daily_pay  = PXS_asset( 100 );
     auto subject = "hello";
     auto permlink = "somethingpermlink";
 
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
 
     signed_transaction tx;
 
@@ -4263,18 +4263,18 @@ BOOST_AUTO_TEST_CASE( update_proposal_003 )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     auto creator    = "alice";
     auto receiver   = "bob";
     auto start_date = db->head_block_time() + fc::days( 1 );
     auto end_date   = start_date + fc::days( 2 );
-    auto daily_pay  = HBD_asset( 100 );
+    auto daily_pay  = PXS_asset( 100 );
     auto subject = "hello";
     auto permlink = "somethingpermlink";
 
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
 
     signed_transaction tx;
 
@@ -4298,9 +4298,9 @@ BOOST_AUTO_TEST_CASE( update_proposal_003 )
     auto proposal = proposal_idx.find( creator );
 
     // Superior than current proposal
-    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, HBD_asset( 110 ), subject, permlink, alice_private_key), fc::exception);
+    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, PXS_asset( 110 ), subject, permlink, alice_private_key), fc::exception);
     // Negative value
-    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, HBD_asset( -110 ), subject, permlink, alice_private_key), fc::exception);
+    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, PXS_asset( -110 ), subject, permlink, alice_private_key), fc::exception);
 
     validate_database();
   } FC_LOG_AND_RETHROW()
@@ -4314,18 +4314,18 @@ BOOST_AUTO_TEST_CASE( update_proposal_004 )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     auto creator    = "alice";
     auto receiver   = "bob";
     auto start_date = db->head_block_time() + fc::days( 1 );
     auto end_date   = start_date + fc::days( 2 );
-    auto daily_pay  = HBD_asset( 100 );
+    auto daily_pay  = PXS_asset( 100 );
     auto subject = "hello";
     auto permlink = "somethingpermlink";
 
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
 
     signed_transaction tx;
 
@@ -4348,9 +4348,9 @@ BOOST_AUTO_TEST_CASE( update_proposal_004 )
     const auto& proposal_idx = db->get_index< proposal_index >().indices().get< by_creator >();
     auto proposal = proposal_idx.find( creator );
     // Empty subject
-    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, HBD_asset( 110 ), "", permlink, alice_private_key), fc::exception);
+    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, PXS_asset( 110 ), "", permlink, alice_private_key), fc::exception);
     // Subject too long
-    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, HBD_asset( 110 ), "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, PXS_asset( 110 ), "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
                                         permlink, alice_private_key), fc::exception);
 
     validate_database();
@@ -4365,18 +4365,18 @@ BOOST_AUTO_TEST_CASE( update_proposal_005 )
     ACTORS( DEFAULT_VESTING, (alice)(bob)(dave) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     auto creator    = "alice";
     auto receiver   = "bob";
     fc::time_point_sec start_date = db->head_block_time() + fc::days( 1 );
     auto end_date   = start_date + fc::days( 2 );
-    auto daily_pay  = HBD_asset( 100 );
+    auto daily_pay  = PXS_asset( 100 );
     auto subject = "hello";
     auto permlink = "somethingpermlink";
 
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
 
     signed_transaction tx;
 
@@ -4400,11 +4400,11 @@ BOOST_AUTO_TEST_CASE( update_proposal_005 )
     const auto& proposal_idx = db->get_index< proposal_index >().indices().get< by_creator >();
     auto proposal = proposal_idx.find( creator );
     // Empty permlink
-    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, HBD_asset( 110 ), subject, "", alice_private_key), fc::exception);
+    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, PXS_asset( 110 ), subject, "", alice_private_key), fc::exception);
     // Post doesn't exist
-    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, HBD_asset( 110 ), subject, "doesntexist", alice_private_key), fc::exception);
+    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, PXS_asset( 110 ), subject, "doesntexist", alice_private_key), fc::exception);
     // Post exists but is made by an user that is neither the receiver or the creator
-    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, HBD_asset( 110 ), subject, "davepermlink", alice_private_key), fc::exception);
+    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, PXS_asset( 110 ), subject, "davepermlink", alice_private_key), fc::exception);
 
     validate_database();
   } FC_LOG_AND_RETHROW()
@@ -4419,7 +4419,7 @@ BOOST_AUTO_TEST_CASE( update_proposal_006 )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     auto creator    = "alice";
@@ -4427,11 +4427,11 @@ BOOST_AUTO_TEST_CASE( update_proposal_006 )
     fc::time_point_sec start_date = db->head_block_time() + fc::days( 1 );
     auto end_date   = start_date + fc::days( 2 );
     fc::time_point_sec end_date_invalid = start_date + fc::days( 3 );
-    auto daily_pay  = HBD_asset( 100 );
+    auto daily_pay  = PXS_asset( 100 );
     auto subject = "hello";
     auto permlink = "somethingpermlink";
 
-    ISSUE_FUNDS( creator, HBD_asset( 80'000 ) );
+    ISSUE_FUNDS( creator, PXS_asset( 80'000 ) );
 
     signed_transaction tx;
 
@@ -4453,8 +4453,8 @@ BOOST_AUTO_TEST_CASE( update_proposal_006 )
 
     const auto& proposal_idx = db->get_index< proposal_index >().indices().get< by_creator >();
     auto proposal = proposal_idx.find( creator );
-    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, HBD_asset( 110 ), subject, permlink, alice_private_key, &start_date), fc::exception);
-    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, HBD_asset( 110 ), subject, permlink, alice_private_key, &end_date_invalid), fc::exception);
+    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, PXS_asset( 110 ), subject, permlink, alice_private_key, &start_date), fc::exception);
+    HIVE_REQUIRE_THROW( update_proposal(proposal->proposal_id, creator, PXS_asset( 110 ), subject, permlink, alice_private_key, &end_date_invalid), fc::exception);
 
     validate_database();
   } FC_LOG_AND_RETHROW()
@@ -4527,11 +4527,11 @@ BOOST_AUTO_TEST_CASE( proposals_removing_with_threshold_03 )
     BOOST_TEST_MESSAGE( "Testing: removing of all proposals/votes in one block using threshold = -1" );
 
     // extra vesting so each account has enough RC to create a proposal and cast many proposal votes
-    std::vector< performance::initial_data > inits = performance::generate_accounts( this, 200, HIVE_asset( 200'000 ) );
+    std::vector< performance::initial_data > inits = performance::generate_accounts( this, 200, PIXA_asset( 200'000 ) );
 
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
@@ -4546,14 +4546,14 @@ BOOST_AUTO_TEST_CASE( proposals_removing_with_threshold_03 )
     auto start_date_00 = start_time + start_time_shift;
     auto end_date_00 = start_date_00 + end_time_shift;
 
-    auto daily_pay = HBD_asset( 100 );
+    auto daily_pay = PXS_asset( 100 );
 
     const auto nr_proposals = 200;
     std::vector< int64_t > proposals_id;
 
     for( auto item : inits )
     {
-      ISSUE_FUNDS( item.account, HBD_asset( 10'000'000 ) );
+      ISSUE_FUNDS( item.account, PXS_asset( 10'000'000 ) );
     }
     //=====================preparing=====================
 
@@ -4637,13 +4637,13 @@ BOOST_AUTO_TEST_CASE( generating_payments )
 
     std::vector< performance::initial_data > inits = performance::generate_accounts( this, 30000 );
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     //=====================preparing=====================
     const auto nr_proposals = 5;
     std::vector< int64_t > proposals_id;
-    flat_map< std::string, HBD_asset > before_tbds;
+    flat_map< std::string, PXS_asset > before_tbds;
 
     auto call = [&]( uint32_t& i, uint32_t max, const std::string& info )
     {
@@ -4660,9 +4660,9 @@ BOOST_AUTO_TEST_CASE( generating_payments )
     {
       if( i < 5 )
       {
-        ISSUE_FUNDS( item.account, HBD_asset( 11'000 ) );
+        ISSUE_FUNDS( item.account, PXS_asset( 11'000 ) );
       }
-      vest( item.account, HIVE_asset( 30'000 ) );
+      vest( item.account, PIXA_asset( 30'000 ) );
 
       call( i, 50, "${x} accounts got VESTS" );
     }
@@ -4679,8 +4679,8 @@ BOOST_AUTO_TEST_CASE( generating_payments )
     auto start_date = start_time + start_time_shift;
     auto end_date = start_date + end_time_shift;
 
-    auto daily_pay = HBD_asset( 24'000 );
-    auto paid = HBD_asset( 1'000 ); // because only 1 hour
+    auto daily_pay = PXS_asset( 24'000 );
+    auto paid = PXS_asset( 1'000 ); // because only 1 hour
 
     /* This unit test triggers an edge case where the maintenance window for proposals happens after 1h and 3s (one block)
       due to block skipping (in mainnet that can happen if maintenance block is missed).
@@ -4692,7 +4692,7 @@ BOOST_AUTO_TEST_CASE( generating_payments )
       expected pay in single maintenance, but in the same time payout periods will drift even more.
      */
 
-    ISSUE_FUNDS( db->get_treasury_name(), HBD_asset( 5'000'000'000 ) );
+    ISSUE_FUNDS( db->get_treasury_name(), PXS_asset( 5'000'000'000 ) );
     //=====================preparing=====================
     for( int32_t i = 0; i < nr_proposals; ++i )
     {
@@ -4713,7 +4713,7 @@ BOOST_AUTO_TEST_CASE( generating_payments )
     {
       auto item = inits[ i % inits.size() ];
       const account_object& account = db->get_account( item.account );
-      before_tbds[ item.account ] = account.get_hbd_balance();
+      before_tbds[ item.account ] = account.get_pxs_balance();
     }
 
     generate_blocks( start_time + ( start_time_shift - block_interval ) );
@@ -4725,7 +4725,7 @@ BOOST_AUTO_TEST_CASE( generating_payments )
       auto item = inits[ i % inits.size() ];
       const account_object& account = db->get_account( item.account );
 
-      auto after_tbd = account.get_hbd_balance();
+      auto after_tbd = account.get_pxs_balance();
       auto before_tbd = before_tbds[ item.account ];
       idump( (before_tbd) );
       idump( (after_tbd) );
@@ -4738,43 +4738,43 @@ BOOST_AUTO_TEST_CASE( generating_payments )
   FC_LOG_AND_RETHROW()
 }
 
-BOOST_AUTO_TEST_CASE( converting_hive_to_dhf )
+BOOST_AUTO_TEST_CASE( converting_pixa_to_dhf )
 {
   try
   {
-    BOOST_TEST_MESSAGE( "Testing: converting hive to hbd in the dhf" );
+    BOOST_TEST_MESSAGE( "Testing: converting hive to pxs in the dhf" );
     const auto& dgpo = db->get_dynamic_global_properties();
     const account_object& _treasury = db->get_treasury();
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
 
-    auto before_inflation_treasury_hbd_balance =  _treasury.get_hbd_balance();
+    auto before_inflation_treasury_pxs_balance =  _treasury.get_pxs_balance();
     generate_block();
-    auto treasury_per_block_inflation =  _treasury.get_hbd_balance() - before_inflation_treasury_hbd_balance;
+    auto treasury_per_block_inflation =  _treasury.get_pxs_balance() - before_inflation_treasury_pxs_balance;
 
-    ISSUE_FUNDS( db->get_treasury_name(), HIVE_asset( 100'000 ) );
+    ISSUE_FUNDS( db->get_treasury_name(), PIXA_asset( 100'000 ) );
     generate_block();
 
-    auto before_treasury_hbd_balance =  _treasury.get_hbd_balance();
-    auto before_treasury_hive_balance =  _treasury.get_hive_balance();
+    auto before_treasury_pxs_balance =  _treasury.get_pxs_balance();
+    auto before_treasury_pixa_balance =  _treasury.get_pixa_balance();
 
-    const HIVE_asset hive_converted = HIVE_PROPOSAL_CONVERSION_RATE * before_treasury_hive_balance / HIVE_100_PERCENT;
+    const PIXA_asset pixa_converted = HIVE_PROPOSAL_CONVERSION_RATE * before_treasury_pixa_balance / HIVE_100_PERCENT;
     // Same because of the 1:1 tests to tbd ratio
-    const HBD_asset hbd_converted( hive_converted.amount );
+    const PXS_asset pxs_converted( pixa_converted.amount );
     // Generate until the next daily maintenance
     auto next_block = get_nr_blocks_until_daily_proposal_maintenance_block();
     auto before_daily_maintenance_time = dgpo.get_next_daily_maintenance_time();
     generate_blocks( next_block - 1);
 
-    auto treasury_hbd_inflation =  _treasury.get_hbd_balance() - before_treasury_hbd_balance;
+    auto treasury_pxs_inflation =  _treasury.get_pxs_balance() - before_treasury_pxs_balance;
     generate_block();
 
-    treasury_hbd_inflation += treasury_per_block_inflation;
+    treasury_pxs_inflation += treasury_per_block_inflation;
     auto after_daily_maintenance_time = dgpo.get_next_daily_maintenance_time();
-    auto after_treasury_hbd_balance =  _treasury.get_hbd_balance();
-    auto after_treasury_hive_balance =  _treasury.get_hive_balance();
+    auto after_treasury_pxs_balance =  _treasury.get_pxs_balance();
+    auto after_treasury_pixa_balance =  _treasury.get_pixa_balance();
 
-    BOOST_REQUIRE_EQUAL( before_treasury_hbd_balance, after_treasury_hbd_balance - treasury_hbd_inflation - hbd_converted );
-    BOOST_REQUIRE_EQUAL( before_treasury_hive_balance, after_treasury_hive_balance + hive_converted );
+    BOOST_REQUIRE_EQUAL( before_treasury_pxs_balance, after_treasury_pxs_balance - treasury_pxs_inflation - pxs_converted );
+    BOOST_REQUIRE_EQUAL( before_treasury_pixa_balance, after_treasury_pixa_balance + pixa_converted );
     BOOST_REQUIRE_EQUAL( before_daily_maintenance_time, after_daily_maintenance_time - fc::seconds( HIVE_DAILY_PROPOSAL_MAINTENANCE_PERIOD ) );
     validate_database();
   }

@@ -34,8 +34,8 @@ using namespace hive::protocol::testnet_blockchain_configuration;
 #define HIVE_MIN_REPLY_INTERVAL               (configuration_data.min_reply_interval) // 3 seconds
 #define HIVE_MIN_COMMENT_EDIT_INTERVAL        (configuration_data.min_comment_edit_interval) // 3 seconds
 
-#define HIVE_INIT_SUPPLY                      (configuration_data.get_init_hive_supply().get_amount())
-#define HIVE_HBD_INIT_SUPPLY                  (configuration_data.get_init_hbd_supply().get_amount())
+#define HIVE_INIT_SUPPLY                      (configuration_data.get_init_pixa_supply().get_amount())
+#define HIVE_PXS_INIT_SUPPLY                  (configuration_data.get_init_pxs_supply().get_amount())
 #define HIVE_INITIAL_VESTING                  (configuration_data.get_initial_vesting().get_amount())
 #define HIVE_INITIAL_VESTING_PRICE            (configuration_data.get_initial_vesting_price())
 
@@ -50,9 +50,9 @@ using namespace hive::protocol::testnet_blockchain_configuration;
 #define HIVE_MIN_COMMENT_EDIT_INTERVAL        (fc::seconds(3)) // 3 seconds
 
 #define HIVE_INIT_SUPPLY                      int64_t(0)
-#define HIVE_HBD_INIT_SUPPLY                  int64_t(0)
-// 1:1 in display units: VEST_asset(1000) raw = 0.001000 VESTS, HIVE_asset(1) raw = 0.001 HIVE.
-// Multiplication: amount_VESTS * 1 / 1000 yields raw HIVE = display HIVE = display VESTS.
+#define HIVE_PXS_INIT_SUPPLY                  int64_t(0)
+// 1:1 in display units: VEST_asset(1000) raw = 0.001000 VESTS, PIXA_asset(1) raw = 0.001 PIXA.
+// Multiplication: amount_VESTS * 1 / 1000 yields raw PIXA = display PIXA = display VESTS.
 #define HIVE_INITIAL_VESTING_PRICE            (hive::protocol::VEST_price( 1000, 1 ))
 
 #endif /// USE_ALTERNATE_CHAIN_ID
@@ -330,7 +330,7 @@ using namespace hive::protocol::testnet_blockchain_configuration;
 
 #define HIVE_MAX_ACCOUNT_WITNESS_VOTES        30
 
-#define HIVE_DEFAULT_HBD_INTEREST_RATE        0
+#define HIVE_DEFAULT_PXS_INTEREST_RATE        0
 
 #define HIVE_INFLATION_RATE_START_PERCENT     (978) // Fixes block 7,000,000 to 9.5%
 #define HIVE_INFLATION_RATE_STOP_PERCENT      (95) // 0.95%
@@ -351,7 +351,7 @@ using namespace hive::protocol::testnet_blockchain_configuration;
  * HF17, HF19 and HF21 each seed `recent_claims` with a snapshot taken from Steem/Hive mainnet,
  * and all three ran at block 1 on this chain, so the fund started life with a denominator
  * 5.036e17 - roughly 1.2 million times the scale of the claims Pixagram actually produces.
- * Every author payout therefore came out below HIVE_MIN_PAYOUT_HBD and was zeroed outright by
+ * Every author payout therefore came out below HIVE_MIN_PAYOUT_PXS and was zeroed outright by
  * `util::get_rshare_reward()`, consuming the rshares for nothing.
  *
  * The reset value is
@@ -379,11 +379,11 @@ using namespace hive::protocol::testnet_blockchain_configuration;
 #define HIVE_MIN_ACCOUNT_CREATION_FEE         1
 #define HIVE_MAX_ACCOUNT_CREATION_FEE         int64_t(1000000000)
 
-#define HIVE_CREATE_ACCOUNT_WITH_HIVE_MODIFIER   30
+#define HIVE_CREATE_ACCOUNT_WITH_PIXA_MODIFIER   30
 #define HIVE_CREATE_ACCOUNT_DELEGATION_RATIO     5
 #define HIVE_CREATE_ACCOUNT_DELEGATION_TIME      fc::days(30)
 
-#define HIVE_MINING_REWARD                    HIVE_asset( 1000 )
+#define HIVE_MINING_REWARD                    PIXA_asset( 1000 )
 #define HIVE_EQUIHASH_N                       140
 #define HIVE_EQUIHASH_K                       6
 
@@ -391,7 +391,7 @@ using namespace hive::protocol::testnet_blockchain_configuration;
 #define HIVE_MIN_LIQUIDITY_REWARD_PERIOD_SEC  (fc::seconds(60)) // 1 minute required on books to receive volume
 #define HIVE_LIQUIDITY_REWARD_PERIOD_SEC      (60*60)
 #define HIVE_LIQUIDITY_REWARD_BLOCKS          (HIVE_LIQUIDITY_REWARD_PERIOD_SEC/HIVE_BLOCK_INTERVAL)
-#define HIVE_MIN_LIQUIDITY_REWARD             HIVE_asset( 1000*HIVE_LIQUIDITY_REWARD_BLOCKS ) // Minumum reward to be paid out to liquidity providers
+#define HIVE_MIN_LIQUIDITY_REWARD             PIXA_asset( 1000*HIVE_LIQUIDITY_REWARD_BLOCKS ) // Minumum reward to be paid out to liquidity providers
 #define HIVE_MIN_CONTENT_REWARD               HIVE_MINING_REWARD
 #define HIVE_MIN_CURATE_REWARD                HIVE_MINING_REWARD
 #define HIVE_MIN_PRODUCER_REWARD              HIVE_MINING_REWARD
@@ -438,16 +438,16 @@ using namespace hive::protocol::testnet_blockchain_configuration;
 #define HIVE_PRODUCER_APR_PERCENT             750
 #define HIVE_POW_APR_PERCENT                  750
 
-#define HIVE_MIN_PAYOUT_HBD                   HBD_asset( 20 )
+#define HIVE_MIN_PAYOUT_PXS                   PXS_asset( 20 )
 
-#define HIVE_HBD_START_PERCENT_HF14           (2*HIVE_1_PERCENT) // Start reducing printing of HBD at 2% Market Cap
-#define HIVE_HBD_STOP_PERCENT_HF14            (5*HIVE_1_PERCENT) // Stop printing HBD at 5% Market Cap
-#define HIVE_HBD_START_PERCENT_HF20           (9*HIVE_1_PERCENT) // Start reducing printing of HBD at 9% Market Cap
-#define HIVE_HBD_STOP_PERCENT_HF20            (10*HIVE_1_PERCENT) // Stop printing HBD at 10% Market Cap
-#define HIVE_HBD_START_PERCENT_HF26           (20*HIVE_1_PERCENT) // Start reducing printing of HBD at 20% Market Cap
-#define HIVE_HBD_STOP_PERCENT_HF26            (20*HIVE_1_PERCENT) // Stop printing HBD at 20% Market Cap
-#define HIVE_HBD_HARD_LIMIT_PRE_HF26          (10*HIVE_1_PERCENT) // Artificial HBD price kicks in at 10% Market Cap
-#define HIVE_HBD_HARD_LIMIT                   (30*HIVE_1_PERCENT) // Artificial HBD price kicks in at 30% Market Cap
+#define HIVE_PXS_START_PERCENT_HF14           (2*HIVE_1_PERCENT) // Start reducing printing of PXS at 2% Market Cap
+#define HIVE_PXS_STOP_PERCENT_HF14            (5*HIVE_1_PERCENT) // Stop printing PXS at 5% Market Cap
+#define HIVE_PXS_START_PERCENT_HF20           (9*HIVE_1_PERCENT) // Start reducing printing of PXS at 9% Market Cap
+#define HIVE_PXS_STOP_PERCENT_HF20            (10*HIVE_1_PERCENT) // Stop printing PXS at 10% Market Cap
+#define HIVE_PXS_START_PERCENT_HF26           (20*HIVE_1_PERCENT) // Start reducing printing of PXS at 20% Market Cap
+#define HIVE_PXS_STOP_PERCENT_HF26            (20*HIVE_1_PERCENT) // Stop printing PXS at 20% Market Cap
+#define HIVE_PXS_HARD_LIMIT_PRE_HF26          (10*HIVE_1_PERCENT) // Artificial PXS price kicks in at 10% Market Cap
+#define HIVE_PXS_HARD_LIMIT                   (30*HIVE_1_PERCENT) // Artificial PXS price kicks in at 30% Market Cap
 
 #define HIVE_MIN_ACCOUNT_NAME_LENGTH          3
 #define HIVE_MAX_ACCOUNT_NAME_LENGTH          16
@@ -464,7 +464,7 @@ using namespace hive::protocol::testnet_blockchain_configuration;
 #define HIVE_MIN_TRANSACTION_SIZE_LIMIT       1024
 #define HIVE_SECONDS_PER_YEAR                 (uint64_t(60*60*24*365ll))
 
-#define HIVE_HBD_INTEREST_COMPOUND_INTERVAL_SEC (60*60*24*30)
+#define HIVE_PXS_INTEREST_COMPOUND_INTERVAL_SEC (60*60*24*30)
 #define HIVE_MAX_TRANSACTION_SIZE             (1024*128)
 #define HIVE_MIN_BLOCK_SIZE_LIMIT             (HIVE_MAX_TRANSACTION_SIZE)
 #define HIVE_MAX_BLOCK_SIZE                   (2*1024*1024)
@@ -472,7 +472,7 @@ using namespace hive::protocol::testnet_blockchain_configuration;
 
 #define HIVE_MAX_UNDO_HISTORY                 10000
 
-#define HIVE_BLOCKCHAIN_PRECISION             uint64_t( 1000 )  // actually HBD precision
+#define HIVE_BLOCKCHAIN_PRECISION             uint64_t( 1000 )  // actually PXS precision
 
 /** NOTE: making this a power of 2 (say 2^15) would greatly accelerate fee calcs */
 #ifndef HIVE_CONVERTER_BUILD
@@ -563,7 +563,7 @@ using namespace hive::protocol::testnet_blockchain_configuration;
 #define PIXA_TEAM_ACCOUNT                     "pixa.team"    //team and advisors
 ///@}
 
-/// HIVE PROPOSAL SYSTEM support
+/// PIXA PROPOSAL SYSTEM support
 
 #define HIVE_TREASURY_FEE                          (10 * HIVE_BLOCKCHAIN_PRECISION)
 #define HIVE_PROPOSAL_SUBJECT_MAX_LENGTH           80
@@ -582,7 +582,7 @@ using namespace hive::protocol::testnet_blockchain_configuration;
 #define HIVE_CUSTOM_OP_BLOCK_LIMIT 5
 #endif
 
-/// HIVE RC related constants
+/// PIXA RC related constants
 
 #define HIVE_RC_REGEN_TIME                             (HIVE_VOTING_MANA_REGENERATION_SECONDS) //5 days
 
@@ -595,7 +595,7 @@ using namespace hive::protocol::testnet_blockchain_configuration;
 #define HIVE_RC_STATS_REPORT_FREQUENCY                 HIVE_BLOCKS_PER_DAY //one report per day
 #endif
 
-#define HIVE_RC_HISTORICAL_ACCOUNT_CREATION_ADJUSTMENT 2020748973 // 2020.748973 VESTS == 1.000 HIVE when HF20 occurred on mainnet
+#define HIVE_RC_HISTORICAL_ACCOUNT_CREATION_ADJUSTMENT 2020748973 // 2020.748973 VESTS == 1.000 PIXA when HF20 occurred on mainnet
 
 #define HIVE_RC_MAX_ACCOUNTS_PER_DELEGATION_OP         100
 

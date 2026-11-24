@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE( delegate_rc_operation_apply_single )
     {
       db.modify( db.get_witness_schedule_object(), [&]( witness_schedule_object& wso )
       {
-        wso.median_props.account_creation_fee = HIVE_asset( 3'000 ); //mainnet value
+        wso.median_props.account_creation_fee = PIXA_asset( 3'000 ); //mainnet value
       } );
     } );
     generate_block();
@@ -103,12 +103,12 @@ BOOST_AUTO_TEST_CASE( delegate_rc_operation_apply_single )
     {
       const auto& gpo = db->get_dynamic_global_properties();
       const auto& wso = db->get_witness_schedule_object();
-      min_delegation = ( HIVE_asset( wso.median_props.account_creation_fee.amount / 3 ) * gpo.get_vesting_share_price() ).get_amount();
+      min_delegation = ( PIXA_asset( wso.median_props.account_creation_fee.amount / 3 ) * gpo.get_vesting_share_price() ).get_amount();
     }
 
     BOOST_TEST_MESSAGE( "Testing:  delegate_rc_operation_apply_single to a single account" );
     ACTORS( DEFAULT_VESTING, (alice)(bob)(dave) );
-    vest( "alice", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
     int64_t alice_vests = get_vesting( "alice" ).amount.value;
 
     // Delegating more rc than I have should fail
@@ -245,7 +245,7 @@ BOOST_AUTO_TEST_CASE( delegate_rc_operation_apply_many )
     {
       db.modify( db.get_witness_schedule_object(), [&]( witness_schedule_object& wso )
       {
-        wso.median_props.account_creation_fee = HIVE_asset( 3'000 ); //mainnet value
+        wso.median_props.account_creation_fee = PIXA_asset( 3'000 ); //mainnet value
       } );
     } );
     generate_block();
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE( delegate_rc_operation_apply_many )
 
     BOOST_TEST_MESSAGE( "Testing:  delegate_rc_operation_apply_many to many accounts" );
     ACTORS( DEFAULT_VESTING, (alice)(bob)(dave)(dan) );
-    vest( "alice", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
     int64_t alice_vests = get_vesting( "alice" ).amount.value;
 
     // Delegating more rc than alice has should fail
@@ -420,13 +420,13 @@ BOOST_AUTO_TEST_CASE( delegate_rc_operation_apply_many_different )
   {
     BOOST_TEST_MESSAGE( "Testing:  delegate_rc_operation_apply_many_different to many accounts" );
     generate_block();
-    set_account_creation_fee( HIVE_asset( 300'000 ) ); //increased fee gives alice enough non-delegatable RC to
+    set_account_creation_fee( PIXA_asset( 300'000 ) ); //increased fee gives alice enough non-delegatable RC to
       //afford re-delegating without getting back the RC (only regen power) from the removed delegation to bob
     generate_block();
     ACTORS( DEFAULT_VESTING, (alice)(bob)(dave)(dan)(carol) );
-    set_account_creation_fee( HIVE_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
+    set_account_creation_fee( PIXA_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
     generate_block();
-    vest( "alice", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
     uint64_t alice_vests = get_vesting( "alice" ).amount.value;
 
     std::string json = "[";
@@ -559,7 +559,7 @@ BOOST_AUTO_TEST_CASE( update_outdel_overflow )
   {
     BOOST_TEST_MESSAGE( "Testing:  update_outdel_overflow" );
     generate_block();
-    set_account_creation_fee( HIVE_asset( 3'000 ) ); //realistic fee gives accounts a sizable non-delegatable RC adjustment
+    set_account_creation_fee( PIXA_asset( 3'000 ) ); //realistic fee gives accounts a sizable non-delegatable RC adjustment
     generate_block();
 
     ACTORS( NO_VESTING, (alice)(bob)(dave)(eve)(martin) );
@@ -567,9 +567,9 @@ BOOST_AUTO_TEST_CASE( update_outdel_overflow )
     const account_object& alice = db->get_account( "alice" );
     const account_object& bob = db->get_account( "bob" );
     const account_object& dave = db->get_account( "dave" );
-    set_account_creation_fee( HIVE_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
+    set_account_creation_fee( PIXA_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
     generate_block();
-    vest( "alice", HIVE_asset( 10 ) );
+    vest( "alice", PIXA_asset( 10 ) );
     generate_block();
 
     int64_t vesting_amount = alice.get_vesting().amount.value;
@@ -670,7 +670,7 @@ BOOST_AUTO_TEST_CASE( update_outdel_overflow_many_accounts )
     BOOST_TEST_MESSAGE( "Testing: update_outdel_overflow with many actors" );
     generate_block();
     const int removal_limit = 200; //current mainnet value - if we increase it (we should, but it requires HF) we need to change it here as well
-    set_account_creation_fee( HIVE_asset( 300'000 ) ); //large non-delegatable RC adjustment so alice can still transact (and regenerate) after
+    set_account_creation_fee( PIXA_asset( 300'000 ) ); //large non-delegatable RC adjustment so alice can still transact (and regenerate) after
       // delegating all her vesting-based RC away; actors share the same fee so creation_rc stays consistent for the checks below
     db_plugin->debug_update( [=]( database& db )
     {
@@ -685,10 +685,10 @@ BOOST_AUTO_TEST_CASE( update_outdel_overflow_many_accounts )
     const account_object& alice = db->get_account( "alice" );
     const account_object& actor0 = db->get_account( "actor0" );
     const account_object& actor2 = db->get_account( "actor2" );
-    set_account_creation_fee( HIVE_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
+    set_account_creation_fee( PIXA_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
     generate_block();
 
-    vest( "alice", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
     generate_block();
 
     uint64_t vesting_amount = uint64_t( alice.get_vesting().amount.value );
@@ -815,18 +815,18 @@ BOOST_AUTO_TEST_CASE( direct_rc_delegation_vesting_withdrawal )
   try
   {
     generate_block();
-    set_account_creation_fee( HIVE_asset( 300'000 ) ); //set increased fee so alice can regenerate fully after transaction on RC adjustment
+    set_account_creation_fee( PIXA_asset( 300'000 ) ); //set increased fee so alice can regenerate fully after transaction on RC adjustment
       //alone in the shortened time of single withdrawal step (it is an hour instead of week due to configuration settings)
     generate_block();
     ACTORS( NO_VESTING, (alice)(bob)(dave) );
     generate_block();
-    set_account_creation_fee( HIVE_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
+    set_account_creation_fee( PIXA_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
     generate_block();
     const account_object& alice = db->get_account( "alice" );
     const account_object& bob = db->get_account( "bob" );
     const account_object& dave = db->get_account( "dave" );
 
-    vest( "alice", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
     generate_block();
 
     int64_t creation_rc = alice.get_rc_adjustment().value;
@@ -974,7 +974,7 @@ BOOST_AUTO_TEST_CASE( direct_rc_delegation_vesting_withdrawal_routes )
   try
   {
     generate_block();
-    set_account_creation_fee( HIVE_asset( 300'000 ) ); //set increased fee so alice can regenerate fully after transaction on RC adjustment
+    set_account_creation_fee( PIXA_asset( 300'000 ) ); //set increased fee so alice can regenerate fully after transaction on RC adjustment
       //alone in the shortened time of single withdrawal step (it is an hour instead of week due to configuration settings)
     generate_block();
     ACTORS( NO_VESTING, (alice)(bob)(dave) );
@@ -982,10 +982,10 @@ BOOST_AUTO_TEST_CASE( direct_rc_delegation_vesting_withdrawal_routes )
     const account_object& alice = db->get_account( "alice" );
     const account_object& bob = db->get_account( "bob" );
     const account_object& dave = db->get_account( "dave" );
-    set_account_creation_fee( HIVE_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
+    set_account_creation_fee( PIXA_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
     generate_block();
 
-    vest( "alice", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
     generate_block();
 
     int64_t creation_rc = alice.get_rc_adjustment().value;
@@ -1087,17 +1087,17 @@ BOOST_AUTO_TEST_CASE( rc_delegation_regeneration )
   try
   {
     generate_block();
-    set_account_creation_fee( HIVE_asset( 3'000 ) ); // realistic fee gives bob enough RC adjustment for him to have
+    set_account_creation_fee( PIXA_asset( 3'000 ) ); // realistic fee gives bob enough RC adjustment for him to have
       //enough mana to burn in the test below (realistic vest price makes minimal fee give almost nothing)
     generate_block();
 
     ACTORS( NO_VESTING, (alice)(bob) );
     generate_block();
-    set_account_creation_fee( HIVE_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
+    set_account_creation_fee( PIXA_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
     generate_block();
 
-    fund( "bob", HBD_asset( 100'000 ) );
-    vest( "alice", HIVE_asset( 1'000 ) );
+    fund( "bob", PXS_asset( 100'000 ) );
+    vest( "alice", PIXA_asset( 1'000 ) );
     generate_block();
 
     BOOST_TEST_MESSAGE( "Fetching the baseLine with no RC delegations" );
@@ -1185,15 +1185,15 @@ BOOST_AUTO_TEST_CASE( rc_delegation_removal_no_rc )
   try
   {
     generate_block();
-    set_account_creation_fee( HIVE_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
+    set_account_creation_fee( PIXA_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
     generate_block();
 
     ACTORS( NO_VESTING, (alice)(bob) );
     generate_block();
     const account_object& bob = db->get_account( "bob" );
     ilog( "bob's rc_adjustment = ${a}", ( "a", bob.get_rc_adjustment() ) );
-    fund( "bob", HIVE_asset( 9'000'000'000 ) );
-    vest( "alice", HIVE_asset( 10'000 ) );
+    fund( "bob", PIXA_asset( 9'000'000'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
     generate_block();
 
     BOOST_TEST_MESSAGE( "delegating RC to bob" );
@@ -1244,7 +1244,7 @@ BOOST_AUTO_TEST_CASE( rc_negative_regeneration_bug )
 {
   try
   {
-    set_account_creation_fee( HIVE_asset( 3'000 ) ); // realistic fee gives accounts necessary base RC mana
+    set_account_creation_fee( PIXA_asset( 3'000 ) ); // realistic fee gives accounts necessary base RC mana
     generate_block();
 
     BOOST_TEST_MESSAGE( "Negative RC regeneration bug" );
@@ -1261,9 +1261,9 @@ BOOST_AUTO_TEST_CASE( rc_negative_regeneration_bug )
 
     ACTORS( DEFAULT_VESTING, (delegator1)(delegator2)(delegator3)(delegatee)(pattern2)(pattern3) );
     generate_block();
-    vest( "delegator1", HIVE_asset( 1'000'000 ) );
-    vest( "delegator2", HIVE_asset( 1'000'000 ) );
-    vest( "delegator3", HIVE_asset( 1'000'000 ) );
+    vest( "delegator1", PIXA_asset( 1'000'000 ) );
+    vest( "delegator2", PIXA_asset( 1'000'000 ) );
+    vest( "delegator3", PIXA_asset( 1'000'000 ) );
     auto full_vest = get_vesting( "delegator1" );
     BOOST_REQUIRE_EQUAL( full_vest, get_vesting( "delegator2" ) );
     BOOST_REQUIRE_EQUAL( full_vest, get_vesting( "delegator3" ) );
@@ -1359,7 +1359,7 @@ BOOST_AUTO_TEST_CASE( update_outdel_overflow_delegatee )
   {
     BOOST_TEST_MESSAGE( "Testing: update_outdel_overflow with a vesting delegation" );
     generate_block();
-    set_account_creation_fee( HIVE_asset( 300'000 ) ); //increased fee gives accounts a sizable non-delegatable RC adjustment
+    set_account_creation_fee( PIXA_asset( 300'000 ) ); //increased fee gives accounts a sizable non-delegatable RC adjustment
     generate_block();
 
     ACTORS( NO_VESTING, (alice)(bob)(dave)(eve)(martin) );
@@ -1368,9 +1368,9 @@ BOOST_AUTO_TEST_CASE( update_outdel_overflow_delegatee )
     const account_object& bob = db->get_account( "bob" );
     const account_object& dave = db->get_account( "dave" );
     const account_object& eve = db->get_account( "eve" );
-    set_account_creation_fee( HIVE_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
+    set_account_creation_fee( PIXA_asset( 1 ) ); //it effectively turns off minimum HP delegation limit
     generate_block();
-    vest( "alice", HIVE_asset( 10 ) );
+    vest( "alice", PIXA_asset( 10 ) );
     generate_block();
 
     int64_t vesting_amount = alice.get_vesting().amount.value;
@@ -1454,7 +1454,7 @@ BOOST_AUTO_TEST_CASE( update_outdel_overflow_delegatee_performance )
     BOOST_TEST_MESSAGE( "Testing: performance is taken into consideration, when `rc_direct_delegation_object` are removed" );
     generate_block();
     const int removal_limit = 200; //current mainnet value - if we increase it (we should, but it requires HF) we need to change it here as well
-    set_account_creation_fee( HIVE_asset( 300'000 ) ); //give the actors a sizable non-delegatable RC adjustment so alice can still transact after delegating all her vesting away
+    set_account_creation_fee( PIXA_asset( 300'000 ) ); //give the actors a sizable non-delegatable RC adjustment so alice can still transact after delegating all her vesting away
     db_plugin->debug_update( [=]( database& db )
     {
       db.set_remove_threshold( removal_limit );
@@ -1463,9 +1463,9 @@ BOOST_AUTO_TEST_CASE( update_outdel_overflow_delegatee_performance )
 
     ACTORS( NO_VESTING, (alice)(bob)(carol) );
     generate_block();
-    set_account_creation_fee( HIVE_asset( 1 ) ); //now that the actors exist, turn off the minimum HP delegation limit
+    set_account_creation_fee( PIXA_asset( 1 ) ); //now that the actors exist, turn off the minimum HP delegation limit
     generate_block();
-    vest( "alice", HIVE_asset( 2'000'000 ) );
+    vest( "alice", PIXA_asset( 2'000'000 ) );
     generate_block();
 
     const uint32_t nr_accounts = removal_limit * 4;
@@ -1591,8 +1591,8 @@ BOOST_AUTO_TEST_CASE( update_outdel_overflow_delegatee_performance )
     time_checker( push_12, 100 ); // <- removes `removal_limit` delegations from carol, rest (1 limit) added postponed
     BOOST_REQUIRE_EQUAL( rc_del_idx.size(), 2 * nr_accounts - 4 * removal_limit );
 
-    vest( "bob", HIVE_asset( 1'000'000 ) );
-    vest( "carol", HIVE_asset( 1'000'000 ) );
+    vest( "bob", PIXA_asset( 1'000'000 ) );
+    vest( "carol", PIXA_asset( 1'000'000 ) );
     // even though delegators have new vests that could cover not-yet-removed delegations
     // we still continue to remove them (we could make it differently but that complicates
     // implementation - the mechanism is an safety trigger, so it should be simple)

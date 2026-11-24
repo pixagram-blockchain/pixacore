@@ -506,7 +506,7 @@ DEFINE_API_IMPL( wallet_bridge_api_impl, get_conversion_requests )
   verify_args( arguments, 1 );
 
   const protocol::account_name_type account = arguments.get_array().at(0).as<protocol::account_name_type>();
-  return _database_api->find_hbd_conversion_requests({account}).requests;
+  return _database_api->find_pxs_conversion_requests({account}).requests;
 }
 
 DEFINE_API_IMPL( wallet_bridge_api_impl, get_collateralized_conversion_requests )

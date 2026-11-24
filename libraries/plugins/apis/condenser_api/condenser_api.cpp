@@ -54,7 +54,7 @@ namespace hive { namespace plugins { namespace condenser_api {
 api_chain_properties::api_chain_properties( const hive::chain::chain_properties& c ) :
   account_creation_fee( legacy_asset::from_asset( c.account_creation_fee.to_asset() ) ),
   maximum_block_size( c.maximum_block_size ),
-  hbd_interest_rate( c.hbd_interest_rate ),
+  pxs_interest_rate( c.pxs_interest_rate ),
   account_subsidy_budget( c.account_subsidy_budget ),
   account_subsidy_decay( c.account_subsidy_decay )
 {}
@@ -186,15 +186,15 @@ namespace detail
     legacy_substitutes_type _result
     {
       {"VESTS_SYMBOL",             fc::variant{ legacy_asset::from_asset( asset(0, VESTS_SYMBOL) ).asset_num_to_string() } },
-      {"HIVE_SYMBOL",              fc::variant{ legacy_asset::from_asset( asset(0, HIVE_SYMBOL) ).asset_num_to_string() } },
-      {"HBD_SYMBOL",               fc::variant{ legacy_asset::from_asset( asset(0, HBD_SYMBOL) ).asset_num_to_string() } },
+      {"PIXA_SYMBOL",              fc::variant{ legacy_asset::from_asset( asset(0, PIXA_SYMBOL) ).asset_num_to_string() } },
+      {"PXS_SYMBOL",               fc::variant{ legacy_asset::from_asset( asset(0, PXS_SYMBOL) ).asset_num_to_string() } },
       {"HIVE_MINING_REWARD",        fc::variant{ _asset_type{ HIVE_MINING_REWARD.to_asset(),         transaction_serialization_type::legacy } } },
       {"HIVE_MIN_LIQUIDITY_REWARD", fc::variant{ _asset_type{ HIVE_MIN_LIQUIDITY_REWARD.to_asset(),  transaction_serialization_type::legacy } } },
       {"HIVE_MIN_CONTENT_REWARD",   fc::variant{ _asset_type{ HIVE_MIN_CONTENT_REWARD.to_asset(),    transaction_serialization_type::legacy } } },
       {"HIVE_MIN_CURATE_REWARD",    fc::variant{ _asset_type{ HIVE_MIN_CURATE_REWARD.to_asset(),     transaction_serialization_type::legacy } } },
       {"HIVE_MIN_PRODUCER_REWARD",  fc::variant{ _asset_type{ HIVE_MIN_PRODUCER_REWARD.to_asset(),   transaction_serialization_type::legacy } } },
       {"HIVE_MIN_POW_REWARD",       fc::variant{ _asset_type{ HIVE_MIN_POW_REWARD.to_asset(),        transaction_serialization_type::legacy } } },
-      {"HIVE_MIN_PAYOUT_HBD",       fc::variant{ _asset_type{ HIVE_MIN_PAYOUT_HBD.to_asset(),        transaction_serialization_type::legacy } } }
+      {"HIVE_MIN_PAYOUT_PXS",       fc::variant{ _asset_type{ HIVE_MIN_PAYOUT_PXS.to_asset(),        transaction_serialization_type::legacy } } }
     };
     return _result;
   }
@@ -620,7 +620,7 @@ namespace detail
   DEFINE_API_IMPL( condenser_api_impl, get_conversion_requests )
   {
     CHECK_ARG_SIZE( 1 )
-    auto requests = _database_api->find_hbd_conversion_requests(
+    auto requests = _database_api->find_pxs_conversion_requests(
       {
         args.at(0).as< account_name_type >()
       }).requests;
@@ -739,7 +739,7 @@ namespace detail
     {
       result.push_back( *itr );
 
-      if( itr->get_sell_price().base.symbol == HIVE_SYMBOL )
+      if( itr->get_sell_price().base.symbol == PIXA_SYMBOL )
         result.back().real_price = ASSET_TO_REAL( itr->get_sell_price().quote ) / ASSET_TO_REAL( itr->get_sell_price().base );
       else
         result.back().real_price =  ASSET_TO_REAL( itr->get_sell_price().base ) / ASSET_TO_REAL( itr->get_sell_price().quote );

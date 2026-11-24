@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE( transaction_status_test )
       configuration_data.set_hardfork_schedule(
         fc::time_point::now() - fc::seconds( TRANSACTION_STATUS_TEST_GENESIS_BLOCK_OFFSET * HIVE_BLOCK_INTERVAL ),
         immediate_hf_schedule );
-      configuration_data.set_initial_asset_supply( HIVE_INITIAL_TEST_SUPPLY, HBD_INITIAL_TEST_SUPPLY, HP_INITIAL_TEST_SUPPLY );
+      configuration_data.set_initial_asset_supply( HIVE_INITIAL_TEST_SUPPLY, PXS_INITIAL_TEST_SUPPLY, HP_INITIAL_TEST_SUPPLY );
       {
         std::vector< std::string > init_witnesses;
         for( int i = HIVE_NUM_INIT_MINERS; i < HIVE_MAX_WITNESSES; ++i )
@@ -80,17 +80,17 @@ BOOST_AUTO_TEST_CASE( transaction_status_test )
       fixture.db->_log_hardforks = true;
 
       BOOST_REQUIRE( fixture.db->has_hardfork( HIVE_HARDFORK_0_20 ) );
-      fixture.set_account_creation_fee( HIVE_asset( 3000 ) ); //3.000 HIVE, same as mainnet
+      fixture.set_account_creation_fee( PIXA_asset( 3000 ) ); //3.000 PIXA, same as mainnet
 
-      fixture.vest( HIVE_INIT_MINER_NAME, HIVE_asset( 10'000 ) );
+      fixture.vest( HIVE_INIT_MINER_NAME, PIXA_asset( 10'000 ) );
       fixture.validate_database();
 
       ACTORS_EXT( (fixture), DEFAULT_VESTING, (alice)(bob) );
       fixture.generate_block();
 
-      fixture.issue_funds( "alice", HIVE_asset( 1'000'000 ) );
-      fixture.issue_funds( "alice", HBD_asset( 1'000'000 ) );
-      fixture.issue_funds( "bob", HIVE_asset( 1'000'000 ) );
+      fixture.issue_funds( "alice", PIXA_asset( 1'000'000 ) );
+      fixture.issue_funds( "alice", PXS_asset( 1'000'000 ) );
+      fixture.issue_funds( "bob", PIXA_asset( 1'000'000 ) );
 
       fixture.generate_block();
 

@@ -19,14 +19,14 @@ namespace hive { namespace chain {
 
 clean_database_fixture::clean_database_fixture(
   uint16_t shared_file_size_in_mb, fc::optional<uint32_t> hardfork, bool init_ah_plugin, int block_log_split,
-  const HIVE_asset& init_hive_supply, const HBD_asset& init_hbd_supply, const HIVE_asset& init_vesting_supply,
+  const PIXA_asset& init_pixa_supply, const PXS_asset& init_pxs_supply, const PIXA_asset& init_vesting_supply,
   uint32_t num_witnesses )
 {
   try {
 
   FC_ASSERT( num_witnesses >= HIVE_NUM_INIT_MINERS && num_witnesses <= HIVE_MAX_WITNESSES );
 
-  configuration_data.set_initial_asset_supply( init_hive_supply, init_hbd_supply, init_vesting_supply );
+  configuration_data.set_initial_asset_supply( init_pixa_supply, init_pxs_supply, init_vesting_supply );
   {
     std::vector< std::string > init_witnesses;
     for( uint32_t i = HIVE_NUM_INIT_MINERS; i < num_witnesses; ++i )
@@ -73,12 +73,12 @@ clean_database_fixture::clean_database_fixture(
   // Make test accounts behave like real ones with respect to RC. On testnet the
   // default account_creation_fee is 0.001 (promptly changing to 0.030 during activation of HF20),
   // so post-HF20 accounts get very small rc_adjustment - they risk running out of RC pretty quickly.
-  // Mainnet has used 3.000 HIVE for a long time, which gives every account a reserve that is not
+  // Mainnet has used 3.000 PIXA for a long time, which gives every account a reserve that is not
   // lost even when it delegates away or fails to accumulate any vesting stake.
   if( db->has_hardfork( HIVE_HARDFORK_0_20 ) )
-    set_account_creation_fee( HIVE_asset( 3000 ) ); //3.000 HIVE, same as mainnet
+    set_account_creation_fee( PIXA_asset( 3000 ) ); //3.000 PIXA, same as mainnet
 
-  vest( HIVE_INIT_MINER_NAME, HIVE_asset( 10'000 ) );
+  vest( HIVE_INIT_MINER_NAME, PIXA_asset( 10'000 ) );
   validate_database();
 
   } catch ( const fc::exception& e )
@@ -131,7 +131,7 @@ pruned_database_fixture::~pruned_database_fixture()
 
 hardfork_database_fixture::hardfork_database_fixture( uint16_t shared_file_size_in_mb, uint32_t hardfork, uint32_t num_witnesses )
                             : clean_database_fixture( shared_file_size_in_mb, hardfork, true, 9999,
-                              HIVE_INITIAL_TEST_SUPPLY, HBD_INITIAL_TEST_SUPPLY, HP_INITIAL_TEST_SUPPLY, num_witnesses )
+                              HIVE_INITIAL_TEST_SUPPLY, PXS_INITIAL_TEST_SUPPLY, HP_INITIAL_TEST_SUPPLY, num_witnesses )
 {
 }
 
@@ -159,10 +159,10 @@ config_database_fixture::~config_database_fixture()
 
 genesis_database_fixture::genesis_database_fixture( uint16_t shared_file_size_in_mb )
   // Genesis-era fixtures act close to the chain start, so use the pre-history asset amounts (mainnet
-  // started with neither 500M HIVE nor 200M HP). The "already ran through history" emulation baked into
+  // started with neither 500M PIXA nor 200M HP). The "already ran through history" emulation baked into
   // clean_database_fixture defaults distorts tests that operate right after genesis.
   : clean_database_fixture( shared_file_size_in_mb, 0, true, 9999,
-      HIVE_asset( 9'900'000'000 ), HBD_asset( 100'000'000 ), HIVE_asset( 0 ) )
+      PIXA_asset( 9'900'000'000 ), PXS_asset( 100'000'000 ), PIXA_asset( 0 ) )
 {}
 
 genesis_database_fixture::~genesis_database_fixture()
@@ -234,7 +234,7 @@ int32_t delayed_vote_database_fixture::get_user_voted_witness_count( const accou
   return res;
 }
 
-VEST_asset delayed_vote_database_fixture::to_vest( const HIVE_asset& liquid, const bool to_reward_balance )
+VEST_asset delayed_vote_database_fixture::to_vest( const PIXA_asset& liquid, const bool to_reward_balance )
 {
   const auto& cprops = db->get_dynamic_global_properties();
   VEST_price vesting_share_price = to_reward_balance ? cprops.get_reward_vesting_share_price() : cprops.get_vesting_share_price();

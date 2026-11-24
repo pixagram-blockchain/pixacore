@@ -15,7 +15,7 @@ message fill_transfer_from_savings {
   // @param {string} to_account - user that was specified to receive funds (receiver of amount)
   required string to_account = 2 [json_name = "to"];
 
-  // @param {asset} amount - (HIVE or HBD) funds transfered from savings
+  // @param {asset} amount - (PIXA or PXS) funds transfered from savings
   required asset  amount = 3;
 
   // @param {number} request_id - id of transfer request

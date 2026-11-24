@@ -85,7 +85,7 @@ public:
   }
   void clear_reserve_offer()
   {
-    reserve_price = asset( 0, HBD_SYMBOL );
+    reserve_price = asset( 0, PXS_SYMBOL );
     reserve_expiration = time_point_sec();
   }
   //copy `edition` got its object, so it left the reserve; the offer ends with the last copy
@@ -123,7 +123,7 @@ private:
   uint16_t        reserve = 1;
   uint16_t        reserve_start = 1;
   time_point_sec  reserve_expiration;
-  asset           reserve_price = asset( 0, HBD_SYMBOL );
+  asset           reserve_price = asset( 0, PXS_SYMBOL );
 
   CHAINBASE_UNPACK_CONSTRUCTOR( nft_object, (permlink) );
 };
@@ -190,7 +190,7 @@ public:
 
 private:
   //the price of a copy that is not offered: zero, in a fixed asset so that every node stores the same bytes
-  static asset no_offer() { return asset( 0, HBD_SYMBOL ); }
+  static asset no_offer() { return asset( 0, PXS_SYMBOL ); }
 
   nft_id_type     nft;
   uint16_t        edition = 1;

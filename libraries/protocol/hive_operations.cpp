@@ -45,7 +45,7 @@ namespace hive { namespace protocol {
   void account_create_operation::validate() const
   {
     validate_account_name( new_account_name );
-    validate_asset_type( fee, HIVE_SYMBOL, "Account creation fee must be HIVE" );
+    validate_asset_type( fee, PIXA_SYMBOL, "Account creation fee must be PIXA" );
     owner.validate();
     active.validate();
     posting.validate();
@@ -59,7 +59,7 @@ namespace hive { namespace protocol {
 
     validate_asset_not_negative(fee, "Account creation fee cannot be negative");
     HIVE_PROTOCOL_ASSET_ASSERT(
-      fee <= asset( HIVE_MAX_ACCOUNT_CREATION_FEE, HIVE_SYMBOL ) && "account_create_operation",
+      fee <= asset( HIVE_MAX_ACCOUNT_CREATION_FEE, PIXA_SYMBOL ) && "account_create_operation",
       "Account creation fee cannot be too large",
       ("subject", fee)("max", HIVE_MAX_ACCOUNT_CREATION_FEE)
     );
@@ -69,7 +69,7 @@ namespace hive { namespace protocol {
   {
     validate_account_name( new_account_name );
     validate_account_name( creator );
-    validate_asset_type( fee, HIVE_SYMBOL, "Account creation fee must be HIVE" );
+    validate_asset_type( fee, PIXA_SYMBOL, "Account creation fee must be PIXA" );
     validate_asset_type( delegation, VESTS_SYMBOL, "Delegation must be VESTS" );
 
     owner.validate();
@@ -85,7 +85,7 @@ namespace hive { namespace protocol {
 
     validate_asset_not_negative( fee, "Account creation fee cannot be negative");
     HIVE_PROTOCOL_ASSET_ASSERT(
-      fee <= asset( HIVE_MAX_ACCOUNT_CREATION_FEE, HIVE_SYMBOL ) && "account_create_with_delegation_operation",
+      fee <= asset( HIVE_MAX_ACCOUNT_CREATION_FEE, PIXA_SYMBOL ) && "account_create_with_delegation_operation",
       "Account creation fee cannot be too large",
       ("subject", fee)("max", HIVE_MAX_ACCOUNT_CREATION_FEE)
     );
@@ -177,8 +177,8 @@ namespace hive { namespace protocol {
   void comment_options_operation::validate()const
   {
     validate_account_name( author );
-    validate_number_in_100_percent_range(percent_hbd, "Percent cannot exceed 100%");
-    validate_asset_type(max_accepted_payout, HBD_SYMBOL, "Max accepted payout must be in HBD" );
+    validate_number_in_100_percent_range(percent_pxs, "Percent cannot exceed 100%");
+    validate_asset_type(max_accepted_payout, PXS_SYMBOL, "Max accepted payout must be in PXS" );
     validate_asset_not_negative(max_accepted_payout, "Cannot accept less than 0 payout");
     validate_permlink( permlink );
     for( auto& e : extensions )
@@ -194,10 +194,10 @@ namespace hive { namespace protocol {
   void claim_account_operation::validate()const
   {
     validate_account_name( creator );
-    validate_asset_type(fee, HIVE_SYMBOL, "Account claiming fee must be HIVE");
+    validate_asset_type(fee, PIXA_SYMBOL, "Account claiming fee must be PIXA");
     validate_asset_not_negative(fee, "Account claiming fee cannot be negative");
     HIVE_PROTOCOL_ASSET_ASSERT(
-      fee <= asset( HIVE_MAX_ACCOUNT_CREATION_FEE, HIVE_SYMBOL ),
+      fee <= asset( HIVE_MAX_ACCOUNT_CREATION_FEE, PIXA_SYMBOL ),
       "Account claiming fee cannot be too large",
       ("subject", fee)("max", HIVE_MAX_ACCOUNT_CREATION_FEE)
     );
@@ -234,7 +234,7 @@ namespace hive { namespace protocol {
   {
     validate_account_name( voter );
     validate_account_name( author );
-    validate_number_in_100_percent_range(abs(weight), "Weight is not a HIVE percentage");
+    validate_number_in_100_percent_range(abs(weight), "Weight is not a PIXA percentage");
     validate_permlink( permlink );
   }
 
@@ -251,7 +251,7 @@ namespace hive { namespace protocol {
   void transfer_to_vesting_operation::validate() const
   {
     validate_account_name( from );
-    validate_asset_type( amount, HIVE_SYMBOL, "Amount must be HIVE" );
+    validate_asset_type( amount, PIXA_SYMBOL, "Amount must be PIXA" );
     if ( to != account_name_type() ) validate_account_name( to );
     validate_asset_greater_than_zero(amount, "Must transfer a nonzero amount");
   }
@@ -268,7 +268,7 @@ namespace hive { namespace protocol {
     validate_account_name( to_account );
     HIVE_PROTOCOL_NUMBER_ASSERT(
       0 <= percent && percent <= HIVE_100_PERCENT,
-      "Percent must be valid HIVE percent",
+      "Percent must be valid PIXA percent",
       ("subject", percent)
     );
   }
@@ -296,7 +296,7 @@ namespace hive { namespace protocol {
     {
       asset account_creation_fee;
       fc::raw::unpack_from_vector( itr->second, account_creation_fee );
-      validate_asset_type(account_creation_fee, HIVE_SYMBOL, "account_creation_fee must be in HIVE");
+      validate_asset_type(account_creation_fee, PIXA_SYMBOL, "account_creation_fee must be in PIXA");
       HIVE_PROTOCOL_ASSET_ASSERT(
         account_creation_fee.amount >= HIVE_MIN_ACCOUNT_CREATION_FEE && "witness_set_properties_operation",
         "account_creation_fee smaller than minimum account creation fee",
@@ -330,9 +330,9 @@ namespace hive { namespace protocol {
 
     if( itr != props.end() )
     {
-      uint16_t hbd_interest_rate = 0u;
-      fc::raw::unpack_from_vector( itr->second, hbd_interest_rate );
-      FC_ASSERT( hbd_interest_rate == 0, "hbd_interest_rate is fixed at 0" );
+      uint16_t pxs_interest_rate = 0u;
+      fc::raw::unpack_from_vector( itr->second, pxs_interest_rate );
+      FC_ASSERT( pxs_interest_rate == 0, "pxs_interest_rate is fixed at 0" );
     }
 
     itr = props.find( "new_signing_key" );
@@ -349,11 +349,11 @@ namespace hive { namespace protocol {
 
     if( itr != props.end() )
     {
-      price hbd_exchange_rate;
-      fc::raw::unpack_from_vector( itr->second, hbd_exchange_rate );
-      validate_asset_type(hbd_exchange_rate.base, HBD_SYMBOL, "Base part of price feed must be in HBD");
-      validate_asset_type(hbd_exchange_rate.quote, HIVE_SYMBOL, "Quote part of price feed must be in HIVE");
-      hbd_exchange_rate.validate();
+      price pxs_exchange_rate;
+      fc::raw::unpack_from_vector( itr->second, pxs_exchange_rate );
+      validate_asset_type(pxs_exchange_rate.base, PXS_SYMBOL, "Base part of price feed must be in PXS");
+      validate_asset_type(pxs_exchange_rate.quote, PIXA_SYMBOL, "Quote part of price feed must be in PIXA");
+      pxs_exchange_rate.validate();
     }
 
     itr = props.find( "url" );
@@ -592,9 +592,9 @@ namespace hive { namespace protocol {
   void feed_publish_operation::validate()const
   {
     validate_account_name( publisher );
-    HIVE_PROTOCOL_ASSET_ASSERT( ( is_asset_type( exchange_rate.base, HIVE_SYMBOL ) && is_asset_type( exchange_rate.quote, HBD_SYMBOL ) )
-      || ( is_asset_type( exchange_rate.base, HBD_SYMBOL ) && is_asset_type( exchange_rate.quote, HIVE_SYMBOL ) ),
-      "Price feed must be a HIVE/HBD price", ("subject", exchange_rate) );
+    HIVE_PROTOCOL_ASSET_ASSERT( ( is_asset_type( exchange_rate.base, PIXA_SYMBOL ) && is_asset_type( exchange_rate.quote, PXS_SYMBOL ) )
+      || ( is_asset_type( exchange_rate.base, PXS_SYMBOL ) && is_asset_type( exchange_rate.quote, PIXA_SYMBOL ) ),
+      "Price feed must be a PIXA/PXS price", ("subject", exchange_rate) );
     exchange_rate.validate();
   }
 
@@ -602,17 +602,17 @@ namespace hive { namespace protocol {
   {
     validate_account_name( owner );
 
-    HIVE_PROTOCOL_ASSET_ASSERT(  ( is_asset_type( amount_to_sell, HIVE_SYMBOL ) && is_asset_type( min_to_receive, HBD_SYMBOL ) )
-          || ( is_asset_type( amount_to_sell, HBD_SYMBOL ) && is_asset_type( min_to_receive, HIVE_SYMBOL ) )
+    HIVE_PROTOCOL_ASSET_ASSERT(  ( is_asset_type( amount_to_sell, PIXA_SYMBOL ) && is_asset_type( min_to_receive, PXS_SYMBOL ) )
+          || ( is_asset_type( amount_to_sell, PXS_SYMBOL ) && is_asset_type( min_to_receive, PIXA_SYMBOL ) )
           || (
               amount_to_sell.symbol.space() == asset_symbol_type::smt_nai_space
-              && is_asset_type( min_to_receive, HIVE_SYMBOL )
+              && is_asset_type( min_to_receive, PIXA_SYMBOL )
             )
           || (
-              is_asset_type( amount_to_sell, HIVE_SYMBOL )
+              is_asset_type( amount_to_sell, PIXA_SYMBOL )
               && min_to_receive.symbol.space() == asset_symbol_type::smt_nai_space
             ),
-          "Limit order must be for the HIVE:HBD market", ("subject", amount_to_sell)(min_to_receive) );
+          "Limit order must be for the PIXA:PXS market", ("subject", amount_to_sell)(min_to_receive) );
 
     price( amount_to_sell, min_to_receive ).validate();
   }
@@ -623,17 +623,17 @@ namespace hive { namespace protocol {
     validate_asset_type(amount_to_sell, exchange_rate.base.symbol, "Sell asset must be the base of the price");
     exchange_rate.validate();
 
-    HIVE_PROTOCOL_ASSET_ASSERT(  ( is_asset_type( amount_to_sell, HIVE_SYMBOL ) && is_asset_type( exchange_rate.quote, HBD_SYMBOL ) )
-          || ( is_asset_type( amount_to_sell, HBD_SYMBOL ) && is_asset_type( exchange_rate.quote, HIVE_SYMBOL ) )
+    HIVE_PROTOCOL_ASSET_ASSERT(  ( is_asset_type( amount_to_sell, PIXA_SYMBOL ) && is_asset_type( exchange_rate.quote, PXS_SYMBOL ) )
+          || ( is_asset_type( amount_to_sell, PXS_SYMBOL ) && is_asset_type( exchange_rate.quote, PIXA_SYMBOL ) )
           || (
               amount_to_sell.symbol.space() == asset_symbol_type::smt_nai_space
-              && is_asset_type( exchange_rate.quote, HIVE_SYMBOL )
+              && is_asset_type( exchange_rate.quote, PIXA_SYMBOL )
             )
           || (
-              is_asset_type( amount_to_sell, HIVE_SYMBOL )
+              is_asset_type( amount_to_sell, PIXA_SYMBOL )
               && exchange_rate.quote.symbol.space() == asset_symbol_type::smt_nai_space
             ),
-          "Limit order must be for the HIVE:HBD market", ("subject", amount_to_sell)(exchange_rate) );
+          "Limit order must be for the PIXA:PXS market", ("subject", amount_to_sell)(exchange_rate) );
 
     const auto amount_to_sell_in_quote = amount_to_sell * exchange_rate;
     validate_asset_greater_than_zero(amount_to_sell_in_quote, "Amount to sell cannot round to 0 when traded");
@@ -647,18 +647,18 @@ namespace hive { namespace protocol {
   void convert_operation::validate()const
   {
     validate_account_name( owner );
-    /// only allow conversion from HBD to HIVE, allowing the opposite can enable traders to abuse
+    /// only allow conversion from PXS to PIXA, allowing the opposite can enable traders to abuse
     /// market fluxuations through converting large quantities without moving the price.
-    validate_asset_type(amount, HBD_SYMBOL, "Can only convert HBD to HIVE");
-    validate_asset_greater_than_zero(amount, "Must convert some HBD");
+    validate_asset_type(amount, PXS_SYMBOL, "Can only convert PXS to PIXA");
+    validate_asset_greater_than_zero(amount, "Must convert some PXS");
   }
 
   void collateralized_convert_operation::validate()const
   {
     validate_account_name( owner );
-    /// only allow conversion from HIVE to HBD (at least for now)
-    validate_asset_type(amount, HIVE_SYMBOL, "Can only convert HIVE to HBD");
-    validate_asset_greater_than_zero(amount, "Must convert some HIVE");
+    /// only allow conversion from PIXA to PXS (at least for now)
+    validate_asset_type(amount, PIXA_SYMBOL, "Can only convert PIXA to PXS");
+    validate_asset_greater_than_zero(amount, "Must convert some PIXA");
   }
 
   void escrow_transfer_operation::validate()const
@@ -668,15 +668,15 @@ namespace hive { namespace protocol {
     validate_account_name( agent );
     validate_asset_not_negative(fee, "fee cannot be negative");
 
-    validate_asset_not_negative(hbd_amount, "hbd_amount cannot be negative");
-    validate_asset_not_negative(hive_amount, "hive_amount cannot be negative");
+    validate_asset_not_negative(pxs_amount, "pxs_amount cannot be negative");
+    validate_asset_not_negative(pixa_amount, "pixa_amount cannot be negative");
 
-    HIVE_PROTOCOL_ASSET_ASSERT( hbd_amount.amount > 0 || hive_amount.amount > 0, "escrow must transfer a non-zero amount", ("subject", hive_amount)(hbd_amount) );
+    HIVE_PROTOCOL_ASSET_ASSERT( pxs_amount.amount > 0 || pixa_amount.amount > 0, "escrow must transfer a non-zero amount", ("subject", pixa_amount)(pxs_amount) );
     HIVE_PROTOCOL_ACCOUNT_NAME_ASSERT( from != agent && to != agent, "agent must be a third party", ("subject", agent) );
 
-    validate_asset_type_one_of(fee, {HIVE_SYMBOL, HBD_SYMBOL}, "fee must be HIVE or HBD");
-    validate_asset_type(hbd_amount, HBD_SYMBOL, "HBD amount must contain HBD asset");
-    validate_asset_type(hive_amount, HIVE_SYMBOL, "HIVE amount must contain HIVE asset");
+    validate_asset_type_one_of(fee, {PIXA_SYMBOL, PXS_SYMBOL}, "fee must be PIXA or PXS");
+    validate_asset_type(pxs_amount, PXS_SYMBOL, "PXS amount must contain PXS asset");
+    validate_asset_type(pixa_amount, PIXA_SYMBOL, "PIXA amount must contain PIXA asset");
 
     HIVE_PROTOCOL_NUMBER_ASSERT( ratification_deadline < escrow_expiration, "ratification deadline must be before escrow expiration", ("subject", ratification_deadline)(escrow_expiration) );
     if (!json_meta.empty())
@@ -710,11 +710,11 @@ namespace hive { namespace protocol {
     validate_account_name( receiver );
     HIVE_PROTOCOL_ACCOUNT_NAME_ASSERT( who == from || who == to || who == agent, "who must be from or to or agent", ("subject", who) );
     HIVE_PROTOCOL_ACCOUNT_NAME_ASSERT( receiver == from || receiver == to, "receiver must be from or to", ("subject", receiver) );
-    validate_asset_not_negative(hbd_amount, "HBD amount cannot be negative");
-    validate_asset_not_negative(hive_amount, "HIVE amount cannot be negative");
-    HIVE_PROTOCOL_ASSET_ASSERT( (hbd_amount.amount > 0 || hive_amount.amount > 0) && "escrow_release_operation", "escrow must release a non-zero amount", ("subject", hive_amount)(hbd_amount) );
-    validate_asset_type(hbd_amount, HBD_SYMBOL, "HBD amount must contain HBD asset");
-    validate_asset_type(hive_amount, HIVE_SYMBOL, "HIVE amount must contain HIVE asset");
+    validate_asset_not_negative(pxs_amount, "PXS amount cannot be negative");
+    validate_asset_not_negative(pixa_amount, "PIXA amount cannot be negative");
+    HIVE_PROTOCOL_ASSET_ASSERT( (pxs_amount.amount > 0 || pixa_amount.amount > 0) && "escrow_release_operation", "escrow must release a non-zero amount", ("subject", pixa_amount)(pxs_amount) );
+    validate_asset_type(pxs_amount, PXS_SYMBOL, "PXS amount must contain PXS asset");
+    validate_asset_type(pixa_amount, PIXA_SYMBOL, "PIXA amount must contain PIXA asset");
   }
 
   void request_account_recovery_operation::validate()const
@@ -746,7 +746,7 @@ namespace hive { namespace protocol {
     validate_account_name( from );
     validate_account_name( to );
     validate_asset_greater_than_zero(amount, "Must transfer to savings some amount");
-    validate_asset_type_one_of(amount, {HIVE_SYMBOL, HBD_SYMBOL}, "Must transfer HIVE or HBD");
+    validate_asset_type_one_of(amount, {PIXA_SYMBOL, PXS_SYMBOL}, "Must transfer PIXA or PXS");
     validate_string_max_size(memo, HIVE_MAX_MEMO_SIZE - 1,"Transfer to savings memo is too large");
     validate_is_utf8(memo, "Transfer to savings memo is not UTF8");
   }
@@ -756,7 +756,7 @@ namespace hive { namespace protocol {
     validate_account_name( from );
     validate_account_name( to );
     validate_asset_greater_than_zero(amount, "Must transfer from savings some amount");
-    validate_asset_type_one_of(amount, {HIVE_SYMBOL, HBD_SYMBOL}, "Must transfer HIVE or HBD");
+    validate_asset_type_one_of(amount, {PIXA_SYMBOL, PXS_SYMBOL}, "Must transfer PIXA or PXS");
     validate_string_max_size(memo, HIVE_MAX_MEMO_SIZE - 1, "Transfer from savings memo is too large");
     validate_is_utf8(memo, "Transfer from savings memo is not UTF8");
   }
@@ -779,14 +779,14 @@ namespace hive { namespace protocol {
   void claim_reward_balance_operation::validate()const
   {
     validate_account_name( account );
-    validate_asset_type(reward_hive, HIVE_SYMBOL, "Reward HIVE must be expressed in HIVE");
-    validate_asset_type(reward_hbd, HBD_SYMBOL, "Reward HBD must be expressed in HBD");
+    validate_asset_type(reward_pixa, PIXA_SYMBOL, "Reward PIXA must be expressed in PIXA");
+    validate_asset_type(reward_pxs, PXS_SYMBOL, "Reward PXS must be expressed in PXS");
     validate_asset_type(reward_vests, VESTS_SYMBOL, "Reward VESTS must be expressed in VESTS");
-    validate_asset_not_negative(reward_hbd, "Cannot claim a negative amount");
-    validate_asset_not_negative(reward_hive, "Cannot claim a negative amount");
+    validate_asset_not_negative(reward_pxs, "Cannot claim a negative amount");
+    validate_asset_not_negative(reward_pixa, "Cannot claim a negative amount");
     validate_asset_not_negative(reward_vests, "Cannot claim a negative amount");
-    HIVE_PROTOCOL_ASSET_ASSERT( reward_hive.amount > 0 || reward_hbd.amount > 0 || reward_vests.amount > 0, "Must claim something.",
-      ("subject", reward_hive)("min", 0)
+    HIVE_PROTOCOL_ASSET_ASSERT( reward_pixa.amount > 0 || reward_pxs.amount > 0 || reward_vests.amount > 0, "Must claim something.",
+      ("subject", reward_pixa)("min", 0)
     );
   }
 

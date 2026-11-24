@@ -11,8 +11,8 @@
 
 namespace hive { namespace util {
 namespace {
-using hive::protocol::HIVE_asset;
-using hive::protocol::HBD_asset;
+using hive::protocol::PIXA_asset;
+using hive::protocol::PXS_asset;
 using hive::protocol::effective_comment_vote_operation;
 
 struct supplement_operations_visitor
@@ -32,22 +32,22 @@ struct supplement_operations_visitor
     if( cashout == nullptr || cashout->get_net_rshares() <= 0 )
       return; //voting can happen even after cashout; there will be no new payout though
 
-    const auto& exchange_rate = _db.get_hbd_price();
+    const auto& exchange_rate = _db.get_pxs_price();
     const auto& rf = _db.get_reward_fund();
 
     u256 total_r2 = chain::util::to256( rf.get_recent_claims() );
 
     if( total_r2 > 0 )
     {
-      HIVE_asset reward_hive = rf.get_reward_balance();
+      PIXA_asset reward_pixa = rf.get_reward_balance();
       uint128_t vshares = chain::util::evaluate_reward_curve( cashout->get_net_rshares(), rf.get_author_reward_curve(), rf.get_content_constant() );
 
-      HBD_asset reward_hbd( 0 );
+      PXS_asset reward_pxs( 0 );
       if( !exchange_rate.is_null() )
-        reward_hbd = reward_hive * exchange_rate;
+        reward_pxs = reward_pixa * exchange_rate;
 
       u256 r2 = chain::util::to256( vshares );
-      r2 *= reward_hbd.get_amount();
+      r2 *= reward_pxs.get_amount();
       r2 /= total_r2;
 
       //ABW: yes, formally we should be making copy of the operation, however all things considered

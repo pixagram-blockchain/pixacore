@@ -5,11 +5,11 @@
 
 namespace hive { namespace chain {
 
-using hive::protocol::HBD_asset;
+using hive::protocol::PXS_asset;
 class account_object;
 
 /**
-  *  This object is used to track pending requests to convert HBD to HIVE
+  *  This object is used to track pending requests to convert PXS to PIXA
   */
 class convert_request_object : public object< convert_request_object_type, convert_request_object >
 {
@@ -17,7 +17,7 @@ class convert_request_object : public object< convert_request_object_type, conve
 public:
   template< typename Allocator >
   convert_request_object( allocator< Allocator > a, uint64_t _id,
-    const account_object& _owner, temp_HBD_balance&& _amount, const time_point_sec& _conversion_time, uint32_t _requestid )
+    const account_object& _owner, temp_PXS_balance&& _amount, const time_point_sec& _conversion_time, uint32_t _requestid )
   : id( _id ), amount( std::move( _amount ) ), requestid( _requestid ), conversion_date( _conversion_time )
   {
     init( _owner );
@@ -25,8 +25,8 @@ public:
 
 // getters:
 
-  //amount of HBD to be converted to HIVE
-  const HBD_asset& get_convert_amount() const { return amount; }
+  //amount of PXS to be converted to PIXA
+  const PXS_asset& get_convert_amount() const { return amount; }
 
   //request owner
   account_id_type get_owner() const { return owner; }
@@ -42,11 +42,11 @@ public:
 
 // setters:
 
-  HBD_balance& access_amount() { return amount; }
+  PXS_balance& access_amount() { return amount; }
 
 private:
   account_id_type owner;
-  HBD_balance     amount;
+  PXS_balance     amount;
   uint32_t        requestid = 0; //< id set by owner, the owner,requestid pair must be unique
   time_point_sec  conversion_date; //< actual conversion takes place at that time
 

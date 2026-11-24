@@ -20,8 +20,8 @@ The operation is used to release the funds of the escrow. The escrow may be rele
 | who             | the account that is attempting to release the funds.                     |         |
 | receiver        | the account that should receive funds (might be {from}, might be {to})   |         |
 | escrow\_id = 30 | The escrow indicator                                                     |         |
-| hbd\_amount     | the amount of HBD to release                                             |         |
-| hive\_amount    | the amount of HIVE to release                                            |         |
+| pxs\_amount     | the amount of PXS to release                                             |         |
+| pixa\_amount    | the amount of PIXA to release                                            |         |
 
 ## 3. Authority
 
@@ -33,7 +33,7 @@ You need:
 
 \- a user should be {agent}, {from} or {to}.
 
-\- enough funds on temporary escrow balance to cover {hbd\_amount} and {hive\_amount}.
+\- enough funds on temporary escrow balance to cover {pxs\_amount} and {pixa\_amount}.
  
 \- enough Resource Credit (RC) to make an operation.
 

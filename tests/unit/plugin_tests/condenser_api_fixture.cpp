@@ -23,7 +23,7 @@ condenser_api_fixture::condenser_api_fixture()
   configuration_data.set_min_recurrent_transfers_recurrence( 1 );
   configuration_data.set_generate_missed_block_operations( true );
   configuration_data.set_witness_shutdown_threshold( 0 );
-  configuration_data.set_initial_asset_supply( HIVE_INITIAL_TEST_SUPPLY, HBD_INITIAL_TEST_SUPPLY, HP_INITIAL_TEST_SUPPLY );
+  configuration_data.set_initial_asset_supply( HIVE_INITIAL_TEST_SUPPLY, PXS_INITIAL_TEST_SUPPLY, HP_INITIAL_TEST_SUPPLY );
 
   hive::plugins::account_history::account_history_api_plugin* ah_api_plugin = nullptr;
   hive::plugins::condenser_api::condenser_api_plugin* denser_api_plugin = nullptr;
@@ -95,10 +95,10 @@ void condenser_api_fixture::hf8_scenario( check_point_tester_t check_point_teste
   ACTORS( DEFAULT_VESTING, (hf8alice)(hf8ben) );
   generate_block();
 
-  issue_funds( "hf8alice", HIVE_asset( 2'000'000 ) );
-  issue_funds( "hf8ben", HBD_asset( 2'000'000 ) );
-  issue_funds( "hf8alice", HBD_asset( 2'000'000 ) );
-  issue_funds( "hf8ben", HIVE_asset( 2'000'000 ) );
+  issue_funds( "hf8alice", PIXA_asset( 2'000'000 ) );
+  issue_funds( "hf8ben", PXS_asset( 2'000'000 ) );
+  issue_funds( "hf8alice", PXS_asset( 2'000'000 ) );
+  issue_funds( "hf8ben", PIXA_asset( 2'000'000 ) );
   generate_block();
 
   limit_order_create( "hf8alice", ASSET( "12.800 TESTS" ), ASSET( "13.300 TBD" ), false, fc::seconds( HIVE_MAX_LIMIT_ORDER_EXPIRATION ), 3, hf8alice_private_key );
@@ -131,7 +131,7 @@ void condenser_api_fixture::hf12_scenario( check_point_tester_t check_point_test
 void condenser_api_fixture::hf13_scenario( check_point_tester_t check_point_1_tester, check_point_tester_t check_point_2_tester )
 {
   db->set_hardfork( HIVE_HARDFORK_0_13 );
-  vest( HIVE_INIT_MINER_NAME, HIVE_asset( 1'000'000 ) );
+  vest( HIVE_INIT_MINER_NAME, PIXA_asset( 1'000'000 ) );
   generate_block();
   
   PREP_ACTOR( dan0ah );
@@ -142,12 +142,12 @@ void condenser_api_fixture::hf13_scenario( check_point_tester_t check_point_1_te
   create_with_delegation( HIVE_INIT_MINER_NAME, "edgar0ah", edgar0ah_public_key, edgar0ah_post_key, VEST_asset( 100'000'000'000'000 ), init_account_priv_key );
 
   post_comment("edgar0ah", "permlink1", "Title 1", "Body 1", "parentpermlink1", edgar0ah_post_key);
-  set_comment_options( "edgar0ah", "permlink1", HBD_asset( 50'010 ), HIVE_1_PERCENT * 51, false, true, comment_options_extensions_type(), edgar0ah_post_key );
+  set_comment_options( "edgar0ah", "permlink1", PXS_asset( 50'010 ), HIVE_1_PERCENT * 51, false, true, comment_options_extensions_type(), edgar0ah_post_key );
   // dan0ah casts a vote in check_point_2; at the realistic vest price the pow2 stake alone gives vote
   // rshares below HIVE_VOTE_DUST_THRESHOLD and the PRE-HF20 evaluator HARD-REJECTS the vote ("Voting weight
   // is too small"). Vest dan0ah enough to clear the dust threshold. Done last so it appends to block 3
   // (after the existing operations) rather than shifting them.
-  vest( "dan0ah", HIVE_asset( 10'000 ) );
+  vest( "dan0ah", PIXA_asset( 10'000 ) );
 
   // Following operations can be checked now. They all appear in block 3 regardless of configurations settings of the fixture.
   // pow2_operation, account_created_operation (x2), pow_reward_operation, transfer_operation,
@@ -171,9 +171,9 @@ void condenser_api_fixture::hf19_scenario( check_point_tester_t check_point_test
   ACTORS( DEFAULT_VESTING, (alice19ah)(ben19ah) );
   generate_block();
   
-  witness_create( "alice19ah", alice19ah_private_key, "foo.bar", alice19ah_private_key.get_public_key(), HIVE_asset( 1000 ) );
+  witness_create( "alice19ah", alice19ah_private_key, "foo.bar", alice19ah_private_key.get_public_key(), PIXA_asset( 1000 ) );
   witness_plugin->add_signing_key( alice19ah_private_key );
-  witness_create( "ben19ah", ben19ah_private_key, "foo.bar", ben19ah_private_key.get_public_key(), HIVE_asset( 1000 ) );
+  witness_create( "ben19ah", ben19ah_private_key, "foo.bar", ben19ah_private_key.get_public_key(), PIXA_asset( 1000 ) );
   witness_plugin->add_signing_key( ben19ah_private_key );
 
   // Make witness operations irreversible.
@@ -185,7 +185,7 @@ void condenser_api_fixture::hf19_scenario( check_point_tester_t check_point_test
   // only in next schedule, but then we'd fail in witness update anyway, because it is expected that all witnesses are
   // active if there is less than 21); we need at least 3 by the way, because witness next to his missed block will disable
   // him and one more is needed to accept transaction that reenables him before its his time to produce again
-  witness_create( "ben19ah", ben19ah_private_key, "foo.bar", ben19ah_private_key.get_public_key(), HIVE_asset( 1000 ) );
+  witness_create( "ben19ah", ben19ah_private_key, "foo.bar", ben19ah_private_key.get_public_key(), PIXA_asset( 1000 ) );
 
   // Now all the operations mentioned above can be checked. They can appear as early as 27th block, depending on configuration.
   check_point_tester( std::numeric_limits<uint32_t>::max() ); // <- no limit to max number of block generated inside.
@@ -198,7 +198,7 @@ void condenser_api_fixture::hf23_scenario( check_point_tester_t check_point_test
 
   ACTORS( DEFAULT_VESTING, (steemflower) );
   generate_block();
-  issue_funds( "steemflower", HBD_asset( 123'456'789'012 ) );
+  issue_funds( "steemflower", PXS_asset( 123'456'789'012 ) );
   generate_block();
 
   // Trigger clear_null_account_balance_operation
@@ -224,7 +224,7 @@ void condenser_api_fixture::comment_and_reward_scenario( check_point_tester_t ch
   db->set_hardfork( HIVE_HARDFORK_1_28 );
   generate_block();
   
-  ACTORS( HIVE_asset( 10'000 ), (dan0ah)(edgar0ah) ); // some more vests are needed for RC and crossing HIVE_VOTE_DUST_THRESHOLD
+  ACTORS( PIXA_asset( 10'000 ), (dan0ah)(edgar0ah) ); // some more vests are needed for RC and crossing HIVE_VOTE_DUST_THRESHOLD
 
   beneficiary_route_type beneficiary( account_name_type( "dan0ah" ), HIVE_1_PERCENT*50 );
   comment_payout_beneficiaries beneficiaries;
@@ -232,7 +232,7 @@ void condenser_api_fixture::comment_and_reward_scenario( check_point_tester_t ch
   comment_options_extensions_type extensions = { beneficiaries };
 
   post_comment("edgar0ah", "permlink1", "Title 1", "Body 1", "parentpermlink1", edgar0ah_post_key);
-  set_comment_options( "edgar0ah", "permlink1", HBD_asset( 10'000'000 ), HIVE_100_PERCENT, true, true, extensions, edgar0ah_post_key );
+  set_comment_options( "edgar0ah", "permlink1", PXS_asset( 10'000'000 ), HIVE_100_PERCENT, true, true, extensions, edgar0ah_post_key );
   vote("edgar0ah", "permlink1", "dan0ah", - HIVE_1_PERCENT * 100, dan0ah_post_key);
   vote("edgar0ah", "permlink1", "dan0ah", HIVE_1_PERCENT * 100, dan0ah_post_key); // Changed his mind
 
@@ -243,7 +243,7 @@ void condenser_api_fixture::comment_and_reward_scenario( check_point_tester_t ch
   check_point_1_tester( std::numeric_limits<uint32_t>::max() ); // <- no limit to max number of block generated inside.
 
   // The absolute minimum of claimed values is used here to allow greater flexibility for the tests using this scenario.
-  claim_reward_balance( "edgar0ah", HIVE_asset( 0 ), HBD_asset( 1 ), VEST_asset( 1 ), edgar0ah_post_key );
+  claim_reward_balance( "edgar0ah", PIXA_asset( 0 ), PXS_asset( 1 ), VEST_asset( 1 ), edgar0ah_post_key );
 
   // In following block (which number depends on how many were generated in check_point_1_tester) these operations appear
   // and can be checked:  claim_reward_balance_operation & producer_reward_operation.
@@ -253,18 +253,18 @@ void condenser_api_fixture::comment_and_reward_scenario( check_point_tester_t ch
 void condenser_api_fixture::convert_and_limit_order_scenario( check_point_tester_t check_point_tester )
 {
   db->set_hardfork( HIVE_HARDFORK_1_27 );
-  set_account_creation_fee( HIVE_asset( 3000 ) ); //3.000 HIVE, same as mainnet
+  set_account_creation_fee( PIXA_asset( 3000 ) ); //3.000 PIXA, same as mainnet
   generate_block();
 
   ACTORS( DEFAULT_VESTING, (edgar3ah)(carol3ah) );
   generate_block();
 
-  issue_funds( "edgar3ah", HBD_asset( 300'000 ) );
-  issue_funds( "carol3ah", HIVE_asset( 300'000 ) );
+  issue_funds( "edgar3ah", PXS_asset( 300'000 ) );
+  issue_funds( "carol3ah", PIXA_asset( 300'000 ) );
   generate_block();
 
-  convert_hbd_to_hive( "edgar3ah", 0, HBD_asset( 11'201 ), edgar3ah_private_key );
-  collateralized_convert_hive_to_hbd( "carol3ah", 0, HIVE_asset( 22'102 ), carol3ah_private_key );
+  convert_pxs_to_pixa( "edgar3ah", 0, PXS_asset( 11'201 ), edgar3ah_private_key );
+  collateralized_convert_pixa_to_pxs( "carol3ah", 0, PIXA_asset( 22'102 ), carol3ah_private_key );
   limit_order_create( "carol3ah", ASSET( "11.400 TESTS" ), ASSET( "11.650 TBD" ), false, fc::seconds( HIVE_MAX_LIMIT_ORDER_EXPIRATION ), 1, carol3ah_private_key );
   limit_order2_create( "carol3ah", ASSET( "22.075 TESTS" ), price( ASSET( "0.010 TESTS" ), ASSET( "0.010 TBD" ) ), false, fc::seconds( HIVE_MAX_LIMIT_ORDER_EXPIRATION ), 2, carol3ah_private_key );
   limit_order2_create( "edgar3ah", ASSET( "22.075 TBD" ), price( ASSET( "0.010 TBD" ), ASSET( "0.010 TESTS" ) ), true, fc::seconds( HIVE_MAX_LIMIT_ORDER_EXPIRATION ), 3, edgar3ah_private_key );
@@ -285,15 +285,15 @@ void condenser_api_fixture::vesting_scenario( check_point_tester_t check_point_t
 
   ACTORS( DEFAULT_VESTING, (alice4ah)(ben4ah)(carol4ah) );
   generate_block();
-  issue_funds( "alice4ah", HIVE_asset( 2'900 ) );
+  issue_funds( "alice4ah", PIXA_asset( 2'900 ) );
   generate_block();
 
-  vest( "alice4ah", "alice4ah", HIVE_asset( 2'000 ), alice4ah_private_key );
+  vest( "alice4ah", "alice4ah", PIXA_asset( 2'000 ), alice4ah_private_key );
   set_withdraw_vesting_route( "alice4ah", "ben4ah", HIVE_1_PERCENT * 50, true, alice4ah_private_key);
   // Before HF20 the minimum vesting delegation is (account_creation_fee * 10) in HP and a delegation
   // change must be at least (account_creation_fee) in HP.
   const auto price = db->get_dynamic_global_properties().get_vesting_share_price();
-  const HIVE_asset fee = db->get_witness_schedule_object().median_props.account_creation_fee;
+  const PIXA_asset fee = db->get_witness_schedule_object().median_props.account_creation_fee;
   const VEST_asset min_delegation = ( fee * 10 ) * price;
   const VEST_asset min_update = fee * price;
   delegate_vest( "alice4ah", "carol4ah", min_delegation + min_update, alice4ah_private_key );
@@ -310,15 +310,15 @@ void condenser_api_fixture::vesting_scenario( check_point_tester_t check_point_t
 void condenser_api_fixture::witness_scenario( check_point_tester_t check_point_tester )
 {
   db->set_hardfork( HIVE_HARDFORK_1_27 );
-  set_account_creation_fee( HIVE_asset( 3000 ) ); //3.000 HIVE, same as mainnet
+  set_account_creation_fee( PIXA_asset( 3000 ) ); //3.000 PIXA, same as mainnet
   generate_block();
 
-  ACTORS( HIVE_asset( 10'000 ), (alice5ah)(ben5ah)(carol5ah) ); //a bit more vests to cover RC for operations
+  ACTORS( PIXA_asset( 10'000 ), (alice5ah)(ben5ah)(carol5ah) ); //a bit more vests to cover RC for operations
   generate_block();
 
-  witness_create( "alice5ah", alice5ah_private_key, "foo.bar", alice5ah_private_key.get_public_key(), HIVE_asset( 1000 ) );
+  witness_create( "alice5ah", alice5ah_private_key, "foo.bar", alice5ah_private_key.get_public_key(), PIXA_asset( 1000 ) );
   witness_plugin->add_signing_key( alice5ah_private_key );
-  witness_feed_publish( "alice5ah", HBD_price( 1000, 1000 ), alice5ah_private_key );
+  witness_feed_publish( "alice5ah", PXS_price( 1000, 1000 ), alice5ah_private_key );
   proxy( "ben5ah", "carol5ah", ben5ah_private_key );
   witness_vote( "carol5ah", "alice5ah", carol5ah_private_key, true ); // mistakenly voted
   witness_vote( "carol5ah", "alice5ah", carol5ah_private_key, false ); // fixed the mistake
@@ -342,23 +342,23 @@ void condenser_api_fixture::witness_scenario( check_point_tester_t check_point_t
 void condenser_api_fixture::escrow_and_savings_scenario( check_point_tester_t check_point_tester )
 {
   db->set_hardfork( HIVE_HARDFORK_1_27 );
-  set_account_creation_fee( HIVE_asset( 3000 ) ); //3.000 HIVE, same as mainnet
+  set_account_creation_fee( PIXA_asset( 3000 ) ); //3.000 PIXA, same as mainnet
   generate_block();
 
-  ACTORS( HIVE_asset( 10'000 ), (alice6ah)(ben6ah)(carol6ah) ); //extra vests to cover RC for operations
+  ACTORS( PIXA_asset( 10'000 ), (alice6ah)(ben6ah)(carol6ah) ); //extra vests to cover RC for operations
   generate_block();
-  issue_funds( "alice6ah", HIVE_asset( 1'111 ) );
-  issue_funds( "alice6ah", HBD_asset( 2'121 ) );
+  issue_funds( "alice6ah", PIXA_asset( 1'111 ) );
+  issue_funds( "alice6ah", PXS_asset( 2'121 ) );
   generate_block();
   
-  escrow_transfer( "alice6ah", "ben6ah", "carol6ah", HIVE_asset( 71 ), HBD_asset( 0 ), ASSET( "0.001 TESTS" ), "",
+  escrow_transfer( "alice6ah", "ben6ah", "carol6ah", PIXA_asset( 71 ), PXS_asset( 0 ), ASSET( "0.001 TESTS" ), "",
                   fc::seconds( HIVE_BLOCK_INTERVAL * 10 ), fc::seconds( HIVE_BLOCK_INTERVAL * 20 ), 30, alice6ah_private_key );
-  escrow_transfer( "alice6ah", "ben6ah", "carol6ah", HIVE_asset( 0 ), HBD_asset( 7 ), ASSET( "0.001 TESTS" ), "{\"go\":\"now\"}",
+  escrow_transfer( "alice6ah", "ben6ah", "carol6ah", PIXA_asset( 0 ), PXS_asset( 7 ), ASSET( "0.001 TESTS" ), "{\"go\":\"now\"}",
                   fc::seconds( HIVE_BLOCK_INTERVAL * 10 ), fc::seconds( HIVE_BLOCK_INTERVAL * 20 ), 31, alice6ah_private_key );
 
   escrow_approve( "alice6ah", "ben6ah", "carol6ah", "carol6ah", true, 30, carol6ah_private_key );
   escrow_approve( "alice6ah", "ben6ah", "carol6ah", "ben6ah", true, 30, ben6ah_private_key );
-  escrow_release( "alice6ah", "ben6ah", "carol6ah", "alice6ah", "ben6ah", HIVE_asset( 13 ), HBD_asset( 0 ), 30, alice6ah_private_key );
+  escrow_release( "alice6ah", "ben6ah", "carol6ah", "alice6ah", "ben6ah", PIXA_asset( 13 ), PXS_asset( 0 ), 30, alice6ah_private_key );
   escrow_dispute( "alice6ah", "ben6ah", "carol6ah", "ben6ah", 30, ben6ah_private_key );
 
   escrow_approve( "alice6ah", "ben6ah", "carol6ah", "carol6ah", false, 31, carol6ah_private_key );
@@ -380,13 +380,13 @@ void condenser_api_fixture::proposal_scenario( check_point_tester_t check_point_
   generate_block(); // observe that block, not the one below, because it contains
     // dhf_funding_operation - also block below has custom operation (from debug_update)
     // that contains static "data" field that changes when test is run solo vs all
-  set_account_creation_fee( HIVE_asset( 3000 ) ); //3.000 HIVE, same as mainnet
+  set_account_creation_fee( PIXA_asset( 3000 ) ); //3.000 PIXA, same as mainnet
   generate_block();
 
   ACTORS( DEFAULT_VESTING, (alice7ah)(ben7ah)(carol7ah) );
   generate_block();
-  issue_funds( "alice7ah", HBD_asset( 800'000 ) );
-  issue_funds( "carol7ah", HIVE_asset( 100'000'000 ) );
+  issue_funds( "alice7ah", PXS_asset( 800'000 ) );
+  issue_funds( "carol7ah", PIXA_asset( 100'000'000 ) );
   generate_block();
 
   // Fill treasury handsomely so that the payout occurres early.
@@ -396,12 +396,12 @@ void condenser_api_fixture::proposal_scenario( check_point_tester_t check_point_
   post_comment("alice7ah", "permlink0", "title", "body", "test", alice7ah_post_key);
   int64_t proposal_id = 
   create_proposal( "alice7ah", "ben7ah", "0" /*subject*/, "permlink0", db->head_block_time() - fc::days( 1 ),
-                    db->head_block_time() + fc::days( 2 ), HBD_asset( 100 ), alice7ah_private_key );
+                    db->head_block_time() + fc::days( 2 ), PXS_asset( 100 ), alice7ah_private_key );
   const proposal_object* proposal = find_proposal( proposal_id );
   std::string subject( proposal->subject );
   std::string permlink( proposal->permlink );
   BOOST_REQUIRE_NE( proposal, nullptr );
-  update_proposal( proposal_id, "alice7ah", HBD_asset( 80 ), "new subject", proposal->permlink, alice7ah_private_key);
+  update_proposal( proposal_id, "alice7ah", PXS_asset( 80 ), "new subject", proposal->permlink, alice7ah_private_key);
   vote_proposal( "carol7ah", { proposal_id }, false/*approve*/, carol7ah_private_key);
   remove_proposal( "alice7ah", { proposal_id }, alice7ah_private_key );
 
@@ -409,7 +409,7 @@ void condenser_api_fixture::proposal_scenario( check_point_tester_t check_point_
 
   // Create the same proposal again to be paid from treasury.
   proposal_id = create_proposal( "alice7ah", "ben7ah", subject, permlink, db->head_block_time() - fc::days( 1 ),
-    db->head_block_time() + fc::days( 2 ), HBD_asset( 100 ), alice7ah_private_key );
+    db->head_block_time() + fc::days( 2 ), PXS_asset( 100 ), alice7ah_private_key );
   vote_proposal( "carol7ah", { proposal_id }, true/*approve*/, carol7ah_private_key);
 
   // All operations related to first proposal can be checked now in 5th block except dhf_funding_operation (2nd block),
@@ -435,7 +435,7 @@ void condenser_api_fixture::account_scenario( check_point_tester_t check_point_t
   ACTORS( DEFAULT_VESTING, (alice8ah)(carol8ah) );
   // We need elected witness for claim_account_operation to succeed.
   // alice8ah must also afford the RC of the subsidized account it claims below
-  vest( "alice8ah", HIVE_asset( 10'000'000 ) );
+  vest( "alice8ah", PIXA_asset( 10'000'000 ) );
   generate_block();
   witness_vote( "alice8ah", "initminer", alice8ah_private_key );
   // Generate number of blocks sufficient for the witness to be elected & scheduled (and get a subsidized account).
@@ -445,11 +445,11 @@ void condenser_api_fixture::account_scenario( check_point_tester_t check_point_t
   account_update( "alice8ah", alice8ah_private_key.get_public_key(), R"~("{"position":"top"}")~",
                   fc::optional<authority>(), fc::optional<authority>(), fc::optional<authority>(), alice8ah_private_key );
 
-  claim_account( "alice8ah", HIVE_asset( 0 ), alice8ah_private_key );
+  claim_account( "alice8ah", PIXA_asset( 0 ), alice8ah_private_key );
   PREP_ACTOR( ben8ah );
   create_claimed_account( "alice8ah", "ben8ah", ben8ah_public_key, ben8ah_post_key.get_public_key(), R"~("{"go":"now"}")~", alice8ah_private_key );
 
-  vest( "ben8ah", HIVE_asset( 1'000'000 ) );
+  vest( "ben8ah", PIXA_asset( 1'000'000 ) );
   change_recovery_account( "ben8ah", HIVE_INIT_MINER_NAME, ben8ah_private_key );
   account_update2( "ben8ah", authority(1, carol8ah_public_key,1), fc::optional<authority>(), fc::optional<authority>(),
                     ben8ah_private_key.get_public_key(), R"~("{"success":true}")~", R"~("{"winner":"me"}")~", ben8ah_private_key );
@@ -492,8 +492,8 @@ void condenser_api_fixture::recurrent_transfer_scenario( check_point_tester_t ch
 
   ACTORS( DEFAULT_VESTING, (alice10ah)(ben10ah) );
   generate_block();
-  issue_funds( "alice10ah", HIVE_asset( 40 ) );
-  issue_funds( "ben10ah", HBD_asset( 13'777 ) );
+  issue_funds( "alice10ah", PIXA_asset( 40 ) );
+  issue_funds( "ben10ah", PXS_asset( 13'777 ) );
   generate_block();
 
   recurrent_transfer( "alice10ah", "ben10ah", ASSET( "0.037 TESTS" ), "With love", 1, 2, alice10ah_private_key );
@@ -528,17 +528,17 @@ void condenser_api_fixture::combo_1_scenario( check_point_tester_t check_point_t
   // keep the account creation fee at its minimum so the delegation below stays valid and the
   // amount alice12ah needs to create ben12ah stays minimal. Do it before the block below so the internal
   // debug_update transaction lands in an unobserved block instead of polluting the tested one.
-  set_account_creation_fee( HIVE_asset( 1 ) );
+  set_account_creation_fee( PIXA_asset( 1 ) );
   generate_block();
 
   PREP_ACTOR( alice12ah );
-  account_create( "alice12ah", alice12ah_public_key, alice12ah_public_key, HIVE_asset( 6'000 ) ); // add some vests to cover delegation and RC for operations
-  fund( "alice12ah", HIVE_asset( 1 ) ); // so alice12ah can pay the account creation fee for ben12ah below
+  account_create( "alice12ah", alice12ah_public_key, alice12ah_public_key, PIXA_asset( 6'000 ) ); // add some vests to cover delegation and RC for operations
+  fund( "alice12ah", PIXA_asset( 1 ) ); // so alice12ah can pay the account creation fee for ben12ah below
 
   post_comment( "alice12ah", "permlink12-1", "Title 12-1", "Body 12-1", "parentpermlink12", alice12ah_private_key );
 
   PREP_ACTOR( ben12ah );
-  account_create( "ben12ah", "alice12ah", alice12ah_private_key, HIVE_asset( 0 ), ben12ah_public_key, ben12ah_public_key, "{\"relation\":\"sibling\"}" );
+  account_create( "ben12ah", "alice12ah", alice12ah_private_key, PIXA_asset( 0 ), ben12ah_public_key, ben12ah_public_key, "{\"relation\":\"sibling\"}" );
   delegate_vest( "alice12ah", "ben12ah", VEST_asset( 1'000'000'000 ), alice12ah_private_key ); // enough delegation to cover RC costs of ben12ah operations
 
   post_comment_to_comment( "ben12ah", "permlink12-2", "Title 12-1", "Body 12-1", "alice12ah", "permlink12-1", ben12ah_private_key );

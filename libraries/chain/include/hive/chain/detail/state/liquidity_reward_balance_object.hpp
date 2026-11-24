@@ -11,7 +11,7 @@ namespace hive { namespace chain {
   *  When a user is a taker, their volume decreases
   *
   *  Every 1000 blocks, the account that has the highest volume_weight() is paid the maximum of
-  *  1000 HIVE or 1000 * virtual_supply / (100*blocks_per_year) aka 10 * virtual_supply / blocks_per_year
+  *  1000 PIXA or 1000 * virtual_supply / (100*blocks_per_year) aka 10 * virtual_supply / blocks_per_year
   *
   *  After being paid volume gets reset to 0
   */
@@ -21,14 +21,14 @@ class liquidity_reward_balance_object : public object< liquidity_reward_balance_
 public:
   CHAINBASE_DEFAULT_CONSTRUCTOR( liquidity_reward_balance_object )
 
-  int64_t get_hive_volume() const { return hive_volume; }
-  int64_t get_hbd_volume() const { return hbd_volume; }
+  int64_t get_hive_volume() const { return pixa_volume; }
+  int64_t get_pxs_volume() const { return pxs_volume; }
 
   account_id_type   owner;
   time_point_sec    last_update = fc::time_point_sec::min(); /// used to decay negative liquidity balances. block num
   uint128_t         weight = 0;
-  int64_t           hive_volume = 0;
-  int64_t           hbd_volume = 0;
+  int64_t           pixa_volume = 0;
+  int64_t           pxs_volume = 0;
 
   /// this is the sort index
   uint128_t volume_weight()const
@@ -36,7 +36,7 @@ public:
     // #857: compute in uint128 so the int64*int64 product cannot overflow; gated by is_positive()
     // so the committed value is unchanged from the historical form (every overflow had is_positive()==0).
     if( is_positive() )
-      return uint128_t( hive_volume ) * uint128_t( hbd_volume );
+      return uint128_t( pixa_volume ) * uint128_t( pxs_volume );
     else
       return 0;
   }
@@ -44,7 +44,7 @@ public:
   uint128_t min_volume_weight()const
   {
     if( is_positive() )
-      return uint128_t( std::min( hive_volume, hbd_volume ) );
+      return uint128_t( std::min( pixa_volume, pxs_volume ) );
     else
       return 0;
   }
@@ -56,7 +56,7 @@ public:
 
   bool is_positive()const
   {
-    return hive_volume > 0 && hbd_volume > 0;
+    return pixa_volume > 0 && pxs_volume > 0;
   }
 
   CHAINBASE_UNPACK_CONSTRUCTOR( liquidity_reward_balance_object );
@@ -65,4 +65,4 @@ public:
 } } // hive::chain
 
 FC_REFLECT( hive::chain::liquidity_reward_balance_object,
-          (id)(owner)(last_update)(weight)(hive_volume)(hbd_volume) )
+          (id)(owner)(last_update)(weight)(pixa_volume)(pxs_volume) )

@@ -158,7 +158,7 @@ void comment_options_evaluator::do_apply( const comment_options_operation& o )
     return;
   }
 
-  HBD_asset o_max_accepted_payout = o.get_max_accepted_payout();
+  PXS_asset o_max_accepted_payout = o.get_max_accepted_payout();
 
   if( !o.allow_curation_rewards || !o.allow_votes || o_max_accepted_payout < comment_cashout->get_max_accepted_payout() )
     HIVE_CHAIN_VOTING_ASSERT( !comment_cashout->has_votes(), o.author, "One of the included comment options requires the comment to have no rshares allocated to it." );
@@ -166,11 +166,11 @@ void comment_options_evaluator::do_apply( const comment_options_operation& o )
   HIVE_CHAIN_STATE_ASSERT( comment_cashout->allows_curation_rewards() >= o.allow_curation_rewards, o.author, "Curation rewards cannot be re-enabled." );
   HIVE_CHAIN_VOTING_ASSERT( comment_cashout->allows_votes() >= o.allow_votes, o.author, "Voting cannot be re-enabled." );
   HIVE_CHAIN_STATE_ASSERT( comment_cashout->get_max_accepted_payout() >= o_max_accepted_payout, o.author, "A comment cannot accept a greater payout." );
-  HIVE_CHAIN_STATE_ASSERT( comment_cashout->get_percent_hbd() >= o.percent_hbd, o.author, "A comment cannot accept a greater percent HBD." );
+  HIVE_CHAIN_STATE_ASSERT( comment_cashout->get_percent_pxs() >= o.percent_pxs, o.author, "A comment cannot accept a greater percent PXS." );
 
   _db.modify( *comment_cashout, [&]( comment_cashout_object& c )
   {
-    c.configure_options( o.percent_hbd, o_max_accepted_payout, o.allow_votes, o.allow_curation_rewards );
+    c.configure_options( o.percent_pxs, o_max_accepted_payout, o.allow_votes, o.allow_curation_rewards );
   } );
 
   for( auto& e : o.extensions )
@@ -383,11 +383,11 @@ void pre_hf20_vote_evaluator( const vote_operation& o, database& _db )
 
   if( _db.has_hardfork( HIVE_HARDFORK_0_14__259 ) )
   {
-    HIVE_CHAIN_BALANCE_ASSERT( abs_rshares > HIVE_VOTE_DUST_THRESHOLD || o.weight == 0, o.voter, "Voting weight is too small, please accumulate more voting power or Hive Power." );
+    HIVE_CHAIN_BALANCE_ASSERT( abs_rshares > HIVE_VOTE_DUST_THRESHOLD || o.weight == 0, o.voter, "Voting weight is too small, please accumulate more voting power or Pixa Power." );
   }
   else if( _db.has_hardfork( HIVE_HARDFORK_0_13__248 ) )
   {
-    HIVE_CHAIN_BALANCE_ASSERT( abs_rshares > HIVE_VOTE_DUST_THRESHOLD || abs_rshares == 1, o.voter, "Voting weight is too small, please accumulate more voting power or Hive Power." );
+    HIVE_CHAIN_BALANCE_ASSERT( abs_rshares > HIVE_VOTE_DUST_THRESHOLD || abs_rshares == 1, o.voter, "Voting weight is too small, please accumulate more voting power or Pixa Power." );
   }
 
   const auto& comment_vote_idx = _db.get_index< comment_vote_index, by_comment_voter >();

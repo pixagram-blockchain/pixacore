@@ -233,7 +233,7 @@ Assuming that the hived `data` directory is located under: `$(pwd)/data`:
 cat << EOT > data/alternate-chain-spec.json
 {
   "init_supply": 1000000000000,
-  "hbd_init_supply": 1000000000000,
+  "pxs_init_supply": 1000000000000,
   "genesis_time": $(date +%s),
   "hardfork_schedule": [
     {"hardfork": 28, "block_num": 1}

@@ -173,14 +173,14 @@ def test_database_api_exposes_stable_asset_price_and_endpoint_aliases(tmp_path: 
             class Props3(Struct):
                 account_subsidy_budget: int
                 account_subsidy_decay: int
-                hbd_interest_rate: int
+                pxs_interest_rate: int
                 maximum_block_size: int
                 account_creation_fee: AccountCreationFee
 
             class Props4(Struct):
                 account_subsidy_budget: int
                 account_subsidy_decay: int
-                hbd_interest_rate: int
+                pxs_interest_rate: int
                 maximum_block_size: int
                 account_creation_fee: AccountCreationFee
 

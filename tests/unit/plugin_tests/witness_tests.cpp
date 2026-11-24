@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE( witness_basic_with_runtime_expiration_01_test )
 
         db->with_read_lock( [&]()
         {
-          BOOST_REQUIRE_EQUAL( get_hbd_balance( "bob" ).amount.value, 1200 );
+          BOOST_REQUIRE_EQUAL( get_pxs_balance( "bob" ).amount.value, 1200 );
         } );
 
         ilog( "'API' thread finished" );
@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE( witness_basic_with_runtime_expiration_02_test )
           _scheduling( HIVE_MAX_TIME_UNTIL_EXPIRATION );
           db->with_read_lock( [&]()
           {
-            BOOST_REQUIRE_EQUAL( get_hbd_balance( "bob" ).amount.value, 1001 );
+            BOOST_REQUIRE_EQUAL( get_pxs_balance( "bob" ).amount.value, 1001 );
           } );
         }
 
@@ -182,7 +182,7 @@ BOOST_AUTO_TEST_CASE( witness_basic_with_runtime_expiration_02_test )
           _scheduling( HIVE_MAX_TIME_UNTIL_SIGNATURE_EXPIRATION );
           db->with_read_lock( [&]()
           {
-            BOOST_REQUIRE_EQUAL( get_hbd_balance( "bob" ).amount.value, 1002 );
+            BOOST_REQUIRE_EQUAL( get_pxs_balance( "bob" ).amount.value, 1002 );
           } );
         }
 
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE( witness_basic_with_runtime_expiration_02_test )
           _scheduling( HIVE_MAX_TIME_UNTIL_SIGNATURE_EXPIRATION / 2 );
           db->with_read_lock( [&]()
           {
-            BOOST_REQUIRE_EQUAL( get_hbd_balance( "bob" ).amount.value, 1003 );
+            BOOST_REQUIRE_EQUAL( get_pxs_balance( "bob" ).amount.value, 1003 );
           } );
         }
 
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE( witness_basic_with_runtime_expiration_02_test )
           _scheduling( HIVE_MAX_TIME_UNTIL_SIGNATURE_EXPIRATION + 1, false/*pass*/, false/*msg_duplicate*/ );
           db->with_read_lock( [&]()
           {
-            BOOST_REQUIRE_EQUAL( get_hbd_balance( "bob" ).amount.value, 1003 );
+            BOOST_REQUIRE_EQUAL( get_pxs_balance( "bob" ).amount.value, 1003 );
           } );
         }
 
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE( witness_basic_with_runtime_expiration_03_test )
 
           db->with_read_lock( [&]()
           {
-            BOOST_REQUIRE_EQUAL( get_hbd_balance( "bob" ).amount.value, 1000 + _max_trxs );
+            BOOST_REQUIRE_EQUAL( get_pxs_balance( "bob" ).amount.value, 1000 + _max_trxs );
           } );
         }
         {
@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE( witness_basic_with_runtime_expiration_03_test )
 
           db->with_read_lock( [&]()
           {
-            BOOST_REQUIRE_EQUAL( get_hbd_balance( "bob" ).amount.value, 1100 + 2 );
+            BOOST_REQUIRE_EQUAL( get_pxs_balance( "bob" ).amount.value, 1100 + 2 );
           } );
 
         }

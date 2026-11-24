@@ -18,7 +18,7 @@ message transfer_from_savings {
   // @param {string} to_account - Account name.
   required string to_account = 3 [json_name = "to"];
 
-  // @param {asset} amount - The allowed currency: HIVE and HBD, amount > 0.
+  // @param {asset} amount - The allowed currency: PIXA and PXS, amount > 0.
   required asset  amount = 4;
 
   // @param {string} memo - Have to be UTF8,  must be shorter than 2048.

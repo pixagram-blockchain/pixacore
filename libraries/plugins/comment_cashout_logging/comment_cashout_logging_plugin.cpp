@@ -77,14 +77,14 @@ std::string asset_num_to_string(uint32_t asset_num)
   switch( asset_num)
   {
 #ifdef IS_TEST_NET
-    case HIVE_ASSET_NUM_HIVE:
+    case HIVE_ASSET_NUM_PIXA:
       return "TESTS";
-    case HIVE_ASSET_NUM_HBD:
+    case HIVE_ASSET_NUM_PXS:
       return "TBD";
 #else
-    case HIVE_ASSET_NUM_HIVE:
+    case HIVE_ASSET_NUM_PIXA:
       return "PIXA";
-    case HIVE_ASSET_NUM_HBD:
+    case HIVE_ASSET_NUM_PXS:
       return "PXS";
 #endif
     case HIVE_ASSET_NUM_VESTS:
@@ -144,8 +144,8 @@ struct operation_visitor
     _log_file << "claim_reward_balance_operation" << ";"
        << _db.head_block_num() << ";" 
        << static_cast<std::string>(op.account) << ";" 
-       << asset_to_string(op.reward_hive) << ";" 
-       << asset_to_string(op.reward_hbd) << ";" 
+       << asset_to_string(op.reward_pixa) << ";" 
+       << asset_to_string(op.reward_pxs) << ";" 
        << asset_to_string(op.reward_vests) << "\n";
   }
 
@@ -155,8 +155,8 @@ struct operation_visitor
       << _db.head_block_num() << ";" 
       << static_cast<std::string>(op.author) << ";"
       << op.permlink << ";" 
-      << asset_to_string(op.hbd_payout) << ";" 
-      << asset_to_string(op.hive_payout) << ";" 
+      << asset_to_string(op.pxs_payout) << ";" 
+      << asset_to_string(op.pixa_payout) << ";" 
       << asset_to_string(op.vesting_payout)
       << "\n";
   }
@@ -189,8 +189,8 @@ struct operation_visitor
       << static_cast<std::string>(op.benefactor) << ";" 
       << static_cast<std::string>(op.author) << ";" 
       << op.permlink << ";"
-      << asset_to_string(op.hbd_payout) << ";" 
-      << asset_to_string(op.hive_payout) << ";" 
+      << asset_to_string(op.pxs_payout) << ";" 
+      << asset_to_string(op.pixa_payout) << ";" 
       << asset_to_string(op.vesting_payout)
       << "\n";
   }

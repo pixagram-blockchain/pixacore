@@ -24,8 +24,8 @@ In case of the escrow releases, the operation: escrow\_release\_operation should
 | to                                       | account\_name\_type                                                                                                                                                               |         |
 | agent                                    | account\_name\_type                                                                                                                                                               |         |
 | escrow\_id = 30;                         | It is defined by the sender.It should be unique for { from }.                                                                                                                     |         |
-| hbd\_amount = asset( 0, HBD\_SYMBOL );   | Escrow amount.                                                                                                                                                                    |         |
-| hive\_amount = asset( 0, HIVE\_SYMBOL ); | Escrow amount.                                                                                                                                                                    |         |
+| pxs\_amount = asset( 0, PXS\_SYMBOL );   | Escrow amount.                                                                                                                                                                    |         |
+| pixa\_amount = asset( 0, PIXA\_SYMBOL ); | Escrow amount.                                                                                                                                                                    |         |
 | fee                                      | The fee amount depends on the agent.The fee is paid to the agent when approved.                                                                                                   |         |
 | ratification\_deadline                   | Time for approval for { to } and { agent }.<br>If the escrow is not approved till { ratification\_deadline }, it will be rejected and all funds returned to { from }.time\_point\_sec |         |
 | escrow\_expiration                       | See description of escrow\_release\_operation.time\_point\_sec                                                                                                                    |         |
@@ -39,9 +39,9 @@ Active
 
 You need:
 
-\- enough Hive or HBD to make a transfer.
+\- enough PIXA or PXS to make a transfer.
 
-\- enough Hive or HBD for a fee for an {agent}.
+\- enough PIXA or PXS for a fee for an {agent}.
  
 \- enough Resource Credit (RC)  to make an operation.
 
@@ -51,7 +51,7 @@ After the operation:
 
 \- the escrow amount is frozen, it is transferred to a temporary account after the operation escrow\_approve\_operation.
 
-\- the Hive or HBD balance of {from} is decreased by { fee } for an agent.
+\- the PIXA or PXS balance of {from} is decreased by { fee } for an agent.
 
 \- when either { agent } or { to } reject the escrow or the time for approval is over, the escrow amount and {fee} are  transferred back to { from } balance and the virtual operation: escrow\_rejected\_operation is generated.
 

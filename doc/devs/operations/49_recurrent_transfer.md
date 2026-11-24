@@ -2,7 +2,7 @@
 
 ## 1. Description
 
-Creates/updates/removes a recurrent transfer in the currency Hive or HBD.
+Creates/updates/removes a recurrent transfer in the currency PIXA or PXS.
 
 Since HF 28, if user has more than one recurrent transfer to the same receiver or if user creates the recurrent transfer using pair_id in the {extensions}, user has to specify the pair_id in order to update or remove the defined recurrent transfer. 
 
@@ -36,7 +36,7 @@ The global parameters:
 | -------------- | -------------------------------------------------------------------------------------------------------------- | ------------ |
 | from           |                                                                           |              |
 | to             | Account to transfer asset to. Cannot set a transfer to yourself                                                                             |              |
-| amount         | The amount of asset to transfer from @ref from to @ref to. <br> If the recurrent transfer failed 10  (HIVE_MAX_CONSECUTIVE_RECURRENT_TRANSFER_FAILURES) times because of the lack of funds, the recurrent transfer will be deleted. <br> Allowed currency: Hive and HBD. |  |
+| amount         | The amount of asset to transfer from @ref from to @ref to. <br> If the recurrent transfer failed 10  (HIVE_MAX_CONSECUTIVE_RECURRENT_TRANSFER_FAILURES) times because of the lack of funds, the recurrent transfer will be deleted. <br> Allowed currency: PIXA and PXS. |  |
 | memo           | must be shorter than 2048 |              |
 | recurrence = 0; | How often will the payment be triggered, unit: hours.<br> The first transfer is executed immediately.<br> The minimum value of the parameter is 24 h. |              |
 | executions = 0; | How many times the recurrent payment will be executed.<br> Executions must be at least 2 when creating a new recurrent transfer.<br> Since HF 29 executions may be set to 1 when modifying an existing recurrent transfer (for example to update the amount or memo of the last remaining payment). |              |
@@ -52,7 +52,7 @@ Active
 
 You need:
 
-\- your balance in Hive/HBD is equal or higher than the first recurrent transfer.
+\- your balance in PIXA/PXS is equal or higher than the first recurrent transfer.
 
 \- enough Resource Credit (RC)  to make an operation - for all defined by operation recurrent transfers.  
 

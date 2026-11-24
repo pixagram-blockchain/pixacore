@@ -67,10 +67,10 @@ BOOST_AUTO_TEST_CASE( basic_checks )
   try
   {
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
-    vest( "alice", HIVE_asset( 10'000 ) );
-    vest( "bob", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
+    vest( "bob", PIXA_asset( 10'000 ) );
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
 
     auto _create_or_update_comments = [this]( const std::string& author, const fc::ecc::private_key& post_key )
     {
@@ -145,12 +145,12 @@ BOOST_AUTO_TEST_CASE( nested_comments )
   try
   {
     ACTORS( DEFAULT_VESTING, (alice)(bob)(sam)(dave) );
-    vest( "alice", HIVE_asset( 10'000 ) );
-    vest( "bob", HIVE_asset( 10'000 ) );
-    vest( "sam", HIVE_asset( 10'000 ) );
-    vest( "dave", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
+    vest( "bob", PIXA_asset( 10'000 ) );
+    vest( "sam", PIXA_asset( 10'000 ) );
+    vest( "dave", PIXA_asset( 10'000 ) );
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
 
     auto _create_or_update_comments = [this, &alice_post_key, &bob_post_key, &sam_post_key, &dave_post_key]()
     {
@@ -253,7 +253,7 @@ void fork_reverts_cashout_scanario( const std::string& comment_archive_type, boo
   test.generate_block();
   test.db->_log_hardforks = true;
 
-  test.vest( HIVE_INIT_MINER_NAME, HIVE_asset( 10'000 ) );
+  test.vest( HIVE_INIT_MINER_NAME, PIXA_asset( 10'000 ) );
 
   // Fill up the rest of miners
   for( int i = HIVE_NUM_INIT_MINERS; i < HIVE_MAX_WITNESSES; i++ )
@@ -438,8 +438,8 @@ BOOST_FIXTURE_TEST_CASE( inconsistent_comment_archive, empty_fixture )
     {
       clean_database_fixture fixture( 512U, fc::optional<uint32_t>(), false ); // don't init AH (there is separate test for that)
       comment_archive_dir = fixture.get_chain_plugin().comment_storage_dir();
-      fixture.account_create( "alice", fixture.init_account_pub_key, fixture.init_account_pub_key, HIVE_asset( 10'000 ) );
-      fixture.account_create( "bob", fixture.init_account_pub_key, fixture.init_account_pub_key, HIVE_asset( 10'000 ) );
+      fixture.account_create( "alice", fixture.init_account_pub_key, fixture.init_account_pub_key, PIXA_asset( 10'000 ) );
+      fixture.account_create( "bob", fixture.init_account_pub_key, fixture.init_account_pub_key, PIXA_asset( 10'000 ) );
       fixture.post_comment( "alice", "test", "test", "test body", "category", fixture.init_account_priv_key );
       // first 30 blocks use different LIB mechanics
       fixture.generate_blocks( 3 * HIVE_MAX_WITNESSES ); // the comment should be archived after that

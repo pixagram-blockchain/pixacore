@@ -340,15 +340,15 @@ namespace chain {
       bool                      is_nft_price_symbol( const asset_symbol_type& symbol )const;
       /// The fee, in PXS, that minting given number of editions costs: PIXA_NFT_MINT_FEE_PER_EDITION
       /// (1.000 PXS) per edition.
-      HBD_asset                 get_nft_mint_fee( uint16_t editions )const;
+      PXS_asset                 get_nft_mint_fee( uint16_t editions )const;
       /// @}
 
       const dynamic_global_property_object&  get_dynamic_global_properties()const;
       uint32_t                               get_node_skip_flags()const;
       void                                   set_node_skip_flags( uint32_t skip_flags );
       const feed_history_object&             get_feed_history()const;
-      // returns current internal HBD-HIVE exchange rate
-      const HBD_price&                       get_hbd_price()const;
+      // returns current internal PXS-PIXA exchange rate
+      const PXS_price&                       get_pxs_price()const;
       const witness_schedule_object&         get_witness_schedule_object()const;
       const witness_schedule_object&         get_future_witness_schedule_object() const;
 
@@ -539,31 +539,31 @@ namespace chain {
         */
       uint32_t get_slot_at_time(fc::time_point_sec when)const;
 
-      /** @return the HBD created and deposited to_account, may return HIVE if there is no median feed */
-      std::pair< HBD_asset, HIVE_asset > award_hbd( const account_object& to_account, temp_HIVE_balance& hive_balance, bool is_reward );
+      /** @return the PXS created and deposited to_account, may return PIXA if there is no median feed */
+      std::pair< PXS_asset, PIXA_asset > award_pxs( const account_object& to_account, temp_PIXA_balance& pixa_balance, bool is_reward );
 
       using Before = std::function< void( const VEST_asset& ) >;
-      VEST_asset adjust_account_vesting_balance( const account_object& to_account, temp_HIVE_balance& liquid, bool is_reward, Before&& before_vesting_callback );
+      VEST_asset adjust_account_vesting_balance( const account_object& to_account, temp_PIXA_balance& liquid, bool is_reward, Before&& before_vesting_callback );
 
-      VEST_asset create_vesting( const account_object& to_account, temp_HIVE_balance& liquid, bool is_reward = false );
+      VEST_asset create_vesting( const account_object& to_account, temp_PIXA_balance& liquid, bool is_reward = false );
 
-      void adjust_liquidity_reward( const account_object& owner, const asset& volume, bool is_hbd );
+      void adjust_liquidity_reward( const account_object& owner, const asset& volume, bool is_pxs );
 
       void adjust_balance( const account_object& a, temp_balance& any_balance, const asset& delta );
-      void adjust_balance( const account_object& a, temp_HIVE_balance& hive_balance, const HIVE_asset& delta );
-      void adjust_balance( const account_object& a, temp_HBD_balance& hbd_balance, const HBD_asset& delta );
+      void adjust_balance( const account_object& a, temp_PIXA_balance& pixa_balance, const PIXA_asset& delta );
+      void adjust_balance( const account_object& a, temp_PXS_balance& pxs_balance, const PXS_asset& delta );
       void adjust_balance( const account_name_type& name, temp_balance& any_balance, const asset& delta ) { adjust_balance( get_account( name ), any_balance, delta ); }
-      void adjust_balance( const account_name_type& name, temp_HIVE_balance& hive_balance, const HIVE_asset& delta ) { adjust_balance( get_account( name ), hive_balance, delta ); }
-      void adjust_balance( const account_name_type& name, temp_HBD_balance& hbd_balance, const HBD_asset& delta ) { adjust_balance( get_account( name ), hbd_balance, delta ); }
+      void adjust_balance( const account_name_type& name, temp_PIXA_balance& pixa_balance, const PIXA_asset& delta ) { adjust_balance( get_account( name ), pixa_balance, delta ); }
+      void adjust_balance( const account_name_type& name, temp_PXS_balance& pxs_balance, const PXS_asset& delta ) { adjust_balance( get_account( name ), pxs_balance, delta ); }
 
       void adjust_savings_balance( const account_object& a, temp_balance& any_balance, const asset& delta );
-      void adjust_savings_balance( const account_object& a, temp_HIVE_balance& hive_balance, const HIVE_asset& delta );
-      void adjust_savings_balance( const account_object& a, temp_HBD_balance& hbd_balance, const HBD_asset& delta );
+      void adjust_savings_balance( const account_object& a, temp_PIXA_balance& pixa_balance, const PIXA_asset& delta );
+      void adjust_savings_balance( const account_object& a, temp_PXS_balance& pxs_balance, const PXS_asset& delta );
 
-      void adjust_reward_balance( const account_object& a, temp_HIVE_balance& hive_balance, const HIVE_asset& value_delta );
-      void adjust_reward_balance( const account_object& a, temp_HBD_balance& hbd_balance, const HBD_asset& value_delta );
+      void adjust_reward_balance( const account_object& a, temp_PIXA_balance& pixa_balance, const PIXA_asset& value_delta );
+      void adjust_reward_balance( const account_object& a, temp_PXS_balance& pxs_balance, const PXS_asset& value_delta );
 
-      temp_HIVE_balance issue_mining_reward( const HIVE_asset& reward );
+      temp_PIXA_balance issue_mining_reward( const PIXA_asset& reward );
       void adjust_rshares2( fc::uint128_t old_rshares2, fc::uint128_t new_rshares2 );
       void update_owner_authority( const account_object& account, const authority& owner_authority );
 
@@ -596,47 +596,47 @@ namespace chain {
         */
       void clear_witness_votes( const account_object& a );
       void process_vesting_withdrawals();
-      HIVE_asset pay_curators( const comment_object& comment, const comment_cashout_object& comment_cashout,
-        HIVE_asset& max_rewards, VEST_asset& total_paid_reward, temp_HIVE_balance& reward_balance );
-      HIVE_asset cashout_comment_helper( util::comment_reward_context& ctx, temp_HIVE_balance& reward_balance,
+      PIXA_asset pay_curators( const comment_object& comment, const comment_cashout_object& comment_cashout,
+        PIXA_asset& max_rewards, VEST_asset& total_paid_reward, temp_PIXA_balance& reward_balance );
+      PIXA_asset cashout_comment_helper( util::comment_reward_context& ctx, temp_PIXA_balance& reward_balance,
         const comment_object& comment, const comment_cashout_object& comment_cashout,
         const comment_cashout_ex_object* comment_cashout_ex, bool forward_curation_remainder = true );
       void process_comment_cashout();
       void process_funds();
       void process_conversions();
       void remove_pending_conversion_requests( const account_object& account );
-      void get_convert_request_totals( HIVE_asset& total_hive, HBD_asset& total_hbd, uint64_t& collateralized_count, uint64_t& convert_count ) const;
+      void get_convert_request_totals( PIXA_asset& total_pixa, PXS_asset& total_pxs, uint64_t& collateralized_count, uint64_t& convert_count ) const;
       void process_savings_withdraws();
       void process_subsidized_accounts();
       void account_recovery_processing();
       void expire_escrow_ratification();
       void remove_escrow( const escrow_object& escrow, bool emit_rejected_vop = true );
       void remove_pending_escrows( const account_object& account, const account_name_type& account_name );
-      void get_escrow_totals( HIVE_asset& total_hive, HBD_asset& total_hbd, uint64_t& escrow_count ) const;
+      void get_escrow_totals( PIXA_asset& total_pixa, PXS_asset& total_pxs, uint64_t& escrow_count ) const;
       void remove_pending_savings_withdraws( const account_object& account, const account_name_type& account_name );
-      void get_savings_withdraw_totals( HIVE_asset& total_hive, HBD_asset& total_hbd, uint64_t& withdrawal_count ) const;
-      void get_limit_order_totals( HIVE_asset& total_hive, HBD_asset& total_hbd, uint64_t& order_count ) const;
+      void get_savings_withdraw_totals( PIXA_asset& total_pixa, PXS_asset& total_pxs, uint64_t& withdrawal_count ) const;
+      void get_limit_order_totals( PIXA_asset& total_pixa, PXS_asset& total_pxs, uint64_t& order_count ) const;
       void remove_pending_limit_orders( const account_object& account, const account_name_type& account_name );
       void process_decline_voting_rights();
       void update_median_feed();
 
-      HIVE_asset get_liquidity_reward()const;
-      HIVE_asset get_content_reward()const;
-      HIVE_asset get_producer_reward()const;
-      HIVE_asset get_curation_reward()const;
-      HIVE_asset get_pow_reward()const;
+      PIXA_asset get_liquidity_reward()const;
+      PIXA_asset get_content_reward()const;
+      PIXA_asset get_producer_reward()const;
+      PIXA_asset get_curation_reward()const;
+      PIXA_asset get_pow_reward()const;
 
       uint16_t get_curation_rewards_percent() const;
 
-      void pay_reward_funds( temp_HIVE_balance& reward_balance, const HIVE_asset& content_reward );
+      void pay_reward_funds( temp_PIXA_balance& reward_balance, const PIXA_asset& content_reward );
       void pay_liquidity_reward();
 
       /**
-        * Helper method to return the current HBD value of a given amount of
-        * HIVE.  Return 0 HBD if there isn't a current_median_history
+        * Helper method to return the current PXS value of a given amount of
+        * PIXA.  Return 0 PXS if there isn't a current_median_history
         */
-      HBD_asset to_hbd( const HIVE_asset& hive )const;
-      HIVE_asset to_hive( const HBD_asset& hbd )const;
+      PXS_asset to_pxs( const PIXA_asset& pixa )const;
+      PIXA_asset to_pixa( const PXS_asset& pxs )const;
 
       time_point_sec   head_block_time()const;
       uint32_t         head_block_num()const;
@@ -687,7 +687,7 @@ namespace chain {
       void retally_witness_votes();
       void retally_witness_vote_counts( bool force = false );
       void retally_liquidity_weight();
-      uint16_t calculate_HBD_percent();
+      uint16_t calculate_PXS_percent();
       void update_virtual_supply();
 
       bool has_hardfork( uint32_t hardfork )const;
@@ -730,7 +730,7 @@ namespace chain {
       void restore_accounts( const std::set< std::string >& restored_accounts );
 
       //Clears all pending operations on account that involve balance, moves tokens to treasury account
-      void gather_balance( const std::string& name, const HIVE_asset& hive_balance, const HBD_asset& hbd_balance );
+      void gather_balance( const std::string& name, const PIXA_asset& pixa_balance, const PXS_asset& pxs_balance );
       void clear_accounts( const std::set< std::string >& cleared_accounts );
       void clear_account( const account_object& account );
 
@@ -765,9 +765,9 @@ namespace chain {
       void create_block_summary(const std::shared_ptr<full_block_type>& full_block);
 
       //calculates sum of all balances stored on given account, returns true if any is nonzero
-      bool collect_account_total_balance( const account_object& account, HIVE_asset* total_hive, HBD_asset* total_hbd, VEST_asset* total_vests );
+      bool collect_account_total_balance( const account_object& account, PIXA_asset* total_pixa, PXS_asset* total_pxs, VEST_asset* total_vests );
       //liquifies vesting rewards held on given account returning liquid balance
-      temp_HIVE_balance liquify_reward_balance( const account_object& account );
+      temp_PIXA_balance liquify_reward_balance( const account_object& account );
       //removes (burns) balances held on null account
       void clear_null_account_balance();
       //moves balances from old treasury account to current one

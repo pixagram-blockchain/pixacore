@@ -38,7 +38,7 @@ namespace hive { namespace protocol {
     void validate_nft_price( const asset& price )
     {
       HIVE_PROTOCOL_ASSET_ASSERT_WITH_SUBJECT(
-        ( is_asset_type( price, HBD_SYMBOL ) || is_asset_type( price, HIVE_SYMBOL ) ) && "nft_price", price,
+        ( is_asset_type( price, PXS_SYMBOL ) || is_asset_type( price, PIXA_SYMBOL ) ) && "nft_price", price,
         "NFT price must be expressed in a liquid asset. Actual: ${subject}" );
       validate_asset_greater_than_zero( price, "NFT price must be positive" );
     }
@@ -60,7 +60,7 @@ namespace hive { namespace protocol {
     validate_number_in_100_percent_range( royalty, "NFT royalty" );
     validate_string_max_size( license, PIXA_NFT_MAX_LICENSE_LENGTH, "NFT license is too long" );
     validate_is_utf8( license, "NFT license is not UTF8" );
-    validate_asset_type( fee, HBD_SYMBOL, "NFT mint fee must be PXS" );
+    validate_asset_type( fee, PXS_SYMBOL, "NFT mint fee must be PXS" );
     validate_asset_not_negative( fee, "NFT mint fee cannot be negative" );
   }
 

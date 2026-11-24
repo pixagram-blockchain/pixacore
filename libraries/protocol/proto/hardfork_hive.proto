@@ -5,7 +5,7 @@ import "asset.proto";
 package hive.protocol.buffers;
 
 /* Related to hardfork 23 (HIVE inception hardfork).
- * Generated for every account that did not receive HIVE airdrop.
+ * Generated for every account that did not receive PIXA airdrop.
  */
 message hardfork_hive {
   // @param {string} account - account excluded from airdrop (source of amounts for airdrop)
@@ -17,15 +17,15 @@ message hardfork_hive {
   // @param {string} other_affected_accounts - delegatees that lost delegations from account - filled before pre notification
   repeated string other_affected_accounts = 3 [json_name = "other_affected_accounts"];
 
-  // @param {asset} hbd_transferred - (HBD) part of airdrop to treasury (sourced from various HBD balances on account)
-  required asset  hbd_transferred = 4 [json_name = "hbd_transferred"];
+  // @param {asset} pxs_transferred - (PXS) part of airdrop to treasury (sourced from various PXS balances on account)
+  required asset  pxs_transferred = 4 [json_name = "pxs_transferred"];
 
-  // @param {asset} hive_transferred - (HIVE) part of airdrop to treasury (sourced from various HIVE balances on account)
-  required asset  hive_transferred = 5 [json_name = "hive_transferred"];
+  // @param {asset} pixa_transferred - (PIXA) part of airdrop to treasury (sourced from various PIXA balances on account)
+  required asset  pixa_transferred = 5 [json_name = "pixa_transferred"];
 
   // @param {asset} vests_converted - (VESTS) sum of all sources of VESTS on account
   required asset  vests_converted = 6 [json_name = "vests_converted"];
 
-  // @param {asset} total_hive_from_vests - (HIVE) part of airdrop to treasury (sourced from conversion of vests_converted)
-  required asset  total_hive_from_vests = 7 [json_name = "total_hive_from_vests"];
+  // @param {asset} total_pixa_from_vests - (PIXA) part of airdrop to treasury (sourced from conversion of vests_converted)
+  required asset  total_pixa_from_vests = 7 [json_name = "total_pixa_from_vests"];
 }

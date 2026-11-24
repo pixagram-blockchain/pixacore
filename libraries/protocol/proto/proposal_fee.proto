@@ -17,6 +17,6 @@ message proposal_fee {
   // @param {number} proposal_id - id of proposal
   required uint32 proposal_id = 3 [json_name = "proposal_id"];
 
-  // @param {asset} fee - (HBD) amount paid for proposal [should actually be part of create_proposal_operation but it's too late now]
+  // @param {asset} fee - (PXS) amount paid for proposal [should actually be part of create_proposal_operation but it's too late now]
   required asset  fee = 4;
 }

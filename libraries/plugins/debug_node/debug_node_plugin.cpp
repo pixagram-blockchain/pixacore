@@ -292,14 +292,14 @@ void debug_apply_update( chain::database& db, const fc::variant_object& vo, bool
 */
 
 void debug_node_plugin::calculate_modifiers_according_to_new_price(const VEST_price& new_price,
-  const HIVE_asset& total_hive, const VEST_asset& total_vests,
-  HIVE_asset& hive_modifier, VEST_asset& vest_modifier ) const
+  const PIXA_asset& total_pixa, const VEST_asset& total_vests,
+  PIXA_asset& pixa_modifier, VEST_asset& vest_modifier ) const
 {
-  hive_modifier = HIVE_asset( 0 );
+  pixa_modifier = PIXA_asset( 0 );
   vest_modifier = VEST_asset( 0 );
 
   fc::uint128_t a = total_vests.amount.value;
-  fc::uint128_t b = total_hive.amount.value;
+  fc::uint128_t b = total_pixa.amount.value;
 
   auto alpha_x = fc::uint128_t( new_price.get_base().amount.value ) * b;
   auto alpha_y = fc::uint128_t( new_price.get_quote().amount.value ) * a;
@@ -316,7 +316,7 @@ void debug_node_plugin::calculate_modifiers_according_to_new_price(const VEST_pr
     /// Means that alpha is < 1, so we will be increasing Hive pool
     b *= alpha_y - alpha_x;
     b /= alpha_x;
-    hive_modifier = HIVE_asset( fc::uint128_to_int64(b) );
+    pixa_modifier = PIXA_asset( fc::uint128_to_int64(b) );
   }
 }
 
@@ -324,23 +324,23 @@ void debug_node_plugin::debug_set_vest_price( const VEST_price& new_price,
   fc::optional<protocol::transaction_id_type> transaction_id )
 {
   VEST_asset vest_modifier;
-  HIVE_asset hive_modifier;
+  PIXA_asset pixa_modifier;
 
   const auto& dgpo = database().get_dynamic_global_properties();
-  calculate_modifiers_according_to_new_price( new_price, dgpo.get_total_vesting_fund_hive(), dgpo.get_total_vesting_shares(), hive_modifier, vest_modifier );
-  ilog( "vest_modifier=${vest_modifier}, hive_modifier=${hive_modifier}", ( vest_modifier ) ( hive_modifier ) );
+  calculate_modifiers_according_to_new_price( new_price, dgpo.get_total_vesting_fund_pixa(), dgpo.get_total_vesting_shares(), pixa_modifier, vest_modifier );
+  ilog( "vest_modifier=${vest_modifier}, pixa_modifier=${pixa_modifier}", ( vest_modifier ) ( pixa_modifier ) );
 
-  ilog( "Before modification: total_vesting_shares=${vest}, total_vesting_fund_hive=${hive}",
-    ( "vest", dgpo.get_total_vesting_shares() )( "hive", dgpo.get_total_vesting_fund_hive() ) );
+  ilog( "Before modification: total_vesting_shares=${vest}, total_vesting_fund_pixa=${hive}",
+    ( "vest", dgpo.get_total_vesting_shares() )( "hive", dgpo.get_total_vesting_fund_pixa() ) );
 
-  debug_update( [ this, vest_modifier, hive_modifier ]( chain::database& db )
+  debug_update( [ this, vest_modifier, pixa_modifier ]( chain::database& db )
   {
     hive::chain::temp_VEST_balance new_vests;
     db.modify( db.get_dynamic_global_properties(), [&]( hive::chain::dynamic_global_property_object& p )
     {
       new_vests = p.issue_VESTS( vest_modifier );
-      hive::chain::temp_HIVE_balance new_hive = p.issue_HIVE( hive_modifier );
-      p.access_total_vesting_fund_hive().transfer_from( new_hive );
+      hive::chain::temp_PIXA_balance new_pixa = p.issue_PIXA( pixa_modifier );
+      p.access_total_vesting_fund_pixa().transfer_from( new_pixa );
     } );
     const hive::chain::account_object& miner_account = db.get_account( HIVE_INIT_MINER_NAME );
     auto _update_initminer = [&]()
@@ -354,8 +354,8 @@ void debug_node_plugin::debug_set_vest_price( const VEST_price& new_price,
     db.rc().update_rc_for_custom_action( _update_initminer, miner_account );
   }, hive::chain::database::skip_nothing, transaction_id );
 
-  ilog( "After modification: total_vesting_shares=${vest}, total_vesting_fund_hive=${hive}",
-    ( "vest", dgpo.get_total_vesting_shares() )( "hive", dgpo.get_total_vesting_fund_hive() ) );
+  ilog( "After modification: total_vesting_shares=${vest}, total_vesting_fund_pixa=${hive}",
+    ( "vest", dgpo.get_total_vesting_shares() )( "hive", dgpo.get_total_vesting_fund_pixa() ) );
   ilog( "Final price=${p}", ( "p", dgpo.get_vesting_share_price() ) );
 }
 

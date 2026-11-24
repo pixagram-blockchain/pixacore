@@ -147,10 +147,10 @@ BOOST_AUTO_TEST_CASE( rc_usage_buckets )
     // afford the most expensive operations. The extra vesting is negligible next to the ~200M HP genesis
     // supply and does not affect the measured RC costs (those depend on resource usage, not on the payer's
     // balance).
-    ACTORS( HIVE_asset( 100'000'000 ), (alice)(bob)(sam) );
-    fund( "alice", HIVE_asset( 1'000 ) );
-    fund( "bob", HIVE_asset( 1'000 ) );
-    fund( "sam", HIVE_asset( 1'000 ) );
+    ACTORS( PIXA_asset( 100'000'000 ), (alice)(bob)(sam) );
+    fund( "alice", PIXA_asset( 1'000 ) );
+    fund( "bob", PIXA_asset( 1'000 ) );
+    fund( "sam", PIXA_asset( 1'000 ) );
     generate_block();
 
     BOOST_TEST_MESSAGE( "Some resources consumed" );
@@ -324,7 +324,7 @@ BOOST_AUTO_TEST_CASE( rc_usage_buckets )
     market_bytes_share = new_market_bytes_share;
     BOOST_CHECK_EQUAL( pools.get_usage( resource_new_accounts ), 0 );
 
-    claim_account( "alice", HIVE_asset( 0 ), alice_private_key );
+    claim_account( "alice", PIXA_asset( 0 ), alice_private_key );
     generate_block(); //switch bucket
     BOOST_CHECK_EQUAL( print( true ), 0 );
     //last transaction should be registered within new bucket - it uses new account and execution, tx itself also state and history
@@ -353,8 +353,8 @@ BOOST_AUTO_TEST_CASE( rc_single_recover_account )
 
     ACTORS( DEFAULT_VESTING, (agent)(victim)(thief) );
     generate_block(); 
-    vest( "agent", HIVE_asset( 1'000'000 ) );
-    fund( "victim", HIVE_asset( 1'000 ) );
+    vest( "agent", PIXA_asset( 1'000'000 ) );
+    fund( "victim", PIXA_asset( 1'000 ) );
 
     const auto& agent_rc = db->get_account( "agent" );
     const auto& victim_rc = db->get_account( "victim" );
@@ -470,8 +470,8 @@ BOOST_AUTO_TEST_CASE( rc_many_recover_accounts )
 
     ACTORS( DEFAULT_VESTING, (agent)(victim1)(victim2)(victim3)(thief1)(thief2)(thief3) );
     generate_block();
-    vest( "agent", HIVE_asset( 1'000'000 ) );
-    issue_funds( "victim1", HIVE_asset( 1'000 ) );
+    vest( "agent", PIXA_asset( 1'000'000 ) );
+    issue_funds( "victim1", PIXA_asset( 1'000 ) );
 
     const auto& agent_rc = db->get_account( "agent" );
     const auto& victim1_rc = db->get_account( "victim1" );
@@ -628,9 +628,9 @@ BOOST_AUTO_TEST_CASE( rc_multisig_recover_account )
 
     ACTORS( DEFAULT_VESTING, (agent)(thief) );
     generate_block();
-    vest( "agent", HIVE_asset( 1'000'000 ) );
-    vest( "thief", HIVE_asset( 1'000'000 ) );
-    fund( "agent", HIVE_asset( 1'000'000 ) );
+    vest( "agent", PIXA_asset( 1'000'000 ) );
+    vest( "thief", PIXA_asset( 1'000'000 ) );
+    fund( "agent", PIXA_asset( 1'000'000 ) );
 
     BOOST_TEST_MESSAGE( "create signer accounts and victim account (with agent as recovery)" );
 
@@ -654,7 +654,7 @@ BOOST_AUTO_TEST_CASE( rc_multisig_recover_account )
         return out;
       }
 
-      void create( int n, bool _isMixed, database_fixture* _this, const HIVE_asset& fee )
+      void create( int n, bool _isMixed, database_fixture* _this, const PIXA_asset& fee )
       {
         isMixed = _isMixed;
 
@@ -740,7 +740,7 @@ BOOST_AUTO_TEST_CASE( rc_multisig_recover_account )
     create.posting = create.owner;
     push_transaction( create, agent_private_key );
 
-    vest( "victim", HIVE_asset( 5'000'000 ) );
+    vest( "victim", PIXA_asset( 5'000'000 ) );
     generate_block();
     const auto& victim_rc = db->get_account( "victim" );
 
@@ -809,8 +809,8 @@ BOOST_AUTO_TEST_CASE( rc_tx_order_bug )
 
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
-    vest( "alice", HIVE_asset( 30'000 ) ); // give alice extra vests to speed up her rc mana regeneration
-    fund( "alice", HIVE_asset( 1'000'000 ) );
+    vest( "alice", PIXA_asset( 30'000 ) ); // give alice extra vests to speed up her rc mana regeneration
+    fund( "alice", PIXA_asset( 1'000'000 ) );
 
     const auto& alice_rc = db->get_account( "alice" );
 
@@ -828,27 +828,27 @@ BOOST_AUTO_TEST_CASE( rc_tx_order_bug )
     transfer.memo = "First transfer";
     tx1.operations.push_back( transfer );
     push_transaction( tx1, alice_private_key ); //t1
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 990'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 10'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 990'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 10'000 ) );
     transfer.amount = ASSET( "5.000 TESTS" );
     transfer.memo = "Second transfer";
     tx2.operations.push_back( transfer );
     HIVE_REQUIRE_EXCEPTION( push_transaction( tx2, alice_private_key ), "has_mana", plugin_exception ); //t2
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 990'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 10'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 990'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 10'000 ) );
     generate_block(); //t1 becomes part of block
 
     BOOST_TEST_MESSAGE( "Save aside and remove head block" );
     auto block = get_block_reader().get_block_by_number( db->head_block_num() );
     BOOST_REQUIRE( block );
     db->pop_block(); //t1 becomes popped
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 1'000'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 1'000'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 0 ) );
 
     BOOST_TEST_MESSAGE( "Reapply transaction that failed before putting it to pending" );
     push_transaction( tx2, alice_private_key ); //t2 becomes pending
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 995'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 5'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 995'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 5'000 ) );
 
     BOOST_TEST_MESSAGE( "Push previously popped block - pending transaction should run into lack of RC again" );
     //the only way to see if we run into problem is to observe ilog messages
@@ -868,16 +868,16 @@ BOOST_AUTO_TEST_CASE( rc_tx_order_bug )
       push_block( block );
       //t1 was applied as part of block, then popped version of t1 was skipped as duplicate and t2 was
       //applied as pending, however lack of RC caused it to be dropped; we can check that by looking at balances
-      BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 990'000 ) );
-      BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 10'000 ) );
+      BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 990'000 ) );
+      BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 10'000 ) );
 
       generate_block();
       //due to change that makes pending transactions drop from list due to lack of RC, testing fix for
       //former 'is_producing() == false' when building new block is no longer possible; nevertheless witness actually
       //'is_in_control()' when producing block, which means pending t2 would not be included during block production
       //(due to lack of RC)
-      BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 990'000 ) );
-      BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 10'000 ) );
+      BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 990'000 ) );
+      BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 10'000 ) );
       block = get_block_reader().get_block_by_number( db->head_block_num() );
       BOOST_REQUIRE( block );
       //check that block is indeed empty, without t2 and that tx2 waits as pending <- no longer true; tx2 was dropped above
@@ -889,8 +889,8 @@ BOOST_AUTO_TEST_CASE( rc_tx_order_bug )
       push_transaction( tx2, alice_private_key );
 
       //check that t2 did not expire while RC was regenerating and got accepted when send second time
-      BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 985'000 ) );
-      BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 15'000 ) );
+      BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 985'000 ) );
+      BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 15'000 ) );
     }
 
     validate_database();
@@ -906,7 +906,7 @@ BOOST_AUTO_TEST_CASE( rc_pending_data_reset )
 
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
-    fund( "alice", HIVE_asset( 1'000'000 ) );
+    fund( "alice", PIXA_asset( 1'000'000 ) );
     generate_block();
 
     auto check_direction = []( const resource_cost_type& values, const std::array< int, HIVE_RC_NUM_RESOURCE_TYPES >& sign )
@@ -1034,12 +1034,12 @@ BOOST_AUTO_TEST_CASE( rc_differential_usage_operations )
 
     generate_block();
 
-    ACTORS( HIVE_asset( 50'000 ), (alice)(bob)(sam) );
+    ACTORS( PIXA_asset( 50'000 ), (alice)(bob)(sam) );
     generate_block();
-    fund( "alice", HIVE_asset( 1'000'000 ) );
+    fund( "alice", PIXA_asset( 1'000'000 ) );
     // keep the minimum RC delegation at 0 (account_creation_fee/3 rounds down to 0) so the small test
     // delegations below are accepted; the measured resource usage does not depend on the creation fee
-    set_account_creation_fee( HIVE_asset( 1 ) );
+    set_account_creation_fee( PIXA_asset( 1 ) );
     generate_block();
 
     auto alice_owner_key = generate_private_key( "alice_owner" );
@@ -1171,10 +1171,10 @@ BOOST_AUTO_TEST_CASE( rc_differential_usage_operations )
     witness.owner = "alice";
     witness.url = "https://alice.has.cat";
     witness.block_signing_key = generate_private_key( "alice_witness" ).get_public_key();
-    witness.props.account_creation_fee = legacy_hive_asset::from_amount( HIVE_MIN_ACCOUNT_CREATION_FEE );
+    witness.props.account_creation_fee = legacy_pixa_asset::from_amount( HIVE_MIN_ACCOUNT_CREATION_FEE );
     witness.props.maximum_block_size = HIVE_MIN_BLOCK_SIZE_LIMIT * 2;
-    witness.props.hbd_interest_rate = 0;
-    witness.fee = asset( 0, HIVE_SYMBOL );
+    witness.props.pxs_interest_rate = 0;
+    witness.fee = asset( 0, PIXA_SYMBOL );
     push_transaction( witness, alice_active_key );
     tx_usage = db->rc().get_tx_info().usage;
     //when witness is created there is no initial state to give discount
@@ -1331,7 +1331,7 @@ BOOST_AUTO_TEST_CASE( rc_differential_usage_negative )
 
     // keep the minimum RC delegation at 0 (account_creation_fee/3 rounds down to 0) so the small test
     // delegations below are accepted; the measured resource usage does not depend on the creation fee
-    set_account_creation_fee( HIVE_asset( 1 ) );
+    set_account_creation_fee( PIXA_asset( 1 ) );
     generate_block();
 
     PREP_ACTOR( alice );
@@ -1396,14 +1396,14 @@ BOOST_AUTO_TEST_CASE( rc_differential_usage_negative )
     generate_block();
 
     //add some source of RC so they can actually perform those (expensive) operations
-    vest( "alice", HIVE_asset( 10'000 ) );
-    fund( "alice", HIVE_asset( 10'000 ) );
-    vest( "barry", HIVE_asset( 10'000 ) );
-    fund( "barry", HIVE_asset( 10'000 ) );
-    vest( "carol", HIVE_asset( 10'000 ) );
-    fund( "carol", HIVE_asset( 10'000 ) );
-    vest( "diana", HIVE_asset( 10'000 ) );
-    fund( "diana", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
+    fund( "alice", PIXA_asset( 10'000 ) );
+    vest( "barry", PIXA_asset( 10'000 ) );
+    fund( "barry", PIXA_asset( 10'000 ) );
+    vest( "carol", PIXA_asset( 10'000 ) );
+    fund( "carol", PIXA_asset( 10'000 ) );
+    vest( "diana", PIXA_asset( 10'000 ) );
+    fund( "diana", PIXA_asset( 10'000 ) );
     generate_block();
     //see explanation at the end of rc_pending_data_reset test
     //note that we don't actually have access to data on transaction but whole block, so it is
@@ -1498,7 +1498,7 @@ BOOST_AUTO_TEST_CASE( rc_differential_usage_many_ops )
   {
     BOOST_TEST_MESSAGE( "Testing differential RC usage with multiple operations" );
 
-    ACTORS( HIVE_asset( 10'000 ), (alice)(carol) );
+    ACTORS( PIXA_asset( 10'000 ), (alice)(carol) );
     generate_block();
     //see explanation at the end of rc_pending_data_reset test
     //note that we don't actually have access to data on transaction but whole block, so it is
@@ -1512,10 +1512,10 @@ BOOST_AUTO_TEST_CASE( rc_differential_usage_many_ops )
     witness.owner = "alice";
     witness.url = "https://alice.wonder.land/my.cat";
     witness.block_signing_key = generate_private_key( "alice_witness" ).get_public_key();
-    witness.props.account_creation_fee = legacy_hive_asset::from_amount( HIVE_MIN_ACCOUNT_CREATION_FEE );
+    witness.props.account_creation_fee = legacy_pixa_asset::from_amount( HIVE_MIN_ACCOUNT_CREATION_FEE );
     witness.props.maximum_block_size = HIVE_MIN_BLOCK_SIZE_LIMIT * 2;
-    witness.props.hbd_interest_rate = 0;
-    witness.fee = asset( 0, HIVE_SYMBOL );
+    witness.props.pxs_interest_rate = 0;
+    witness.fee = asset( 0, PIXA_SYMBOL );
     tx.operations.push_back( witness );
     witness.url = "https://alice.has.cat";
     tx.operations.push_back( witness );
@@ -1528,10 +1528,10 @@ BOOST_AUTO_TEST_CASE( rc_differential_usage_many_ops )
     witness.owner = "carol";
     witness.url = "blocks@north.carolina";
     witness.block_signing_key = generate_private_key( "carol_witness" ).get_public_key();
-    witness.props.account_creation_fee = legacy_hive_asset::from_amount( HIVE_MAX_ACCOUNT_CREATION_FEE / 2 );
+    witness.props.account_creation_fee = legacy_pixa_asset::from_amount( HIVE_MAX_ACCOUNT_CREATION_FEE / 2 );
     witness.props.maximum_block_size = HIVE_MAX_BLOCK_SIZE;
-    witness.props.hbd_interest_rate = 0;
-    witness.fee = asset( 100, HIVE_SYMBOL );
+    witness.props.pxs_interest_rate = 0;
+    witness.fee = asset( 100, PIXA_SYMBOL );
     push_transaction( witness, carol_private_key );
     auto carol_state_usage = db->rc().get_block_info().usage[ resource_state_bytes ];
     generate_block();
@@ -1557,8 +1557,8 @@ BOOST_AUTO_TEST_CASE( rc_exception_during_modify )
 
     ACTORS( DEFAULT_VESTING, (dave) );
     generate_block();
-    vest( "dave", HIVE_asset( 70'000'000 ) ); //<- change that amount to tune RC cost
-    issue_funds( "dave", HIVE_asset( 1'000'000 ) );
+    vest( "dave", PIXA_asset( 70'000'000 ) ); //<- change that amount to tune RC cost
+    issue_funds( "dave", PIXA_asset( 1'000'000 ) );
 
     generate_block();
 

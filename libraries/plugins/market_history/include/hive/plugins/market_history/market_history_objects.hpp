@@ -50,11 +50,11 @@ public:
   fc::time_point_sec   open;
   uint32_t             seconds = 0;
 
-  bucket_object_details hive;
-  bucket_object_details non_hive;
+  bucket_object_details pixa;
+  bucket_object_details non_pixa;
 
-  price high()const { return price( asset( non_hive.high, HBD_SYMBOL ), asset( hive.high, HIVE_SYMBOL ) ); }
-  price low()const { return price( asset( non_hive.low, HBD_SYMBOL ), asset( hive.low, HIVE_SYMBOL ) ); }
+  price high()const { return price( asset( non_pixa.high, PXS_SYMBOL ), asset( pixa.high, PIXA_SYMBOL ) ); }
+  price low()const { return price( asset( non_pixa.low, PXS_SYMBOL ), asset( pixa.low, PIXA_SYMBOL ) ); }
 };
 
 typedef oid_ref< bucket_object > bucket_id_type;
@@ -85,8 +85,8 @@ FC_REFLECT( hive::plugins::market_history::bucket_object_details,
 FC_REFLECT( hive::plugins::market_history::bucket_object,
               (id)
               (open)(seconds)
-              (hive)
-              (non_hive)
+              (pixa)
+              (non_pixa)
       )
 
 FC_REFLECT( hive::plugins::market_history::order_history_object,

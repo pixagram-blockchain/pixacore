@@ -50,21 +50,21 @@ struct window_input_data
 {
   uint32_t   nr_voters  = 0;
   uint32_t   interval   = 0;
-  HIVE_asset amount;
+  PIXA_asset amount;
 };
 
 struct comment_reward_info
 {
-  HIVE_asset total_reward;
-  HIVE_asset author_tokens;
-  HIVE_asset curation_tokens;
+  PIXA_asset total_reward;
+  PIXA_asset author_tokens;
+  PIXA_asset curation_tokens;
 };
 
 struct reward_stat
 {
   using rewards_stats = std::vector<reward_stat>;
 
-  HIVE_asset value;
+  PIXA_asset value;
 
   public:
 
@@ -76,7 +76,7 @@ struct reward_stat
       display_reward( obj.curation_tokens );
     }
 
-    static void display_reward( const HIVE_asset& reward )
+    static void display_reward( const PIXA_asset& reward )
     {
       std::string str = std::to_string( reward.get_amount() );
 
@@ -409,16 +409,16 @@ struct curation_rewards_handler
     std::copy( _post_voter_keys.begin(), _post_voter_keys.end(), std::back_inserter( post_voter_keys ) );
   }
 
-  HIVE_asset prepare_funds_impl( uint32_t idx, HIVE_asset amount )
+  PIXA_asset prepare_funds_impl( uint32_t idx, PIXA_asset amount )
   {
     test_object.fund( voters[idx], amount );
     test_object.vest( voters[idx], voters[idx], amount / 10, active_voter_keys[idx] );
     return amount;
   }
 
-  HIVE_asset prepare_funds( uint32_t& counter, const window_input_data& window )
+  PIXA_asset prepare_funds( uint32_t& counter, const window_input_data& window )
   {
-    HIVE_asset funds;
+    PIXA_asset funds;
     for( uint32_t i = counter; i < counter + window.nr_voters; ++i )
     {
       funds += prepare_funds_impl( i, window.amount );
@@ -433,7 +433,7 @@ struct curation_rewards_handler
     BOOST_REQUIRE_GE( voters.size(), early.nr_voters + mid.nr_voters + late.nr_voters );
 
     uint32_t counter = 0;
-    HIVE_asset funds;
+    PIXA_asset funds;
 
     funds += prepare_funds( counter, early );
     funds += prepare_funds( counter, mid );
@@ -442,9 +442,9 @@ struct curation_rewards_handler
     test_object.issue_funds( HIVE_INIT_MINER_NAME, funds );
   }
 
-  void prepare_funds( HIVE_asset amount = HIVE_asset( curation_rewards_handler::default_amount ) )
+  void prepare_funds( PIXA_asset amount = PIXA_asset( curation_rewards_handler::default_amount ) )
   {
-    HIVE_asset funds;
+    PIXA_asset funds;
     for( uint32_t i = 0; i < voters.size(); ++i )
     {
       funds += prepare_funds_impl( i, amount );
@@ -536,13 +536,13 @@ struct curation_rewards_handler
       if( _seconds >= dgpo.get_early_voting_seconds() )
       {
         if( _seconds < ( dgpo.get_early_voting_seconds() + dgpo.get_mid_voting_seconds() ) )
-          mid_stats.emplace_back( reward_stat{ HIVE_asset( item.reward ) } );
+          mid_stats.emplace_back( reward_stat{ PIXA_asset( item.reward ) } );
         else
-          late_stats.emplace_back( reward_stat{ HIVE_asset( item.reward ) } );
+          late_stats.emplace_back( reward_stat{ PIXA_asset( item.reward ) } );
       }
       else
       {
-        early_stats.emplace_back( reward_stat{ HIVE_asset( item.reward ) } );
+        early_stats.emplace_back( reward_stat{ PIXA_asset( item.reward ) } );
       }
     }
   }
@@ -562,11 +562,11 @@ struct curation_rewards_handler
 
       if( _seconds >= dgpo.get_reverse_auction_seconds() )
       {
-        late_stats.emplace_back( reward_stat{ HIVE_asset( item.reward ) } );
+        late_stats.emplace_back( reward_stat{ PIXA_asset( item.reward ) } );
       }
       else
       {
-        early_stats.emplace_back( reward_stat{ HIVE_asset( item.reward ) } );
+        early_stats.emplace_back( reward_stat{ PIXA_asset( item.reward ) } );
       }
     }
   }
@@ -584,7 +584,7 @@ struct curation_rewards_handler
       test_object.generate_blocks( _time + fc::seconds( cashout_time - _seconds ) );
   }
 
-  HIVE_asset calculate_reward()
+  PIXA_asset calculate_reward()
   {
     const auto& props = db.get_dynamic_global_properties();
 
@@ -595,11 +595,11 @@ struct curation_rewards_handler
     // below subtraction cannot underflow int64_t because inflation_rate_adjustment is <2^32
     int64_t current_inflation_rate = std::max( start_inflation_rate - inflation_rate_adjustment, inflation_rate_floor );
 
-    auto new_hive = ( props.get_virtual_supply() * current_inflation_rate ) / ( int64_t( HIVE_100_PERCENT ) * int64_t( HIVE_BLOCKS_PER_YEAR ) );
-    return new_hive * props.get_content_reward_percent() / HIVE_100_PERCENT;
+    auto new_pixa = ( props.get_virtual_supply() * current_inflation_rate ) / ( int64_t( HIVE_100_PERCENT ) * int64_t( HIVE_BLOCKS_PER_YEAR ) );
+    return new_pixa * props.get_content_reward_percent() / HIVE_100_PERCENT;
   }
 
-  HIVE_asset current_total_reward()
+  PIXA_asset current_total_reward()
   {
     const auto& reward_idx = db.get_index< reward_fund_index, by_id >();
 
@@ -607,7 +607,7 @@ struct curation_rewards_handler
 
     auto found = reward_idx.find( fund_id );
     if( found == reward_idx.end() )
-      return HIVE_asset( 0 );
+      return PIXA_asset( 0 );
 
     return found->get_reward_balance();
   }
@@ -630,7 +630,7 @@ void basic_test_impl(
   crh.prepare_voters();
   mgr_test.generate_block();
 
-  mgr_test.set_price_feed( HBD_price( 1000, 1000 ) );
+  mgr_test.set_price_feed( PXS_price( 1000, 1000 ) );
   mgr_test.generate_block();
 
   crh.prepare_funds( early, mid, late );
@@ -743,7 +743,7 @@ BOOST_AUTO_TEST_CASE( basic_test_v0 )
   {
     BOOST_TEST_MESSAGE( "Testing: curation rewards after HF25. Reward during whole rewards-time (7 days). Voting in every window." );
 
-    HIVE_asset _a( curation_rewards_handler::default_amount );
+    PIXA_asset _a( curation_rewards_handler::default_amount );
 
     basic_test_impl( "00.content_format.time:curation_reward.csv",
                       *this,
@@ -760,7 +760,7 @@ BOOST_AUTO_TEST_CASE( basic_test_v1 )
   {
     BOOST_TEST_MESSAGE( "Testing: curation rewards after HF25. Reward during whole rewards-time (7 days). Voting in 2 windows: early, mid." );
 
-    HIVE_asset _a( curation_rewards_handler::default_amount );
+    PIXA_asset _a( curation_rewards_handler::default_amount );
 
     basic_test_impl( "01.content_format.time:curation_reward.csv",
                       *this,
@@ -777,7 +777,7 @@ BOOST_AUTO_TEST_CASE( basic_test_v2 )
   {
     BOOST_TEST_MESSAGE( "Testing: curation rewards after HF25. Reward during whole rewards-time (7 days). Voting in 2 windows: early, mid." );
 
-    HIVE_asset _a( curation_rewards_handler::default_amount );
+    PIXA_asset _a( curation_rewards_handler::default_amount );
 
     basic_test_impl( "02.content_format.time:curation_reward.csv",
                       *this,
@@ -794,7 +794,7 @@ BOOST_AUTO_TEST_CASE( basic_test_v3 )
   {
     BOOST_TEST_MESSAGE( "Testing: curation rewards after HF25. Reward during whole rewards-time (7 days). Voting in early window." );
 
-    HIVE_asset _a( curation_rewards_handler::default_amount );
+    PIXA_asset _a( curation_rewards_handler::default_amount );
 
     basic_test_impl( "03.content_format.time:curation_reward.csv",
                       *this,
@@ -811,7 +811,7 @@ BOOST_AUTO_TEST_CASE( basic_test_v4 )
   {
     BOOST_TEST_MESSAGE( "Testing: curation rewards after HF25. Reward during whole rewards-time (7 days). Voting in mid window." );
 
-    HIVE_asset _a( curation_rewards_handler::default_amount );
+    PIXA_asset _a( curation_rewards_handler::default_amount );
 
     basic_test_impl( "04.content_format.time:curation_reward.csv",
                       *this,
@@ -828,7 +828,7 @@ BOOST_AUTO_TEST_CASE( basic_test_v5 )
   {
     BOOST_TEST_MESSAGE( "Testing: curation rewards after HF25. Reward during whole rewards-time (7 days). Voting in early window." );
 
-    HIVE_asset _a( curation_rewards_handler::default_amount * 2 );
+    PIXA_asset _a( curation_rewards_handler::default_amount * 2 );
 
     basic_test_impl( "05.content_format.time:curation_reward.csv",
                       *this,
@@ -845,7 +845,7 @@ BOOST_AUTO_TEST_CASE( basic_test_v6 )
   {
     BOOST_TEST_MESSAGE( "Testing: curation rewards after HF25. Reward during whole rewards-time (7 days). Voting in mid window." );
 
-    HIVE_asset _a( curation_rewards_handler::default_amount * 2 );
+    PIXA_asset _a( curation_rewards_handler::default_amount * 2 );
 
     basic_test_impl( "06.content_format.time:curation_reward.csv",
                       *this,
@@ -864,7 +864,7 @@ BOOST_AUTO_TEST_CASE( basic_test_v7 )
     BOOST_TEST_MESSAGE( "Totally 50 voters vote on 1 comment" );
     BOOST_TEST_MESSAGE( "1 voter votes in early window, rest of voters vote in mid window." );
 
-    HIVE_asset _a( curation_rewards_handler::default_amount * 2 );
+    PIXA_asset _a( curation_rewards_handler::default_amount * 2 );
 
     basic_test_impl( "07.content_format.time:curation_reward.csv",
                       *this,
@@ -883,7 +883,7 @@ BOOST_AUTO_TEST_CASE( basic_test_v8 )
     BOOST_TEST_MESSAGE( "Totally 50 voters vote on 1 comment" );
     BOOST_TEST_MESSAGE( "5 voters vote in early window, rest of voters vote in mid window." );
 
-    HIVE_asset _a( curation_rewards_handler::default_amount * 2 );
+    PIXA_asset _a( curation_rewards_handler::default_amount * 2 );
 
     basic_test_impl( "08.content_format.time:curation_reward.csv",
                       *this,
@@ -905,7 +905,7 @@ BOOST_AUTO_TEST_CASE( no_votes )
     crh.prepare_author( { 0 } );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     uint32_t author_number = 0;
@@ -955,7 +955,7 @@ BOOST_AUTO_TEST_CASE( one_vote_for_comment )
     crh.prepare_10_voters();
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     crh.prepare_funds();
@@ -1003,7 +1003,7 @@ BOOST_AUTO_TEST_CASE( one_vote_for_comment )
     {
       auto cmp = []( const reward_stat& item_a, const reward_stat& item_b )
       {
-        return item_a.value == HIVE_asset( 623715 ) && item_a.value == item_b.value;
+        return item_a.value == PIXA_asset( 623715 ) && item_a.value == item_b.value;
       };
       reward_stat::check_phases( early_stats, mid_stats, cmp );
       reward_stat::check_phases( mid_stats, late_stats, cmp );
@@ -1029,7 +1029,7 @@ BOOST_AUTO_TEST_CASE( two_votes_for_comment )
     crh.prepare_10_voters();
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     crh.prepare_funds();
@@ -1147,7 +1147,7 @@ void two_comments_in_the_same_blocks_impl( cluster_database_fixture& cluster, bo
       crh.create_printer();
       executor->generate_block();
 
-      executor->set_price_feed( HBD_price( 1000, 1000 ) );
+      executor->set_price_feed( PXS_price( 1000, 1000 ) );
       executor->generate_block();
 
       crh.prepare_funds();
@@ -1157,7 +1157,7 @@ void two_comments_in_the_same_blocks_impl( cluster_database_fixture& cluster, bo
     };
 
     auto execution = []( curation_rewards_handler& crh, cluster_database_fixture::ptr_hardfork_database_fixture& executor,
-                          HIVE_asset& total_rewards_pool_before, HIVE_asset& total_rewards_pool_after )
+                          PIXA_asset& total_rewards_pool_before, PIXA_asset& total_rewards_pool_after )
     {
       size_t vote_counter = 0;
 
@@ -1191,12 +1191,12 @@ void two_comments_in_the_same_blocks_impl( cluster_database_fixture& cluster, bo
       reward_stat::rewards_stats early_stats[2];
       reward_stat::rewards_stats late_stats[2];
 
-      HIVE_asset total_rewards_pool_before;
-      HIVE_asset total_rewards_pool_after;
+      PIXA_asset total_rewards_pool_before;
+      PIXA_asset total_rewards_pool_after;
 
       curation_rewards_handler crh( *executor, *( executor->db ) );
 
-      HIVE_asset reward_per_block = preparation( crh, executor );
+      PIXA_asset reward_per_block = preparation( crh, executor );
 
       {
         execution( crh, executor, total_rewards_pool_before, total_rewards_pool_after );
@@ -1281,8 +1281,8 @@ void two_comments_in_the_same_blocks_impl( cluster_database_fixture& cluster, bo
       reward_stat::rewards_stats mid_stats[2];
       reward_stat::rewards_stats late_stats[2];
 
-      HIVE_asset total_rewards_pool_before;
-      HIVE_asset total_rewards_pool_after;
+      PIXA_asset total_rewards_pool_before;
+      PIXA_asset total_rewards_pool_after;
 
       if( restore_author_reward_curve )
       {
@@ -1297,7 +1297,7 @@ void two_comments_in_the_same_blocks_impl( cluster_database_fixture& cluster, bo
 
       curation_rewards_handler crh( *executor, *( executor->db ) );
 
-      HIVE_asset reward_per_block = preparation( crh, executor );
+      PIXA_asset reward_per_block = preparation( crh, executor );
 
       {
         //**********************HF 25 is activated**********************
@@ -1420,7 +1420,7 @@ void two_comments_in_different_blocks_impl( cluster_database_fixture& cluster, b
       crh.create_printer();
       executor->generate_block();
 
-      executor->set_price_feed( HBD_price( 1000, 1000 ) );
+      executor->set_price_feed( PXS_price( 1000, 1000 ) );
       executor->generate_block();
 
       crh.prepare_funds();
@@ -1430,7 +1430,7 @@ void two_comments_in_different_blocks_impl( cluster_database_fixture& cluster, b
     };
 
     auto execution = []( curation_rewards_handler& crh, cluster_database_fixture::ptr_hardfork_database_fixture& executor,
-                          HIVE_asset total_rewards_pool_before[], HIVE_asset total_rewards_pool_after[] )
+                          PIXA_asset total_rewards_pool_before[], PIXA_asset total_rewards_pool_after[] )
     {
       size_t vote_counter = 0;
 
@@ -1482,12 +1482,12 @@ void two_comments_in_different_blocks_impl( cluster_database_fixture& cluster, b
       reward_stat::rewards_stats early_stats[2];
       reward_stat::rewards_stats late_stats[2];
 
-      HIVE_asset total_rewards_pool_before[2];
-      HIVE_asset total_rewards_pool_after[2];
+      PIXA_asset total_rewards_pool_before[2];
+      PIXA_asset total_rewards_pool_after[2];
 
       curation_rewards_handler crh( *executor, *( executor->db ) );
 
-      HIVE_asset reward_per_block = preparation( crh, executor );
+      PIXA_asset reward_per_block = preparation( crh, executor );
 
       {
         //**********************HF 24 is activated**********************
@@ -1566,8 +1566,8 @@ void two_comments_in_different_blocks_impl( cluster_database_fixture& cluster, b
       reward_stat::rewards_stats mid_stats[2];
       reward_stat::rewards_stats late_stats[2];
 
-      HIVE_asset total_rewards_pool_before[2];
-      HIVE_asset total_rewards_pool_after[2];
+      PIXA_asset total_rewards_pool_before[2];
+      PIXA_asset total_rewards_pool_after[2];
 
       if( restore_author_reward_curve )
       {
@@ -1582,7 +1582,7 @@ void two_comments_in_different_blocks_impl( cluster_database_fixture& cluster, b
 
       curation_rewards_handler crh( *executor, *( executor->db ) );
 
-      HIVE_asset reward_per_block = preparation( crh, executor );
+      PIXA_asset reward_per_block = preparation( crh, executor );
 
       {
         //**********************HF 25 is activated**********************
@@ -1684,7 +1684,7 @@ BOOST_AUTO_TEST_CASE( one_vote_per_comment )
       crh.prepare_10_voters();
       executor->generate_block();
 
-      executor->set_price_feed( HBD_price( 1000, 1000 ) );
+      executor->set_price_feed( PXS_price( 1000, 1000 ) );
       executor->generate_block();
 
       crh.prepare_funds();
@@ -1694,7 +1694,7 @@ BOOST_AUTO_TEST_CASE( one_vote_per_comment )
     };
 
     auto execution = []( curation_rewards_handler& crh, ptr_hardfork_database_fixture& executor,
-                          HIVE_asset& total_rewards_pool_before, HIVE_asset& total_rewards_pool_after )
+                          PIXA_asset& total_rewards_pool_before, PIXA_asset& total_rewards_pool_after )
     {
       size_t vote_counter = 0;
       uint32_t vote_01_time = 12;
@@ -1718,12 +1718,12 @@ BOOST_AUTO_TEST_CASE( one_vote_per_comment )
     {
       reward_stat::rewards_stats early_stats;
       reward_stat::rewards_stats late_stats;
-      HIVE_asset total_rewards_pool_before;
-      HIVE_asset total_rewards_pool_after;
+      PIXA_asset total_rewards_pool_before;
+      PIXA_asset total_rewards_pool_after;
 
       curation_rewards_handler crh( *executor, *( executor->db ) );
 
-      HIVE_asset reward_per_block = preparation( crh, executor );
+      PIXA_asset reward_per_block = preparation( crh, executor );
 
       {
         //**********************HF 24 is activated**********************
@@ -1789,12 +1789,12 @@ BOOST_AUTO_TEST_CASE( one_vote_per_comment )
       reward_stat::rewards_stats early_stats;
       reward_stat::rewards_stats mid_stats;
       reward_stat::rewards_stats late_stats;
-      HIVE_asset total_rewards_pool_before;
-      HIVE_asset total_rewards_pool_after;
+      PIXA_asset total_rewards_pool_before;
+      PIXA_asset total_rewards_pool_after;
 
       curation_rewards_handler crh( *executor, *( executor->db ) );
 
-      HIVE_asset reward_per_block = preparation( crh, executor );
+      PIXA_asset reward_per_block = preparation( crh, executor );
 
       {
         //**********************HF 25 is activated**********************
@@ -1877,7 +1877,7 @@ BOOST_AUTO_TEST_CASE( one_vote_per_comment_v2 )
       crh.prepare_10_voters();
       executor->generate_block();
 
-      executor->set_price_feed( HBD_price( 1000, 1000 ) );
+      executor->set_price_feed( PXS_price( 1000, 1000 ) );
       executor->generate_block();
 
       crh.prepare_funds();
@@ -1887,7 +1887,7 @@ BOOST_AUTO_TEST_CASE( one_vote_per_comment_v2 )
     };
 
     auto execution = []( curation_rewards_handler& crh, ptr_hardfork_database_fixture& executor,
-                          HIVE_asset& total_rewards_pool_before, HIVE_asset& total_rewards_pool_after )
+                          PIXA_asset& total_rewards_pool_before, PIXA_asset& total_rewards_pool_after )
     {
       size_t vote_counter = 0;
       uint32_t vote_01_time = 300/*old value of 'reverse_auction_seconds'*/;
@@ -1911,12 +1911,12 @@ BOOST_AUTO_TEST_CASE( one_vote_per_comment_v2 )
     {
       reward_stat::rewards_stats early_stats;
       reward_stat::rewards_stats late_stats;
-      HIVE_asset total_rewards_pool_before;
-      HIVE_asset total_rewards_pool_after;
+      PIXA_asset total_rewards_pool_before;
+      PIXA_asset total_rewards_pool_after;
 
       curation_rewards_handler crh( *executor, *( executor->db ) );
 
-      HIVE_asset reward_per_block = preparation( crh, executor );
+      PIXA_asset reward_per_block = preparation( crh, executor );
 
       {
         //**********************HF 24 is activated**********************
@@ -1981,12 +1981,12 @@ BOOST_AUTO_TEST_CASE( one_vote_per_comment_v2 )
       reward_stat::rewards_stats early_stats;
       reward_stat::rewards_stats mid_stats;
       reward_stat::rewards_stats late_stats;
-      HIVE_asset total_rewards_pool_before;
-      HIVE_asset total_rewards_pool_after;
+      PIXA_asset total_rewards_pool_before;
+      PIXA_asset total_rewards_pool_after;
 
       curation_rewards_handler crh( *executor, *( executor->db ) );
 
-      HIVE_asset reward_per_block = preparation( crh, executor );
+      PIXA_asset reward_per_block = preparation( crh, executor );
 
       {
         //**********************HF 25 is activated**********************
@@ -2068,7 +2068,7 @@ BOOST_AUTO_TEST_CASE( five_votes_per_comment )
       crh.prepare_10_voters();
       executor->generate_block();
 
-      executor->set_price_feed( HBD_price( 1000, 1000 ) );
+      executor->set_price_feed( PXS_price( 1000, 1000 ) );
       executor->generate_block();
 
       crh.prepare_funds();
@@ -2078,7 +2078,7 @@ BOOST_AUTO_TEST_CASE( five_votes_per_comment )
     };
 
     auto execution = []( curation_rewards_handler& crh, ptr_hardfork_database_fixture& executor,
-                          HIVE_asset& total_rewards_pool_before, HIVE_asset& total_rewards_pool_after )
+                          PIXA_asset& total_rewards_pool_before, PIXA_asset& total_rewards_pool_after )
     {
       size_t vote_counter = 0;
       uint32_t vote_01_time = 300/*old value of 'reverse_auction_seconds'*/ + 3;
@@ -2106,12 +2106,12 @@ BOOST_AUTO_TEST_CASE( five_votes_per_comment )
     {
       reward_stat::rewards_stats early_stats;
       reward_stat::rewards_stats late_stats;
-      HIVE_asset total_rewards_pool_before;
-      HIVE_asset total_rewards_pool_after;
+      PIXA_asset total_rewards_pool_before;
+      PIXA_asset total_rewards_pool_after;
 
       curation_rewards_handler crh( *executor, *( executor->db ) );
 
-      HIVE_asset reward_per_block = preparation( crh, executor );
+      PIXA_asset reward_per_block = preparation( crh, executor );
 
       {
         //**********************HF 24 is activated**********************
@@ -2198,12 +2198,12 @@ BOOST_AUTO_TEST_CASE( five_votes_per_comment )
       reward_stat::rewards_stats early_stats;
       reward_stat::rewards_stats mid_stats;
       reward_stat::rewards_stats late_stats;
-      HIVE_asset total_rewards_pool_before;
-      HIVE_asset total_rewards_pool_after;
+      PIXA_asset total_rewards_pool_before;
+      PIXA_asset total_rewards_pool_after;
 
       curation_rewards_handler crh( *executor, *( executor->db ) );
 
-      HIVE_asset reward_per_block = preparation( crh, executor );
+      PIXA_asset reward_per_block = preparation( crh, executor );
 
       {
         //**********************HF 25 is activated**********************

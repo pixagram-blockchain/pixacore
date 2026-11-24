@@ -30,9 +30,9 @@ std::string to_string(const hive::protocol::fixed_string<N>& v);
 template<typename Storage>
 std::string to_string(const hive::protocol::fixed_string_impl<Storage>& v);
 std::string to_string(const hive::protocol::legacy_asset& v);
-std::string to_string(const hive::protocol::legacy_hive_asset_symbol_type& v);
+std::string to_string(const hive::protocol::legacy_pixa_asset_symbol_type& v);
 std::string to_string(const hive::protocol::asset& v);
-std::string to_string(const hive::protocol::legacy_hive_asset& v);
+std::string to_string(const hive::protocol::legacy_pixa_asset& v);
 std::string to_string(const hive::protocol::public_key_type& v);
 std::string to_string(const hive::protocol::json_string& v);
 std::string to_string(const std::string& v);
@@ -271,12 +271,12 @@ std::string to_string(const hive::protocol::asset& v)
   return to_string(hive::protocol::legacy_asset(v));
 }
 
-std::string to_string(const hive::protocol::legacy_hive_asset& v)
+std::string to_string(const hive::protocol::legacy_pixa_asset& v)
 {
   return to_string(v.to_asset<false>());
 }
 
-std::string to_string(const hive::protocol::legacy_hive_asset_symbol_type& v)
+std::string to_string(const hive::protocol::legacy_pixa_asset_symbol_type& v)
 {
   return "LLL";
 }

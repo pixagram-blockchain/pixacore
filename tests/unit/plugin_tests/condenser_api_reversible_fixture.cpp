@@ -9,7 +9,7 @@
 condenser_api_reversible_fixture::condenser_api_reversible_fixture()
 {
     db->set_hardfork( HIVE_NUM_HARDFORKS );
-    set_account_creation_fee( HIVE_asset( 3000 ) ); //3.000 HIVE, same as mainnet
+    set_account_creation_fee( PIXA_asset( 3000 ) ); //3.000 PIXA, same as mainnet
     generate_block();
 
     ACTORS( DEFAULT_VESTING, (top1)(top2)(top3)(top4)(top5)(top6)(top7)(top8)(top9)(top10)
@@ -20,7 +20,7 @@ condenser_api_reversible_fixture::condenser_api_reversible_fixture()
     {
       const private_key_type account_key = generate_private_key( witness_name );
       const private_key_type witness_key = generate_private_key( witness_name + "_witness" );
-      witness_create( witness_name, account_key, witness_name + ".com", witness_key.get_public_key(), HIVE_asset( 1000 ) );
+      witness_create( witness_name, account_key, witness_name + ".com", witness_key.get_public_key(), PIXA_asset( 1000 ) );
       witness_plugin->add_signing_key( witness_key );
     };
     for( int i = 1; i <= 20; ++i )
@@ -30,7 +30,7 @@ condenser_api_reversible_fixture::condenser_api_reversible_fixture()
 
     ACTORS( DEFAULT_VESTING, (whale)(voter1)(voter2)(voter3)(voter4)(voter5)(voter6)(voter7)(voter8)(voter9)(voter10) );
 
-    vest( "whale", HIVE_asset( 500'000'000 ) );
+    vest( "whale", PIXA_asset( 500'000'000 ) );
 
     account_witness_vote_operation op;
     op.account = "whale";
@@ -45,8 +45,8 @@ condenser_api_reversible_fixture::condenser_api_reversible_fixture()
     {
       std::string name = "voter" + std::to_string(i);
       auto key = generate_private_key( name );
-      fund( name, HIVE_asset( 10'000'000 ) );
-      vest( name, "", HIVE_asset( 10'000'000 / i ), key );
+      fund( name, PIXA_asset( 10'000'000 ) );
+      vest( name, "", PIXA_asset( 10'000'000 / i ), key );
       op.account = name;
       for( int v = 1; v <= i; ++v )
       {

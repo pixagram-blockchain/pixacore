@@ -17,7 +17,7 @@ message claim_account {
   required string            creator = 1;
 
   // @param {asset} fee - The amount of fee for creating a new account is decided by the witnesses.
-  //                      It may be paid in HIVE or in the Recourse Credit (RC).
+  //                      It may be paid in PIXA or in the Recourse Credit (RC).
   //                      If a user wants to pay a fee in RC, it should be set {fee= 0}.
   required asset             fee = 2;
 

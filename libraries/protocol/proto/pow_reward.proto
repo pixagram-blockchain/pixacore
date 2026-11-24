@@ -12,6 +12,6 @@ message pow_reward {
   // @param {string} worker - (potentially new) witness that calculated PoW (receiver of reward)
   required string worker = 1;
 
-  // @param {asset} reward - (VESTS or HIVE) reward for work (HIVE only during first 30 days after genesis)
+  // @param {asset} reward - (VESTS or PIXA) reward for work (PIXA only during first 30 days after genesis)
   required asset  reward = 2;
 }

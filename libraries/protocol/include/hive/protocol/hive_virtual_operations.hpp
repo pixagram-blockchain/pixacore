@@ -10,19 +10,19 @@ namespace hive { namespace protocol {
 
 /**
   * Related to convert_operation.
-  * Generated during block processing after conversion delay passes and HBD is converted to HIVE.
+  * Generated during block processing after conversion delay passes and PXS is converted to PIXA.
   */
 struct fill_convert_request_operation : public virtual_operation
 {
   fill_convert_request_operation() = default;
-  fill_convert_request_operation( const account_name_type& o, const uint32_t id, const HBD_asset& in, const HIVE_asset& out )
+  fill_convert_request_operation( const account_name_type& o, const uint32_t id, const PXS_asset& in, const PIXA_asset& out )
     : owner( o ), requestid( id ), amount_in( in ), amount_out( out )
   {}
 
   account_name_type   owner; //user that requested conversion (receiver of amount_out)
   uint32_t            requestid = 0; //id of the request
-  HBD_asset           amount_in; //(HBD) source of conversion
-  HIVE_asset          amount_out; //(HIVE) effect of conversion
+  PXS_asset           amount_in; //(PXS) source of conversion
+  PIXA_asset          amount_out; //(PIXA) effect of conversion
 };
 
 /**
@@ -35,14 +35,14 @@ struct fill_convert_request_operation : public virtual_operation
 struct author_reward_operation : public virtual_operation
 {
   author_reward_operation() = default;
-  author_reward_operation( const account_name_type& a, const string& p, const HBD_asset& s, const HIVE_asset& st, const VEST_asset& v, const VEST_asset& c, bool must_be_claimed )
-    : author( a ), permlink( p ), hbd_payout( s ), hive_payout( st ), vesting_payout( v ), curators_vesting_payout( c ), payout_must_be_claimed( must_be_claimed )
+  author_reward_operation( const account_name_type& a, const string& p, const PXS_asset& s, const PIXA_asset& st, const VEST_asset& v, const VEST_asset& c, bool must_be_claimed )
+    : author( a ), permlink( p ), pxs_payout( s ), pixa_payout( st ), vesting_payout( v ), curators_vesting_payout( c ), payout_must_be_claimed( must_be_claimed )
   {}
 
-  account_name_type   author; //author of the comment (receiver of hbd_payout, hive_payout, vesting_payout)
+  account_name_type   author; //author of the comment (receiver of pxs_payout, pixa_payout, vesting_payout)
   string              permlink; //permlink of the comment
-  HBD_asset           hbd_payout; //(HBD) part of reward
-  HIVE_asset          hive_payout; //(HIVE) part of reward
+  PXS_asset           pxs_payout; //(PXS) part of reward
+  PIXA_asset          pixa_payout; //(PIXA) part of reward
   VEST_asset          vesting_payout; //(VESTS) part of reward
   VEST_asset          curators_vesting_payout; //(VESTS) curators' portion of comment reward (@see curation_reward_operation)
   bool                payout_must_be_claimed = false; //true if payouts require use of claim_reward_balance_operation
@@ -79,60 +79,60 @@ struct curation_reward_operation : public virtual_operation
 struct comment_reward_operation : public virtual_operation
 {
   comment_reward_operation() = default;
-  comment_reward_operation( const account_name_type& a, const string& pl, const HBD_asset& p, const HIVE_asset& ar,
-    const HBD_asset& tpv, const HBD_asset& cpv, const HBD_asset& bpv )
+  comment_reward_operation( const account_name_type& a, const string& pl, const PXS_asset& p, const PIXA_asset& ar,
+    const PXS_asset& tpv, const PXS_asset& cpv, const PXS_asset& bpv )
     : author( a ), permlink( pl ), payout( p ), author_rewards( ar.amount ),
     total_payout_value( tpv ), curator_payout_value( cpv ), beneficiary_payout_value( bpv )
   {}
 
   account_name_type author; //author of the comment
   string            permlink; //permlink of the comment
-  HBD_asset         payout; //(HBD) total value of comment reward recalculated to HBD
-  share_type        author_rewards; //(HIVE satoshi) raw author reward (@see author_reward_operation) [is it needed?] TODO: turn into HIVE_asset
-  HBD_asset         total_payout_value; //(HBD) overall author reward (from multiple cashouts prior to HF17) recalculated to HBD [is it needed?]
-  HBD_asset         curator_payout_value; //(HBD) overall curation reward (from multiple cashouts prior to HF17) recalculated to HBD [is it needed?]
-  HBD_asset         beneficiary_payout_value; //(HBD) overall beneficiary reward (from multiple cashouts prior to HF17) recalculated to HBD [is it needed?]
+  PXS_asset         payout; //(PXS) total value of comment reward recalculated to PXS
+  share_type        author_rewards; //(PIXA satoshi) raw author reward (@see author_reward_operation) [is it needed?] TODO: turn into PIXA_asset
+  PXS_asset         total_payout_value; //(PXS) overall author reward (from multiple cashouts prior to HF17) recalculated to PXS [is it needed?]
+  PXS_asset         curator_payout_value; //(PXS) overall curation reward (from multiple cashouts prior to HF17) recalculated to PXS [is it needed?]
+  PXS_asset         beneficiary_payout_value; //(PXS) overall beneficiary reward (from multiple cashouts prior to HF17) recalculated to PXS [is it needed?]
 };
 
 /**
   * Related to limit_order_create_operation and limit_order_create2_operation.
-  * Generated during block processing to indicate reward paid to the market makers on internal HIVE<->HBD market.
+  * Generated during block processing to indicate reward paid to the market makers on internal PIXA<->PXS market.
   * No longer active after HF12.
   * @see fill_order_operation
   */
 struct liquidity_reward_operation : public virtual_operation
 {
   liquidity_reward_operation() = default;
-  liquidity_reward_operation( const account_name_type& o, const HIVE_asset& p )
+  liquidity_reward_operation( const account_name_type& o, const PIXA_asset& p )
     : owner( o ), payout( p )
   {}
 
   account_name_type owner; //market maker (receiver of payout)
-  HIVE_asset        payout; //(HIVE) reward for provided liquidity
+  PIXA_asset        payout; //(PIXA) reward for provided liquidity
 };
 
 /**
-  * Related to any operation that modifies HBD liquid or savings balance (including block processing).
-  * Generated when operation modified HBD balance and account received interest payment.
+  * Related to any operation that modifies PXS liquid or savings balance (including block processing).
+  * Generated when operation modified PXS balance and account received interest payment.
   * Interest is stored in related balance (liquid when liquid was modified, savings when savings was modified).
   * Note: since HF25 interest is not calculated nor paid on liquid balance.
   */
 struct interest_operation : public virtual_operation
 {
   interest_operation() = default;
-  interest_operation( const account_name_type& o, const HBD_asset& i, bool _liquid_balance )
-    :owner( o ), interest( i ), is_saved_into_hbd_balance( _liquid_balance )
+  interest_operation( const account_name_type& o, const PXS_asset& i, bool _liquid_balance )
+    :owner( o ), interest( i ), is_saved_into_pxs_balance( _liquid_balance )
   {}
 
-  account_name_type owner; //user that had his HBD balance modified (receiver of interest)
-  HBD_asset         interest; //(HBD) amount of interest paid
-  bool              is_saved_into_hbd_balance = false; //true when liquid balance was modified (not happening after HF25)
+  account_name_type owner; //user that had his PXS balance modified (receiver of interest)
+  PXS_asset         interest; //(PXS) amount of interest paid
+  bool              is_saved_into_pxs_balance = false; //true when liquid balance was modified (not happening after HF25)
 };
 
 /**
   * Related to withdraw_vesting_operation and set_withdraw_vesting_route_operation.
   * Generated during block processing in batches for each active withdraw route (including implied
-  * from_account(VESTS)->from_account(HIVE)) each time vesting withdrawal period passes.
+  * from_account(VESTS)->from_account(PIXA)) each time vesting withdrawal period passes.
   * Note: not generated for implied route when all funds were already distributed along explicit routes
   */
 struct fill_vesting_withdraw_operation : public virtual_operation
@@ -147,7 +147,7 @@ struct fill_vesting_withdraw_operation : public virtual_operation
   account_name_type from_account; //user that activated power down
   account_name_type to_account; //target of vesting route (potentially the same as from_account - receiver of deposited)
   VEST_asset        withdrawn; //(VESTS) source amount
-  asset             deposited; //(HIVE or VESTS) [converted] target amount
+  asset             deposited; //(PIXA or VESTS) [converted] target amount
 };
 
 /**
@@ -164,10 +164,10 @@ struct fill_order_operation : public virtual_operation
 
   account_name_type current_owner; //user that recently created order (taker - receiver of open_pays)
   uint32_t          current_orderid = 0; //id of fresh order
-  asset             current_pays; //(HIVE or HBD) amount paid to open_owner
+  asset             current_pays; //(PIXA or PXS) amount paid to open_owner
   account_name_type open_owner; //user that had his order on the market (maker - receiver of current_pays)
   uint32_t          open_orderid = 0; //id of waiting order
-  asset             open_pays; //(HBD or HIVE) amount paid to current_owner
+  asset             open_pays; //(PXS or PIXA) amount paid to current_owner
 };
 
 /**
@@ -200,7 +200,7 @@ struct fill_transfer_from_savings_operation : public virtual_operation
 
   account_name_type from; //user that initiated transfer from savings
   account_name_type to; //user that was specified to receive funds (receiver of amount)
-  asset             amount; //(HIVE or HBD) funds transfered from savings
+  asset             amount; //(PIXA or PXS) funds transfered from savings
   uint32_t          request_id = 0; //id of transfer request
   string            memo; //memo attached to transfer request
 };
@@ -262,16 +262,16 @@ struct comment_benefactor_reward_operation : public virtual_operation
 {
   comment_benefactor_reward_operation() = default;
   comment_benefactor_reward_operation( const account_name_type& b, const account_name_type& a,
-    const string& p, const HBD_asset& s, const HIVE_asset& st, const VEST_asset& v, bool must_be_claimed )
-    : benefactor( b ), author( a ), permlink( p ), hbd_payout( s ), hive_payout( st ),
+    const string& p, const PXS_asset& s, const PIXA_asset& st, const VEST_asset& v, bool must_be_claimed )
+    : benefactor( b ), author( a ), permlink( p ), pxs_payout( s ), pixa_payout( st ),
     vesting_payout( v ), payout_must_be_claimed( must_be_claimed )
   {}
 
   account_name_type benefactor; //user assigned to receive share of author reward (receiver of payouts)
   account_name_type author; //author of the comment
   string            permlink; //permlink of the comment
-  HBD_asset         hbd_payout; //(HBD) part of reward
-  HIVE_asset        hive_payout; //(HIVE) part of reward
+  PXS_asset         pxs_payout; //(PXS) part of reward
+  PIXA_asset        pixa_payout; //(PIXA) part of reward
   VEST_asset        vesting_payout; //(VESTS) part of reward
   bool              payout_must_be_claimed = false; //true if payouts require use of claim_reward_balance_operation
 };
@@ -288,7 +288,7 @@ struct producer_reward_operation : public virtual_operation
   {}
 
   account_name_type producer; //witness (receiver of vesting_shares)
-  asset             vesting_shares; //(VESTS or HIVE) reward for block production (HIVE only during first 30 days after genesis)
+  asset             vesting_shares; //(VESTS or PIXA) reward for block production (PIXA only during first 30 days after genesis)
 };
 
 /**
@@ -298,7 +298,7 @@ struct producer_reward_operation : public virtual_operation
   */
 struct clear_null_account_balance_operation : public virtual_operation
 {
-  vector< asset >   total_cleared; //(HIVE, VESTS or HBD) nonzero assets burned on 'null' account
+  vector< asset >   total_cleared; //(PIXA, VESTS or PXS) nonzero assets burned on 'null' account
 };
 
 /**
@@ -309,14 +309,14 @@ struct clear_null_account_balance_operation : public virtual_operation
 struct proposal_pay_operation : public virtual_operation
 {
   proposal_pay_operation() = default;
-  proposal_pay_operation( uint32_t _proposal_id, const account_name_type& _receiver, const account_name_type& _treasury, const HBD_asset& _payment )
+  proposal_pay_operation( uint32_t _proposal_id, const account_name_type& _receiver, const account_name_type& _treasury, const PXS_asset& _payment )
     : proposal_id( _proposal_id ), receiver( _receiver ), payer( _treasury ), payment( _payment )
   {}
 
   uint32_t          proposal_id = 0; //id of chosen proposal
   account_name_type receiver; //account designated to receive funding (receiver of payment)
   account_name_type payer; //treasury account, source of payment
-  HBD_asset         payment; //(HBD) paid amount
+  PXS_asset         payment; //(PXS) paid amount
 };
 
 /**
@@ -328,54 +328,54 @@ struct proposal_pay_operation : public virtual_operation
 struct dhf_funding_operation : public virtual_operation
 {
   dhf_funding_operation() = default;
-  dhf_funding_operation( const account_name_type& f, const HBD_asset& v )
+  dhf_funding_operation( const account_name_type& f, const PXS_asset& v )
     : treasury( f ), additional_funds( v )
   {}
 
   account_name_type treasury; //treasury account (receiver of additional_funds)
-  HBD_asset         additional_funds; //(HBD) portion inflation accumulated since previous maintenance period
+  PXS_asset         additional_funds; //(PXS) portion inflation accumulated since previous maintenance period
 };
 
 /**
   * Related to hardfork 23 (HIVE inception hardfork).
-  * Generated for every account that did not receive HIVE airdrop.
+  * Generated for every account that did not receive PIXA airdrop.
   */
 struct hardfork_hive_operation : public virtual_operation
 {
   hardfork_hive_operation() = default;
   //other_affected_accounts as well as assets transfered have to be filled during actual operation
   hardfork_hive_operation( const account_name_type& acc, const account_name_type& _treasury )
-    : account( acc ), treasury( _treasury ), hbd_transferred( 0 ), hive_transferred( 0 ),
-    vests_converted( 0 ), total_hive_from_vests( 0 )
+    : account( acc ), treasury( _treasury ), pxs_transferred( 0 ), pixa_transferred( 0 ),
+    vests_converted( 0 ), total_pixa_from_vests( 0 )
   {}
 
   account_name_type                 account; //account excluded from airdrop (source of amounts for airdrop)
   account_name_type                 treasury; //treasury that received airdrop instead of account (receiver of funds)
   std::vector< account_name_type >  other_affected_accounts; //delegatees that lost delegations from account - filled before pre notification
-  HBD_asset                         hbd_transferred; //(HBD) part of airdrop to treasury (sourced from various HBD balances on account)
-  HIVE_asset                        hive_transferred; //(HIVE) part of airdrop to treasury (sourced from various HIVE balances on account)
+  PXS_asset                         pxs_transferred; //(PXS) part of airdrop to treasury (sourced from various PXS balances on account)
+  PIXA_asset                        pixa_transferred; //(PIXA) part of airdrop to treasury (sourced from various PIXA balances on account)
   VEST_asset                        vests_converted; //(VESTS) sum of all sources of VESTS on account
-  HIVE_asset                        total_hive_from_vests; //(HIVE) part of airdrop to treasury (sourced from conversion of vests_converted)
+  PIXA_asset                        total_pixa_from_vests; //(PIXA) part of airdrop to treasury (sourced from conversion of vests_converted)
 };
 
 /**
   * Related to hardfork 24.
   * Generated for every account that was excluded from HF23 airdrop but won appeal.
-  * Note: the late airdrop did not apply properly since HIVE that the accounts should receive did not account for
-  * HIVE from converted VESTS. [how was it resolved?]
+  * Note: the late airdrop did not apply properly since PIXA that the accounts should receive did not account for
+  * PIXA from converted VESTS. [how was it resolved?]
   * @see hardfork_hive_operation
   */
 struct hardfork_hive_restore_operation : public virtual_operation
 {
   hardfork_hive_restore_operation() = default;
-  hardfork_hive_restore_operation( const account_name_type& acc, const account_name_type& _treasury, const HBD_asset& s, const HIVE_asset& st )
-    : account( acc ), treasury( _treasury ), hbd_transferred( s ), hive_transferred( st )
+  hardfork_hive_restore_operation( const account_name_type& acc, const account_name_type& _treasury, const PXS_asset& s, const PIXA_asset& st )
+    : account( acc ), treasury( _treasury ), pxs_transferred( s ), pixa_transferred( st )
   {}
 
   account_name_type account; //account to receive late airdrop (receiver of funds)
   account_name_type treasury; //treasury, source of late airdrop
-  HBD_asset         hbd_transferred; //(HBD) part of airdrop (equals related hardfork_hive_operation.hbd_transferred)
-  HIVE_asset        hive_transferred; //(HIVE) part of airdrop (equals related hardfork_hive_operation.hive_transferred)
+  PXS_asset         pxs_transferred; //(PXS) part of airdrop (equals related hardfork_hive_operation.pxs_transferred)
+  PIXA_asset        pixa_transferred; //(PIXA) part of airdrop (equals related hardfork_hive_operation.pixa_transferred)
 };
 
 /**
@@ -403,7 +403,7 @@ struct delayed_voting_operation : public virtual_operation
   */
 struct consolidate_treasury_balance_operation : public virtual_operation
 {
-  vector< asset >   total_moved; //(HIVE, VESTS or HBD) funds moved from old to new treasury
+  vector< asset >   total_moved; //(PIXA, VESTS or PXS) funds moved from old to new treasury
 };
 
 /**
@@ -426,7 +426,7 @@ struct effective_comment_vote_operation : public virtual_operation
   uint64_t          weight = 0; //weight of vote depending on when vote was cast and with what power
   int64_t           rshares = 0; //power of the vote
   uint64_t          total_vote_weight = 0; //sum of all vote weights on the target comment in the moment of casting current vote
-  HBD_asset         pending_payout { 0 }; //(HBD) estimated reward on target comment; supplemented by AH RocksDB plugin
+  PXS_asset         pending_payout { 0 }; //(PXS) estimated reward on target comment; supplemented by AH RocksDB plugin
 };
 
 /**
@@ -448,20 +448,20 @@ struct ineffective_delete_comment_operation : public virtual_operation
 
 /**
   * Related to specific case of transfer_operation and to block processing.
-  * When user transferred HIVE to treasury the amount is immediately converted to HBD and this vops is generated.
+  * When user transferred PIXA to treasury the amount is immediately converted to PXS and this vops is generated.
   * Also generated during block processing every day during daily proposal maintenance.
-  * Note: portion of HIVE on treasury balance is converted to HBD and thus increases funds available for proposals.
+  * Note: portion of PIXA on treasury balance is converted to PXS and thus increases funds available for proposals.
   */
 struct dhf_conversion_operation : public virtual_operation
 {
   dhf_conversion_operation() = default;
-  dhf_conversion_operation( const account_name_type& f, const HIVE_asset& c, const HBD_asset& a )
-    : treasury( f ), hive_amount_in( c ), hbd_amount_out( a )
+  dhf_conversion_operation( const account_name_type& f, const PIXA_asset& c, const PXS_asset& a )
+    : treasury( f ), pixa_amount_in( c ), pxs_amount_out( a )
   {}
 
-  account_name_type treasury; //treasury (source of hive_amount_in and receiver of hbd_amount_out)
-  HIVE_asset        hive_amount_in; //(HIVE) source of conversion
-  HBD_asset         hbd_amount_out; //(HBD) effect of conversion
+  account_name_type treasury; //treasury (source of pixa_amount_in and receiver of pxs_amount_out)
+  PIXA_asset        pixa_amount_in; //(PIXA) source of conversion
+  PXS_asset         pxs_amount_out; //(PXS) effect of conversion
 };
 
 /**
@@ -505,13 +505,13 @@ struct changed_recovery_account_operation : public virtual_operation
 struct transfer_to_vesting_completed_operation : public virtual_operation
 {
   transfer_to_vesting_completed_operation() = default;
-  transfer_to_vesting_completed_operation( const account_name_type& f, const account_name_type& t, const HIVE_asset& s, const VEST_asset& v )
-    : from_account( f ), to_account( t ), hive_vested( s ), vesting_shares_received( v )
+  transfer_to_vesting_completed_operation( const account_name_type& f, const account_name_type& t, const PIXA_asset& s, const VEST_asset& v )
+    : from_account( f ), to_account( t ), pixa_vested( s ), vesting_shares_received( v )
   {}
 
-  account_name_type from_account; //account that executed power up (source of hive_vested)
+  account_name_type from_account; //account that executed power up (source of pixa_vested)
   account_name_type to_account; //account that gets power up (receiver of vesting_shares_received)
-  HIVE_asset        hive_vested; //(HIVE) liquid funds being turned into VESTS
+  PIXA_asset        pixa_vested; //(PIXA) liquid funds being turned into VESTS
   VEST_asset        vesting_shares_received; //(VESTS) result of power up
 };
 
@@ -528,7 +528,7 @@ struct pow_reward_operation : public virtual_operation
   {}
 
   account_name_type worker; //(potentially new) witness that calculated PoW (receiver of reward)
-  asset             reward; //(VESTS or HIVE) reward for work (HIVE only during first 30 days after genesis)
+  asset             reward; //(VESTS or PIXA) reward for work (PIXA only during first 30 days after genesis)
 };
 
 /**
@@ -572,8 +572,8 @@ struct account_created_operation : public virtual_operation
 
 /**
   * Related to collateralized_convert_operation.
-  * Generated during block processing after conversion delay passes and HIVE is finally converted to HBD.
-  * Note: HBD is transferred immediately during execution of above operation, this vop is generated after actual
+  * Generated during block processing after conversion delay passes and PIXA is finally converted to PXS.
+  * Note: PXS is transferred immediately during execution of above operation, this vop is generated after actual
   * price of conversion becomes known.
   * @see collateralized_convert_immediate_conversion_operation
   */
@@ -581,28 +581,28 @@ struct fill_collateralized_convert_request_operation : public virtual_operation
 {
   fill_collateralized_convert_request_operation() = default;
   fill_collateralized_convert_request_operation( const account_name_type& o, const uint32_t id,
-    const HIVE_asset& in, const HBD_asset& out, const HIVE_asset& _excess_collateral )
+    const PIXA_asset& in, const PXS_asset& out, const PIXA_asset& _excess_collateral )
     : owner( o ), requestid( id ), amount_in( in ), amount_out( out ), excess_collateral( _excess_collateral )
   {}
 
   account_name_type owner; //user that requested conversion (receiver of excess_collateral)
   uint32_t          requestid = 0; //id of the request
-  HIVE_asset        amount_in; //(HIVE) source of conversion (part of collateral)
-  HBD_asset         amount_out; //(HBD) result of conversion (already transferred to owner when request was made)
-  HIVE_asset        excess_collateral; //(HIVE) unused part of collateral returned to owner
+  PIXA_asset        amount_in; //(PIXA) source of conversion (part of collateral)
+  PXS_asset         amount_out; //(PXS) result of conversion (already transferred to owner when request was made)
+  PIXA_asset        excess_collateral; //(PIXA) unused part of collateral returned to owner
 };
 
 /**
   * Related to block processing or selected operations.
   * Generated every time something occurs that would normally be only visible to node operators in their logs
-  * but might be interesting to general HIVE community. Such vops can be observed on account history of 'initminer'.
+  * but might be interesting to general PIXA community. Such vops can be observed on account history of 'initminer'.
   * Currently the following generate system warnings:
   *  - unknown type of witness during block processing [should probably be FC_ASSERT]
   *    indicates some problem in the code
-  *  - shortfall of collateral during finalization of HIVE->HBD conversion (@see fill_collateralized_convert_request_operation)
+  *  - shortfall of collateral during finalization of PIXA->PXS conversion (@see fill_collateralized_convert_request_operation)
   *    the community covers the difference in form of tiny amount of extra inflation
-  *  - artificial correction of internal price of HIVE due to hitting of HBD hard cap limit
-  *    every operation that involves conversion from HBD to HIVE will give output amount that is smaller than real world value
+  *  - artificial correction of internal price of PIXA due to hitting of PXS hard cap limit
+  *    every operation that involves conversion from PXS to PIXA will give output amount that is smaller than real world value
   *  - noncanonical fee symbol used by witness [should disappear if it never happened as suggested by TODO message]
   *  - witnesses changed maximum block size
   */
@@ -634,7 +634,7 @@ struct fill_recurrent_transfer_operation : public virtual_operation
 
   account_name_type                   from; //user that initiated the transfer (source of amount)
   account_name_type                   to; //user that is target of transfer (receiver of amount)
-  asset                               amount; //(HIVE of HBD) amount transferred in current iteration
+  asset                               amount; //(PIXA of PXS) amount transferred in current iteration
   string                              memo; //memo attached to the transfer
   uint16_t                            remaining_executions = 0; //number of remaining pending transfers
   recurrent_transfer_extensions_type  extensions; //only recurrent_transfer_pair_id is supported so far
@@ -657,7 +657,7 @@ struct failed_recurrent_transfer_operation : public virtual_operation
 
   account_name_type                   from; //user that initiated the transfer (source of amount that has not enough balance to cover it)
   account_name_type                   to; //user that is target of transfer (would be receiver of amount, but no transfer actually happened)
-  asset                               amount; //(HIVE of HBD) amount that was scheduled for transferred in current iteration but failed
+  asset                               amount; //(PIXA of PXS) amount that was scheduled for transferred in current iteration but failed
   string                              memo; //memo attached to the transfer
   uint8_t                             consecutive_failures = 0; //number of failed iterations
   uint16_t                            remaining_executions = 0; //number of remaining pending transfers
@@ -681,7 +681,7 @@ struct limit_order_cancelled_operation : public virtual_operation
 
   account_name_type seller; //user that placed an order (receiver of amount_back)
   uint32_t          orderid = 0; //id of the order
-  asset             amount_back; //(HIVE or HBD) remaining funds from original order that were not traded until cancellation
+  asset             amount_back; //(PIXA or PXS) remaining funds from original order that were not traded until cancellation
 };
 
 /**
@@ -706,31 +706,31 @@ struct producer_missed_operation : public virtual_operation
 struct proposal_fee_operation : public virtual_operation
 {
   proposal_fee_operation() = default;
-  proposal_fee_operation( const account_name_type& c, const account_name_type& t, uint32_t pid, const HBD_asset& f )
+  proposal_fee_operation( const account_name_type& c, const account_name_type& t, uint32_t pid, const PXS_asset& f )
     : creator( c ), treasury( t ), proposal_id( pid ), fee( f )
   {}
 
   account_name_type creator; //user that created proposal (source of fee)
   account_name_type treasury; //treasury account (receiver of fee)
   uint32_t          proposal_id = 0; //id of proposal
-  HBD_asset         fee; //(HBD) amount paid for proposal [should actually be part of create_proposal_operation but it's too late now]
+  PXS_asset         fee; //(PXS) amount paid for proposal [should actually be part of create_proposal_operation but it's too late now]
 };
 
 /**
   * Related to collateralized_convert_operation.
-  * Generated every time above operation is executed. Contains amount of HBD received right when the transfer actually happens.
+  * Generated every time above operation is executed. Contains amount of PXS received right when the transfer actually happens.
   * @see fill_collateralized_convert_request_operation
   */
 struct collateralized_convert_immediate_conversion_operation : public virtual_operation
 {
   collateralized_convert_immediate_conversion_operation() = default;
-  collateralized_convert_immediate_conversion_operation( const account_name_type& o, uint32_t rid, const HBD_asset& out )
-    : owner( o ), requestid( rid ), hbd_out( out )
+  collateralized_convert_immediate_conversion_operation( const account_name_type& o, uint32_t rid, const PXS_asset& out )
+    : owner( o ), requestid( rid ), pxs_out( out )
   {}
 
-  account_name_type owner; //user that requested conversion (receiver of hbd_out)
+  account_name_type owner; //user that requested conversion (receiver of pxs_out)
   uint32_t          requestid = 0; //id of the conversion request
-  HBD_asset         hbd_out; //(HBD) funds after conversion
+  PXS_asset         pxs_out; //(PXS) funds after conversion
 };
 
 /**
@@ -749,7 +749,7 @@ struct escrow_approved_operation : public virtual_operation
   account_name_type to; //user that is target of pending escrow transfer
   account_name_type agent; //user that is an agent of pending escrow transfer (receiver of fee)
   uint32_t          escrow_id = 0; //id of escrow transfer
-  asset             fee; //(HIVE of HBD) fee paid to agent
+  asset             fee; //(PIXA of PXS) fee paid to agent
 };
 
 /**
@@ -763,17 +763,17 @@ struct escrow_rejected_operation : public virtual_operation
 {
   escrow_rejected_operation() = default;
   escrow_rejected_operation( const account_name_type& in, const account_name_type& out, const account_name_type& a, uint32_t eid,
-    const HBD_asset& d, const HIVE_asset& h, const asset& f )
-    : from( in ), to( out ), agent( a ), escrow_id( eid ), hbd_amount( d ), hive_amount( h ), fee( f )
+    const PXS_asset& d, const PIXA_asset& h, const asset& f )
+    : from( in ), to( out ), agent( a ), escrow_id( eid ), pxs_amount( d ), pixa_amount( h ), fee( f )
   {}
 
   account_name_type from; //user that initiated escrow transfer (receiver of all the funds)
   account_name_type to; //user that was target of cancelled escrow transfer
   account_name_type agent; //user that was designated as agent of cancelled escrow transfer
   uint32_t          escrow_id = 0; //id of cancelled escrow transfer
-  HBD_asset         hbd_amount; //(HBD) funds from cancelled escrow transfer (same amount as in escrow_transfer_operation)
-  HIVE_asset        hive_amount; //(HIVE) funds from cancelled escrow transfer (same amount as in escrow_transfer_operation)
-  asset             fee; //(HIVE of HBD) fee from cancelled escrow transfer (same amount as in escrow_transfer_operation)
+  PXS_asset         pxs_amount; //(PXS) funds from cancelled escrow transfer (same amount as in escrow_transfer_operation)
+  PIXA_asset        pixa_amount; //(PIXA) funds from cancelled escrow transfer (same amount as in escrow_transfer_operation)
+  asset             fee; //(PIXA of PXS) fee from cancelled escrow transfer (same amount as in escrow_transfer_operation)
 };
 
 /**
@@ -869,11 +869,11 @@ struct nft_royalty_operation : public virtual_operation
 } } //hive::protocol
 
 FC_REFLECT( hive::protocol::fill_convert_request_operation, (owner)(requestid)(amount_in)(amount_out) )
-FC_REFLECT( hive::protocol::author_reward_operation, (author)(permlink)(hbd_payout)(hive_payout)(vesting_payout)(curators_vesting_payout)(payout_must_be_claimed) )
+FC_REFLECT( hive::protocol::author_reward_operation, (author)(permlink)(pxs_payout)(pixa_payout)(vesting_payout)(curators_vesting_payout)(payout_must_be_claimed) )
 FC_REFLECT( hive::protocol::curation_reward_operation, (curator)(reward)(author)(permlink)(payout_must_be_claimed) )
 FC_REFLECT( hive::protocol::comment_reward_operation, (author)(permlink)(payout)(author_rewards)(total_payout_value)(curator_payout_value)(beneficiary_payout_value) )
 FC_REFLECT( hive::protocol::liquidity_reward_operation, (owner)(payout) )
-FC_REFLECT( hive::protocol::interest_operation, (owner)(interest)(is_saved_into_hbd_balance) )
+FC_REFLECT( hive::protocol::interest_operation, (owner)(interest)(is_saved_into_pxs_balance) )
 FC_REFLECT( hive::protocol::fill_vesting_withdraw_operation, (from_account)(to_account)(withdrawn)(deposited) )
 FC_REFLECT( hive::protocol::fill_order_operation, (current_owner)(current_orderid)(current_pays)(open_owner)(open_orderid)(open_pays) )
 FC_REFLECT( hive::protocol::shutdown_witness_operation, (owner) )
@@ -881,21 +881,21 @@ FC_REFLECT( hive::protocol::fill_transfer_from_savings_operation, (from)(to)(amo
 FC_REFLECT( hive::protocol::hardfork_operation, (hardfork_id) )
 FC_REFLECT( hive::protocol::comment_payout_update_operation, (author)(permlink) )
 FC_REFLECT( hive::protocol::return_vesting_delegation_operation, (account)(vesting_shares) )
-FC_REFLECT( hive::protocol::comment_benefactor_reward_operation, (benefactor)(author)(permlink)(hbd_payout)(hive_payout)(vesting_payout)(payout_must_be_claimed) )
+FC_REFLECT( hive::protocol::comment_benefactor_reward_operation, (benefactor)(author)(permlink)(pxs_payout)(pixa_payout)(vesting_payout)(payout_must_be_claimed) )
 FC_REFLECT( hive::protocol::producer_reward_operation, (producer)(vesting_shares) )
 FC_REFLECT( hive::protocol::clear_null_account_balance_operation, (total_cleared) )
 FC_REFLECT( hive::protocol::proposal_pay_operation, (proposal_id)(receiver)(payer)(payment) )
 FC_REFLECT( hive::protocol::dhf_funding_operation, (treasury)(additional_funds) )
-FC_REFLECT( hive::protocol::hardfork_hive_operation, (account)(treasury)(other_affected_accounts)(hbd_transferred)(hive_transferred)(vests_converted)(total_hive_from_vests) )
-FC_REFLECT( hive::protocol::hardfork_hive_restore_operation, (account)(treasury)(hbd_transferred)(hive_transferred) )
+FC_REFLECT( hive::protocol::hardfork_hive_operation, (account)(treasury)(other_affected_accounts)(pxs_transferred)(pixa_transferred)(vests_converted)(total_pixa_from_vests) )
+FC_REFLECT( hive::protocol::hardfork_hive_restore_operation, (account)(treasury)(pxs_transferred)(pixa_transferred) )
 FC_REFLECT( hive::protocol::delayed_voting_operation, (voter)(votes) )
 FC_REFLECT( hive::protocol::consolidate_treasury_balance_operation, (total_moved) )
 FC_REFLECT( hive::protocol::effective_comment_vote_operation, (voter)(author)(permlink)(weight)(rshares)(total_vote_weight)(pending_payout) )
 FC_REFLECT( hive::protocol::ineffective_delete_comment_operation, (author)(permlink) )
-FC_REFLECT( hive::protocol::dhf_conversion_operation, (treasury)(hive_amount_in)(hbd_amount_out) )
+FC_REFLECT( hive::protocol::dhf_conversion_operation, (treasury)(pixa_amount_in)(pxs_amount_out) )
 FC_REFLECT( hive::protocol::expired_account_notification_operation, (account) )
 FC_REFLECT( hive::protocol::changed_recovery_account_operation, (account)(old_recovery_account)(new_recovery_account) )
-FC_REFLECT( hive::protocol::transfer_to_vesting_completed_operation, (from_account)(to_account)(hive_vested)(vesting_shares_received) )
+FC_REFLECT( hive::protocol::transfer_to_vesting_completed_operation, (from_account)(to_account)(pixa_vested)(vesting_shares_received) )
 FC_REFLECT( hive::protocol::pow_reward_operation, (worker)(reward) )
 FC_REFLECT( hive::protocol::vesting_shares_split_operation, (owner)(vesting_shares_before_split)(vesting_shares_after_split) )
 FC_REFLECT( hive::protocol::account_created_operation, (new_account_name)(creator)(initial_vesting_shares)(initial_delegation) )
@@ -906,9 +906,9 @@ FC_REFLECT( hive::protocol::failed_recurrent_transfer_operation, (from)(to)(amou
 FC_REFLECT( hive::protocol::limit_order_cancelled_operation, (seller)(orderid)(amount_back) )
 FC_REFLECT( hive::protocol::producer_missed_operation, (producer) )
 FC_REFLECT( hive::protocol::proposal_fee_operation, (creator)(treasury)(proposal_id)(fee) )
-FC_REFLECT( hive::protocol::collateralized_convert_immediate_conversion_operation, (owner)(requestid)(hbd_out) )
+FC_REFLECT( hive::protocol::collateralized_convert_immediate_conversion_operation, (owner)(requestid)(pxs_out) )
 FC_REFLECT( hive::protocol::escrow_approved_operation, (from)(to)(agent)(escrow_id)(fee) )
-FC_REFLECT( hive::protocol::escrow_rejected_operation, (from)(to)(agent)(escrow_id)(hbd_amount)(hive_amount)(fee) )
+FC_REFLECT( hive::protocol::escrow_rejected_operation, (from)(to)(agent)(escrow_id)(pxs_amount)(pixa_amount)(fee) )
 FC_REFLECT( hive::protocol::proxy_cleared_operation, (account)(proxy) )
 FC_REFLECT( hive::protocol::declined_voting_rights_operation, (account) )
 FC_REFLECT( hive::protocol::nft_sold_operation, (seller)(buyer)(author)(permlink)(edition)(price)(royalty) )

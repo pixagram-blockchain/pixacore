@@ -21,7 +21,7 @@ message transfer_to_savings {
   //                              The funds may be transferred to someone else savings balance.
   required string to_account = 2 [json_name = "to"];
 
-  // @param {asset} amount - The allowed currency: HIVE and HBD, amount > 0.
+  // @param {asset} amount - The allowed currency: PIXA and PXS, amount > 0.
   required asset  amount = 3;
 
   // @param {string} memo - Have to be UTF8, must be shorter than 2048.

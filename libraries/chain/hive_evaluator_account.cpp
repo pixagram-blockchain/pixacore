@@ -126,7 +126,7 @@ optional< authority > check_authority_accounts_exist(
 }
 
 const account_object& create_account( database& db, const account_name_type& name, const public_key_type& key,
-  const time_point_sec& _creation_time, const time_point_sec& _block_creation_time, bool mined, const HIVE_asset& fee_for_rc_adjustment,
+  const time_point_sec& _creation_time, const time_point_sec& _block_creation_time, bool mined, const PIXA_asset& fee_for_rc_adjustment,
   const account_object* recovery_account, const VEST_asset& initial_delegation )
 {
   if( db.has_hardfork( HIVE_HARDFORK_0_11 ) )
@@ -159,7 +159,7 @@ void account_create_evaluator::do_apply( const account_create_operation& o )
 
   const witness_schedule_object& wso = _db.get_witness_schedule_object();
 
-  HIVE_asset o_fee = o.get_fee();
+  PIXA_asset o_fee = o.get_fee();
 
   if( _db.has_hardfork( HIVE_HARDFORK_0_20__1771 ) )
   {
@@ -168,8 +168,8 @@ void account_create_evaluator::do_apply( const account_create_operation& o )
   }
   else if( !_db.has_hardfork( HIVE_HARDFORK_0_20__1761 ) && _db.has_hardfork( HIVE_HARDFORK_0_19__987 ) )
   {
-    HIVE_CHAIN_FEE_ASSERT( o_fee >= HIVE_asset( wso.median_props.account_creation_fee.amount * HIVE_CREATE_ACCOUNT_WITH_HIVE_MODIFIER ), HIVE_asset( wso.median_props.account_creation_fee.amount * HIVE_CREATE_ACCOUNT_WITH_HIVE_MODIFIER ), "Insufficient Fee: ${f} required, ${p} provided.",
-      ( "f", HIVE_asset( wso.median_props.account_creation_fee.amount * HIVE_CREATE_ACCOUNT_WITH_HIVE_MODIFIER ) )( "p", o_fee ) );
+    HIVE_CHAIN_FEE_ASSERT( o_fee >= PIXA_asset( wso.median_props.account_creation_fee.amount * HIVE_CREATE_ACCOUNT_WITH_PIXA_MODIFIER ), PIXA_asset( wso.median_props.account_creation_fee.amount * HIVE_CREATE_ACCOUNT_WITH_PIXA_MODIFIER ), "Insufficient Fee: ${f} required, ${p} provided.",
+      ( "f", PIXA_asset( wso.median_props.account_creation_fee.amount * HIVE_CREATE_ACCOUNT_WITH_PIXA_MODIFIER ) )( "p", o_fee ) );
   }
   else if( _db.has_hardfork( HIVE_HARDFORK_0_1 ) )
   {
@@ -181,7 +181,7 @@ void account_create_evaluator::do_apply( const account_create_operation& o )
   verify_authority_accounts_exist( _db, o.active, o.new_account_name, authority::active );
   verify_authority_accounts_exist( _db, o.posting, o.new_account_name, authority::posting );
 
-  temp_HIVE_balance fee;
+  temp_PIXA_balance fee;
   _db.adjust_balance( creator, fee, -o_fee );
 
   const auto& new_account = create_account( _db, o.new_account_name, o.memo_key, props.get_head_block_time(), _db.get_current_timestamp(),
@@ -209,17 +209,17 @@ void account_create_with_delegation_evaluator::do_apply( const account_create_wi
   const witness_schedule_object& wso = _db.get_witness_schedule_object();
 
   VEST_asset o_delegation = o.get_delegation();
-  HIVE_asset o_fee = o.get_fee();
+  PIXA_asset o_fee = o.get_fee();
 
-  HIVE_CHAIN_BALANCE_ASSERT( creator.get_hive_balance() >= o_fee && "Can't create",
-    creator.get_hive_balance(), "Insufficient balance to create account.",
-    ( "creator.balance", creator.get_hive_balance() )
+  HIVE_CHAIN_BALANCE_ASSERT( creator.get_pixa_balance() >= o_fee && "Can't create",
+    creator.get_pixa_balance(), "Insufficient balance to create account.",
+    ( "creator.balance", creator.get_pixa_balance() )
     ( "required", o_fee ) );
 
   HIVE_CHAIN_BALANCE_ASSERT( ( creator.get_vesting() - creator.get_delegated_vesting() - creator.get_total_vesting_withdrawal() ) >= o_delegation, o_delegation, "Insufficient vesting shares to delegate to new account.",
     ( "creator.vesting_shares", creator.get_vesting() )( "creator.delegated_vesting_shares", creator.get_delegated_vesting() )( "required", o_delegation ) );
 
-  VEST_asset target_delegation = ( wso.median_props.account_creation_fee * ( HIVE_CREATE_ACCOUNT_WITH_HIVE_MODIFIER * HIVE_CREATE_ACCOUNT_DELEGATION_RATIO ) ) * props.get_vesting_share_price();
+  VEST_asset target_delegation = ( wso.median_props.account_creation_fee * ( HIVE_CREATE_ACCOUNT_WITH_PIXA_MODIFIER * HIVE_CREATE_ACCOUNT_DELEGATION_RATIO ) ) * props.get_vesting_share_price();
 
   VEST_asset current_delegation = ( o_fee * HIVE_CREATE_ACCOUNT_DELEGATION_RATIO ) * props.get_vesting_share_price() + o_delegation;
 
@@ -233,10 +233,10 @@ void account_create_with_delegation_evaluator::do_apply( const account_create_wi
   verify_authority_accounts_exist( _db, o.active, o.new_account_name, authority::active );
   verify_authority_accounts_exist( _db, o.posting, o.new_account_name, authority::posting );
 
-  temp_HIVE_balance fee;
+  temp_PIXA_balance fee;
   _db.modify( creator, [&]( account_object& c )
   {
-    c.access_hive_balance().transfer_to( fee, o_fee );
+    c.access_pixa_balance().transfer_to( fee, o_fee );
     c.access_delegated_vesting() += o_delegation;
   } );
 
@@ -396,11 +396,11 @@ void claim_account_evaluator::do_apply( const claim_account_operation& o )
   const auto& creator = _db.get_account( o.creator );
   const auto& wso = _db.get_witness_schedule_object();
 
-  HIVE_asset o_fee = o.get_fee();
+  PIXA_asset o_fee = o.get_fee();
 
-  HIVE_CHAIN_BALANCE_ASSERT( creator.get_hive_balance() >= o_fee && "Can't claim",
-    creator.get_hive_balance(), "Insufficient balance to create account.",
-    ( "creator.balance", creator.get_hive_balance() )( "required", o_fee ) );
+  HIVE_CHAIN_BALANCE_ASSERT( creator.get_pixa_balance() >= o_fee && "Can't claim",
+    creator.get_pixa_balance(), "Insufficient balance to create account.",
+    ( "creator.balance", creator.get_pixa_balance() )( "required", o_fee ) );
 
   if( o_fee.amount == 0 )
   {
@@ -441,10 +441,10 @@ void claim_account_evaluator::do_apply( const claim_account_operation& o )
       ( "p", o_fee )( "f", wso.median_props.account_creation_fee ) );
   }
 
-  temp_HIVE_balance fee;
+  temp_PIXA_balance fee;
   _db.modify( creator, [&]( account_object& a )
   {
-    a.access_hive_balance().transfer_to( fee, o_fee );
+    a.access_pixa_balance().transfer_to( fee, o_fee );
     a.pending_claimed_accounts++;
   } );
   _db.adjust_balance( _db.get_account( HIVE_NULL_ACCOUNT ), fee, fee.as_asset() );

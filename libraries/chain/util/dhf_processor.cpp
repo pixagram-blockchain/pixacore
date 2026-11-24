@@ -135,17 +135,17 @@ void dhf_processor::sort_by_votes( t_proposals& proposals )
   } );
 }
 
-const HBD_asset& dhf_processor::get_treasury_fund() const
+const PXS_asset& dhf_processor::get_treasury_fund() const
 {
   auto& treasury_account = db.get_treasury();
 
-  return treasury_account.get_hbd_balance();
+  return treasury_account.get_pxs_balance();
 }
 
-HBD_asset dhf_processor::calculate_maintenance_budget( const time_point_sec& head_time )
+PXS_asset dhf_processor::calculate_maintenance_budget( const time_point_sec& head_time )
 {
   //Get funds from 'treasury' account ( treasury_fund )
-  HBD_asset treasury_fund = get_treasury_fund();
+  PXS_asset treasury_fund = get_treasury_fund();
 
   //Calculate budget for given maintenance period
   uint32_t passed_time_seconds = ( head_time - db.get_dynamic_global_properties().get_last_budget_time() ).to_seconds();
@@ -155,10 +155,10 @@ HBD_asset dhf_processor::calculate_maintenance_budget( const time_point_sec& hea
 
   daily_budget_limit = fc::uint128_to_uint64( ( uint128_t( passed_time_seconds ) * daily_budget_limit ) / daily_seconds );
 
-  return HBD_asset( daily_budget_limit );
+  return PXS_asset( daily_budget_limit );
 }
 
-void dhf_processor::transfer_payments( const time_point_sec& head_time, HBD_asset& maintenance_budget_limit, const t_proposals& proposals )
+void dhf_processor::transfer_payments( const time_point_sec& head_time, PXS_asset& maintenance_budget_limit, const t_proposals& proposals )
 {
   if( maintenance_budget_limit.amount.value == 0 )
     return;
@@ -167,7 +167,7 @@ void dhf_processor::transfer_payments( const time_point_sec& head_time, HBD_asse
 
   uint32_t passed_time_seconds = ( head_time - db.get_dynamic_global_properties().get_last_budget_time() ).to_seconds();
 
-  auto processing = [this, &treasury_account]( const proposal_object& _item, const HBD_asset& payment )
+  auto processing = [this, &treasury_account]( const proposal_object& _item, const PXS_asset& payment )
   {
     const auto& receiver_account = db.get_account( _item.receiver );
 
@@ -175,7 +175,7 @@ void dhf_processor::transfer_payments( const time_point_sec& head_time, HBD_asse
     /// Push vop to be recorded by other parts (like AH plugin etc.)
     push_virtual_operation( db, vop);
     /// Virtual ops have no evaluators, so operation must be immediately "evaluated"
-    temp_HBD_balance transfer;
+    temp_PXS_balance transfer;
     db.adjust_balance( treasury_account, transfer, -payment );
     db.adjust_balance( receiver_account, transfer, payment );
   };
@@ -188,7 +188,7 @@ void dhf_processor::transfer_payments( const time_point_sec& head_time, HBD_asse
     if( _item.total_votes == 0 )
       break;
 
-    HBD_asset period_pay;
+    PXS_asset period_pay;
     if( db.has_hardfork(HIVE_HARDFORK_1_30_PROPOSAL_PAY) )
     {
       // Each maintenance period used to pay floor( elapsed * daily_pay / 86400 ) on its own, so the
@@ -204,7 +204,7 @@ void dhf_processor::transfer_payments( const time_point_sec& head_time, HBD_asse
       const uint64_t elapsed_prev = from > _item.start_date ? uint64_t( ( from - _item.start_date ).to_seconds() ) : 0;
       const uint64_t paid_now = fc::uint128_to_uint64( ( uint128_t( elapsed_now ) * rate ) / uint64_t( daily_seconds ) );
       const uint64_t paid_prev = fc::uint128_to_uint64( ( uint128_t( elapsed_prev ) * rate ) / uint64_t( daily_seconds ) );
-      period_pay = HBD_asset( paid_now > paid_prev ? int64_t( paid_now - paid_prev ) : 0 );
+      period_pay = PXS_asset( paid_now > paid_prev ? int64_t( paid_now - paid_prev ) : 0 );
     }
     else if( db.has_hardfork(HIVE_HARDFORK_1_25) )
     {
@@ -213,7 +213,7 @@ void dhf_processor::transfer_payments( const time_point_sec& head_time, HBD_asse
     else
     {
       uint128_t ratio = ( passed_time_seconds * HIVE_100_PERCENT ) / daily_seconds;
-      period_pay = HBD_asset( fc::uint128_to_int64( ratio * _item.daily_pay.amount.value ) / HIVE_100_PERCENT );
+      period_pay = PXS_asset( fc::uint128_to_int64( ratio * _item.daily_pay.amount.value ) / HIVE_100_PERCENT );
     }
 
     if( period_pay >= maintenance_budget_limit )
@@ -290,7 +290,7 @@ void dhf_processor::make_payments( const block_notification& note )
   sort_by_votes( active_proposals );
 
   //Calculate budget for given maintenance period
-  HBD_asset maintenance_budget_limit = calculate_maintenance_budget( head_time );
+  PXS_asset maintenance_budget_limit = calculate_maintenance_budget( head_time );
 
   //Execute transfer for every active proposal
   transfer_payments( head_time, maintenance_budget_limit, active_proposals );
@@ -354,29 +354,29 @@ void dhf_processor::convert_funds( const block_notification& note )
   } );
 
   const auto& treasury_account = db.get_treasury();
-  if( treasury_account.get_hive_balance().amount == 0 )
+  if( treasury_account.get_pixa_balance().amount == 0 )
     return;
 
-  const auto to_convert = HIVE_PROPOSAL_CONVERSION_RATE * treasury_account.get_hive_balance() / HIVE_100_PERCENT;
+  const auto to_convert = HIVE_PROPOSAL_CONVERSION_RATE * treasury_account.get_pixa_balance() / HIVE_100_PERCENT;
 
-  const auto& exchange_rate = db.get_hbd_price();
+  const auto& exchange_rate = db.get_pxs_price();
   FC_ASSERT( not exchange_rate.is_null() ); //current_median_history was null only until block 933600
 
-  auto converted_hbd = to_convert * exchange_rate;
+  auto converted_pxs = to_convert * exchange_rate;
   // Don't convert if the conversion would result in an amount lower than the dust threshold
-  if( converted_hbd < HIVE_MIN_PAYOUT_HBD )
+  if( converted_pxs < HIVE_MIN_PAYOUT_PXS )
     return;
 
-  temp_HIVE_balance to_convert_balance;
-  temp_HBD_balance converted_hbd_balance;
+  temp_PIXA_balance to_convert_balance;
+  temp_PXS_balance converted_pxs_balance;
   db.adjust_balance( treasury_account, to_convert_balance, -to_convert );
   db.modify( dgpo, [&]( dynamic_global_property_object& _dgpo )
   {
-    converted_hbd_balance = _dgpo.convert_HIVE_to_HBD( to_convert_balance, exchange_rate );
+    converted_pxs_balance = _dgpo.convert_PIXA_to_PXS( to_convert_balance, exchange_rate );
   } );
-  db.adjust_balance( treasury_account, converted_hbd_balance, converted_hbd_balance.as_asset() );
+  db.adjust_balance( treasury_account, converted_pxs_balance, converted_pxs_balance.as_asset() );
 
-  operation vop = dhf_conversion_operation( treasury_account.get_name(), to_convert, converted_hbd );
+  operation vop = dhf_conversion_operation( treasury_account.get_name(), to_convert, converted_pxs );
   push_virtual_operation( db, vop );
 }
 

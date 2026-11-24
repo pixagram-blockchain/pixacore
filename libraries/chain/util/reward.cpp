@@ -4,12 +4,12 @@
 
 namespace hive { namespace chain { namespace util {
 
-HIVE_asset get_rshare_reward( const comment_reward_context& ctx )
+PIXA_asset get_rshare_reward( const comment_reward_context& ctx )
 { try {
   FC_ASSERT( ctx.rshares > 0 );
   FC_ASSERT( ctx.total_reward_shares2 > 0 );
 
-  u256 rf( ctx.total_reward_fund_hive.get_amount() );
+  u256 rf( ctx.total_reward_fund_pixa.get_amount() );
   u256 total_claims = to256( ctx.total_reward_shares2 );
 
   //idump( (ctx) );
@@ -19,14 +19,14 @@ HIVE_asset get_rshare_reward( const comment_reward_context& ctx )
 
   u256 payout_u256 = ( rf * claim ) / total_claims;
   FC_ASSERT( payout_u256 <= u256( uint64_t( std::numeric_limits<int64_t>::max() ) ) );
-  HIVE_asset payout( static_cast< uint64_t >( payout_u256 ) );
+  PIXA_asset payout( static_cast< uint64_t >( payout_u256 ) );
 
-  if( is_comment_payout_dust( ctx.current_hive_price, payout ) )
-    payout = HIVE_asset( 0 );
+  if( is_comment_payout_dust( ctx.current_pixa_price, payout ) )
+    payout = PIXA_asset( 0 );
 
-  HIVE_asset max_hive = to_hive( ctx.current_hive_price, ctx.max_hbd );
+  PIXA_asset max_pixa = to_pixa( ctx.current_pixa_price, ctx.max_pxs );
 
-  payout = std::min( payout, max_hive );
+  payout = std::min( payout, max_pixa );
 
   return payout;
 } FC_CAPTURE_AND_RETHROW( (ctx) ) }

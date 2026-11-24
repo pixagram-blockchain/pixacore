@@ -69,10 +69,10 @@ BOOST_AUTO_TEST_CASE( update_operation )
 
       BOOST_REQUIRE_EQUAL( (bool)executor, true );
 
-      ACTORS_EXT( (*executor), HIVE_asset( 50'000 ), (alice) ); // extra RC for account creation
-      executor->fund( "alice", HIVE_asset( 1'000'000 ) );
+      ACTORS_EXT( (*executor), PIXA_asset( 50'000 ), (alice) ); // extra RC for account creation
+      executor->fund( "alice", PIXA_asset( 1'000'000 ) );
       executor->generate_block();
-      executor->set_account_creation_fee( HIVE_asset( 100 ) );
+      executor->set_account_creation_fee( PIXA_asset( 100 ) );
       executor->generate_block();
 
       BOOST_TEST_MESSAGE( "Creating account bob with alice" );
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE( update_operation )
       tx.set_expiration( executor->db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
       executor->push_transaction( tx, alice_private_key );
 
-      executor->vest( "bob", HIVE_asset( 1'000 ) );
+      executor->vest( "bob", PIXA_asset( 1'000 ) );
 
       auto exec_update_op = [&]( const std::string& old_key,  const std::string& new_key, bool is_exception )
       {
@@ -283,9 +283,9 @@ BOOST_AUTO_TEST_CASE( pack_transaction_basic )
       BOOST_TEST_MESSAGE( "Testing: transaction's pack before and after HF26" );
       BOOST_REQUIRE_EQUAL( (bool)executor, true );
 
-      ACTORS_EXT( (*executor), HIVE_asset( 15'000 ), (alice)(bob) ); // extra RC for various operations
-      executor->fund( "alice", HIVE_asset( 1'000'000 ) );
-      executor->fund( "bob", HIVE_asset( 1'000'000 ) );
+      ACTORS_EXT( (*executor), PIXA_asset( 15'000 ), (alice)(bob) ); // extra RC for various operations
+      executor->fund( "alice", PIXA_asset( 1'000'000 ) );
+      executor->fund( "bob", PIXA_asset( 1'000'000 ) );
       executor->generate_block();
 
       auto _get_trx = []( ptr_hardfork_database_fixture& executor, const std::vector<operation>& ops )
@@ -306,7 +306,7 @@ BOOST_AUTO_TEST_CASE( pack_transaction_basic )
       {
         BOOST_TEST_MESSAGE( "Executing operation using legacy/hf26 serialization - transfer operation" );
 
-        auto _66 = HIVE_asset( 66 );
+        auto _66 = PIXA_asset( 66 );
 
         transfer_operation _op;
         _op.from    = "alice";
@@ -314,14 +314,14 @@ BOOST_AUTO_TEST_CASE( pack_transaction_basic )
         _op.amount  = _66.to_asset();
 
         {
-          auto _alice_balance_previous  = executor->get_hive_balance( "alice" );
-          auto _bob_balance_previous    = executor->get_hive_balance( "bob" );
+          auto _alice_balance_previous  = executor->get_pixa_balance( "alice" );
+          auto _bob_balance_previous    = executor->get_pixa_balance( "bob" );
 
           signed_transaction _tx = _get_trx( executor, { _op } );
           executor->push_transaction_ex( _tx, active_key, 0, hive::protocol::pack_type::legacy );
 
-          auto _alice_balance_after = executor->get_hive_balance( "alice" );
-          auto _bob_balance_after   = executor->get_hive_balance( "bob" );
+          auto _alice_balance_after = executor->get_pixa_balance( "alice" );
+          auto _bob_balance_after   = executor->get_pixa_balance( "bob" );
 
           BOOST_REQUIRE_EQUAL( _alice_balance_previous, _alice_balance_after + _66 );
           BOOST_REQUIRE_EQUAL( _bob_balance_previous, _bob_balance_after - _66 );
@@ -331,14 +331,14 @@ BOOST_AUTO_TEST_CASE( pack_transaction_basic )
 
         if( /*is_hf26*/ true ) // ABW: it is no longer needed to distinguish between "past" and HF26 transactions, all can use hf26 pack
         {
-          auto _alice_balance_previous  = executor->get_hive_balance( "alice" );
-          auto _bob_balance_previous    = executor->get_hive_balance( "bob" );
+          auto _alice_balance_previous  = executor->get_pixa_balance( "alice" );
+          auto _bob_balance_previous    = executor->get_pixa_balance( "bob" );
 
           signed_transaction _tx = _get_trx( executor, { _op } );
           executor->push_transaction_ex( _tx, active_key, 0, hive::protocol::pack_type::hf26 );
 
-          auto _alice_balance_after = executor->get_hive_balance( "alice" );
-          auto _bob_balance_after   = executor->get_hive_balance( "bob" );
+          auto _alice_balance_after = executor->get_pixa_balance( "alice" );
+          auto _bob_balance_after   = executor->get_pixa_balance( "bob" );
 
           BOOST_REQUIRE_EQUAL( _alice_balance_previous, _alice_balance_after + _66 );
           BOOST_REQUIRE_EQUAL( _bob_balance_previous, _bob_balance_after - _66 );
@@ -394,7 +394,7 @@ BOOST_AUTO_TEST_CASE( pack_transaction_basic )
 
         _op2.author   = "alice";
         _op2.permlink = "lemon";
-        _op2.max_accepted_payout = asset( 13456, HBD_SYMBOL );
+        _op2.max_accepted_payout = asset( 13456, PXS_SYMBOL );
 
         if( /*is_hf26*/ true )
         {

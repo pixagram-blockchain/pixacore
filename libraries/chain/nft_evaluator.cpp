@@ -75,12 +75,12 @@ struct nft_action_visitor
 
     // The operation states the fee and it has to be exactly the fee for that many copies, so nobody
     // pays an amount other than the one that was signed.
-    const HBD_asset required_fee = _db.get_nft_mint_fee( a.editions );
-    const HBD_asset paid_fee( a.fee );
+    const PXS_asset required_fee = _db.get_nft_mint_fee( a.editions );
+    const PXS_asset paid_fee( a.fee );
     HIVE_CHAIN_FEE_ASSERT( paid_fee == required_fee && "nft_mint_fee", required_fee,
       "Must pay the exact NFT mint fee. paid: ${p} fee: ${f}", ( "p", paid_fee )( "f", required_fee ) );
 
-    temp_HBD_balance fee;
+    temp_PXS_balance fee;
     _db.adjust_balance( _actor, fee, -paid_fee ); // fails when the minter does not have the PXS
 
     // the copies get no object here: each is created when first offered or given

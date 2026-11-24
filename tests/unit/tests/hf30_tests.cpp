@@ -81,8 +81,8 @@ BOOST_AUTO_TEST_CASE( disabled_witness_does_not_halt_pre_hf30_schedule )
 { try {
   account_create( "disabled", init_account_pub_key );
   fund( "disabled", HIVE_MIN_PRODUCER_REWARD );
-  vest( "disabled", HIVE_asset( 50'000 ) ); // RC for the witness_update
-  witness_create( "disabled", init_account_priv_key, "foo.bar", public_key_type(), HIVE_asset( 0 ) );
+  vest( "disabled", PIXA_asset( 50'000 ) ); // RC for the witness_update
+  witness_create( "disabled", init_account_priv_key, "foo.bar", public_key_type(), PIXA_asset( 0 ) );
   generate_blocks( 2 * HIVE_MAX_WITNESSES );
   BOOST_REQUIRE_EQUAL( uint32_t( db->get_witness_schedule_object().num_scheduled_witnesses ), 9u );
   BOOST_REQUIRE_EQUAL( uint32_t( db->get_future_witness_schedule_object().num_scheduled_witnesses ), 9u );
@@ -104,8 +104,8 @@ BOOST_AUTO_TEST_CASE( unapproved_witnesses_cannot_expand_schedule )
     const auto name = std::string( "sybil" ) + std::to_string( i );
     account_create( name, init_account_pub_key );
     fund( name, HIVE_MIN_PRODUCER_REWARD );
-    vest( name, HIVE_asset( 50'000 ) ); // RC for the witness_update
-    witness_create( name, init_account_priv_key, "foo.bar", init_account_pub_key, HIVE_asset( 0 ) );
+    vest( name, PIXA_asset( 50'000 ) ); // RC for the witness_update
+    witness_create( name, init_account_priv_key, "foo.bar", init_account_pub_key, PIXA_asset( 0 ) );
   }
   activate();
   generate_blocks( 3 * HIVE_MAX_WITNESSES );
@@ -127,8 +127,8 @@ BOOST_AUTO_TEST_CASE( unapproved_witnesses_leave_schedule_after_activation )
     const auto name = std::string( "late" ) + std::to_string( i );
     account_create( name, init_account_pub_key );
     fund( name, HIVE_MIN_PRODUCER_REWARD );
-    vest( name, HIVE_asset( 50'000 ) ); // RC for the witness_update
-    witness_create( name, init_account_priv_key, "foo.bar", init_account_pub_key, HIVE_asset( 0 ) );
+    vest( name, PIXA_asset( 50'000 ) ); // RC for the witness_update
+    witness_create( name, init_account_priv_key, "foo.bar", init_account_pub_key, PIXA_asset( 0 ) );
   }
   generate_blocks( 2 * HIVE_MAX_WITNESSES );
   BOOST_REQUIRE_EQUAL( uint32_t( db->get_witness_schedule_object().num_scheduled_witnesses ), 13u );
@@ -161,9 +161,9 @@ BOOST_AUTO_TEST_CASE( open_authority_account_cannot_operate_witness_after_hf30 )
     op.url = "foo.bar";
     op.block_signing_key = generate_private_key( "temp_wit" ).get_public_key();
     op.fee = ASSET( "0.000 TESTS" );
-    op.props.account_creation_fee = legacy_hive_asset::from_asset( ASSET( "1.000 TESTS" ) );
+    op.props.account_creation_fee = legacy_pixa_asset::from_asset( ASSET( "1.000 TESTS" ) );
     op.props.maximum_block_size = HIVE_MIN_BLOCK_SIZE_LIMIT + 1;
-    op.props.hbd_interest_rate = 0;
+    op.props.pxs_interest_rate = 0;
     signed_transaction trx;
     trx.operations.push_back( op );
     trx.set_expiration( db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
@@ -187,11 +187,11 @@ BOOST_AUTO_TEST_CASE( last_enabled_witness_cannot_disable_itself )
   for( uint32_t i = 1; i < 9; ++i )
   {
     const auto name = HIVE_INIT_MINER_NAME + fc::to_string( i );
-    witness_create( name, init_account_priv_key, "foo.bar", public_key_type(), HIVE_asset( 0 ) );
+    witness_create( name, init_account_priv_key, "foo.bar", public_key_type(), PIXA_asset( 0 ) );
   }
   activate();
   HIVE_REQUIRE_THROW( witness_create( HIVE_INIT_MINER_NAME, init_account_priv_key,
-    "foo.bar", public_key_type(), HIVE_asset( 0 ) ), fc::assert_exception );
+    "foo.bar", public_key_type(), PIXA_asset( 0 ) ), fc::assert_exception );
 
   witness_set_properties_operation op;
   op.owner = HIVE_INIT_MINER_NAME;
@@ -222,10 +222,10 @@ BOOST_AUTO_TEST_CASE( small_account_votes_count_from_hf30 )
   // About 100 VESTS: a full vote spends 2% of it, 2,000,000 rshares, which the inherited
   // 50,000,000 floor wipes out and the HF30 floor of 50,000 does not.
   const auto& dgp = db->get_dynamic_global_properties();
-  const int64_t pixa = fc::uint128_to_int64( fc::uint128_t( 100'000'000 ) * dgp.get_total_vesting_fund_hive().amount.value
+  const int64_t pixa = fc::uint128_to_int64( fc::uint128_t( 100'000'000 ) * dgp.get_total_vesting_fund_pixa().amount.value
     / dgp.get_total_vesting_shares().amount.value );
-  vest( "author", HIVE_asset( 3'000'000 ) );   // resource credits for the post
-  vest( "smallvoter", HIVE_asset( pixa ) );
+  vest( "author", PIXA_asset( 3'000'000 ) );   // resource credits for the post
+  vest( "smallvoter", PIXA_asset( pixa ) );
   generate_block();
   const int64_t vests = db->get_account( "smallvoter" ).get_vesting().amount.value;
   BOOST_REQUIRE_GT( vests, 2'500'000 );          // above the HF30 floor for a full vote (2.5 VESTS)
@@ -281,8 +281,8 @@ BOOST_AUTO_TEST_CASE( partial_schedule_pays_the_nominal_witness_share )
 BOOST_AUTO_TEST_CASE( dhf_funding_keeps_the_sub_milli_remainder )
 { try {
   // Mainnet today: 0.140 PIXA of DPF share per block at 1 PXS = 51.833 PIXA is 0.0027 PXS a block.
-  const HBD_price median( HBD_asset( 1000 ), HIVE_asset( 51833 ) );
-  const HIVE_asset share( 140 );
+  const PXS_price median( PXS_asset( 1000 ), PIXA_asset( 51833 ) );
+  const PIXA_asset share( 140 );
   int64_t truncated = 0, exact = 0;
   for( uint32_t block = 1000; block < 2000; ++block )
   {
@@ -294,7 +294,7 @@ BOOST_AUTO_TEST_CASE( dhf_funding_keeps_the_sub_milli_remainder )
   BOOST_REQUIRE_EQUAL( truncated, 2000 );        // 0.002 PXS a block: 26% of the share lost
   // floor(2000 * 2.700982) - floor(1000 * 2.700982) = 5401 - 2700
   BOOST_REQUIRE_EQUAL( exact, 2701 );
-  BOOST_REQUIRE_EQUAL( util::dhf_funding_without_truncation( HIVE_asset( 0 ), median, 5 ).get_amount(), 0 );
+  BOOST_REQUIRE_EQUAL( util::dhf_funding_without_truncation( PIXA_asset( 0 ), median, 5 ).get_amount(), 0 );
 
   // Past the rounding cliff: once the per-block share falls below 0.001 PXS the pre-HF30
   // conversion pays the treasury NOTHING, for every block, permanently. At today's 0.140 PIXA
@@ -302,8 +302,8 @@ BOOST_AUTO_TEST_CASE( dhf_funding_keeps_the_sub_milli_remainder )
   // accumulating the sub-milli remainder across blocks.
   for( const auto quote : { 200, 2000 } )
   {
-    const HBD_price weak( HBD_asset( 1000 ), HIVE_asset( share.get_amount() * 1000 / quote * quote ) );
-    const HBD_price cliff( HBD_asset( 1000 ), HIVE_asset( quote * 1000 ) );
+    const PXS_price weak( PXS_asset( 1000 ), PIXA_asset( share.get_amount() * 1000 / quote * quote ) );
+    const PXS_price cliff( PXS_asset( 1000 ), PIXA_asset( quote * 1000 ) );
     (void) weak;
     int64_t old_total = 0, new_total = 0;
     for( uint32_t block = 1000; block < 11000; ++block )
@@ -392,7 +392,7 @@ BOOST_AUTO_TEST_CASE( reward_conversion_does_not_burn_pixa_after_hf30 )
   // was burned regardless, destroying the remainder - and destroying the entire PXS half when the
   // reward was small enough to round to zero. Verify the remainder is now returned as PIXA.
   ACTORS( DEFAULT_VESTING, (convauthor) );
-  vest( "convauthor", HIVE_asset( 10'000'000 ) );
+  vest( "convauthor", PIXA_asset( 10'000'000 ) );
   approve_all_witnesses();
   activate();
   generate_block();
@@ -403,7 +403,7 @@ BOOST_AUTO_TEST_CASE( reward_conversion_does_not_burn_pixa_after_hf30 )
   {
     chain.modify( chain.get_feed_history(), []( feed_history_object& f )
     {
-      f.current_median_history = HBD_price( HBD_asset( 1000 ), HIVE_asset( 51833 ) );
+      f.current_median_history = PXS_price( PXS_asset( 1000 ), PIXA_asset( 51833 ) );
     } );
   } );
   generate_block();
@@ -411,27 +411,27 @@ BOOST_AUTO_TEST_CASE( reward_conversion_does_not_burn_pixa_after_hf30 )
   BOOST_REQUIRE( !median.is_null() );
 
   // An amount small enough that the PXS leg truncates: below one whole 0.001 PXS it used to vanish.
-  const HIVE_asset tiny( 10 ); // 0.010 PIXA, well under the ~0.052 PIXA needed for 1 PXS satoshi
-  const HBD_asset as_pxs = tiny * median;
+  const PIXA_asset tiny( 10 ); // 0.010 PIXA, well under the ~0.052 PIXA needed for 1 PXS satoshi
+  const PXS_asset as_pxs = tiny * median;
   BOOST_REQUIRE_EQUAL( as_pxs.get_amount(), 0 ); // rounds to zero, so the old path burned all of it
 
-  const auto balance_before = db->get_balance( db->get_account( "convauthor" ), HIVE_SYMBOL );
-  const auto pxs_before = db->get_balance( db->get_account( "convauthor" ), HBD_SYMBOL );
+  const auto balance_before = db->get_balance( db->get_account( "convauthor" ), PIXA_SYMBOL );
+  const auto pxs_before = db->get_balance( db->get_account( "convauthor" ), PXS_SYMBOL );
   db_plugin->debug_update( [=]( database& chain )
   {
-    // award_hbd pays out PIXA its caller already minted (reward payouts do), so mint it here too -
+    // award_pxs pays out PIXA its caller already minted (reward payouts do), so mint it here too -
     // otherwise the chain's supply invariant is violated by the test setup rather than by the code
     // under test.
-    temp_HIVE_balance minted;
+    temp_PIXA_balance minted;
     chain.modify( chain.get_dynamic_global_properties(), [&]( dynamic_global_property_object& g )
     {
-      minted = g.issue_HIVE( tiny );
+      minted = g.issue_PIXA( tiny );
     } );
-    chain.award_hbd( chain.get_account( "convauthor" ), minted, false );
+    chain.award_pxs( chain.get_account( "convauthor" ), minted, false );
   } );
   generate_block();
-  const auto balance_after = db->get_balance( db->get_account( "convauthor" ), HIVE_SYMBOL );
-  const auto pxs_after = db->get_balance( db->get_account( "convauthor" ), HBD_SYMBOL );
+  const auto balance_after = db->get_balance( db->get_account( "convauthor" ), PIXA_SYMBOL );
+  const auto pxs_after = db->get_balance( db->get_account( "convauthor" ), PXS_SYMBOL );
 
   // Nothing was destroyed: the PIXA that could not be converted came back to the account. Before
   // HF30 the whole amount was burned (print rate 10000 sends it all to the PXS leg, which rounds to
@@ -448,9 +448,9 @@ BOOST_AUTO_TEST_CASE( treasury_receives_the_full_dhf_share_after_hf30 )
   approve_all_witnesses();
   activate();
   const auto& treasury = db->get_treasury();
-  const int64_t start = treasury.get_hbd_balance().amount.value;
+  const int64_t start = treasury.get_pxs_balance().amount.value;
   generate_blocks( 200 );
-  BOOST_REQUIRE_GT( db->get_treasury().get_hbd_balance().amount.value, start );
+  BOOST_REQUIRE_GT( db->get_treasury().get_pxs_balance().amount.value, start );
   validate_database();
 } FC_LOG_AND_RETHROW() }
 
@@ -478,8 +478,8 @@ BOOST_AUTO_TEST_CASE( non_producing_witnesses_do_not_raise_hardfork_quorum )
     const auto name = std::string( "attacker" ) + std::to_string( i );
     account_create( name, init_account_pub_key );
     fund( name, HIVE_MIN_PRODUCER_REWARD );
-    vest( name, HIVE_asset( 50'000 ) ); // RC for the witness_update
-    witness_create( name, init_account_priv_key, "foo.bar", init_account_pub_key, HIVE_asset( 0 ) );
+    vest( name, PIXA_asset( 50'000 ) ); // RC for the witness_update
+    witness_create( name, init_account_priv_key, "foo.bar", init_account_pub_key, PIXA_asset( 0 ) );
   }
   // Let the schedule settle so all thirteen witnesses are scheduled and each has produced recently.
   generate_blocks( 2 * HIVE_MAX_WITNESSES );

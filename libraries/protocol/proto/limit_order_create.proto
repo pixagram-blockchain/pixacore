@@ -5,8 +5,8 @@ import "asset.proto";
 package hive.protocol.buffers;
 
 /* This operation creates a limit order and matches it against existing open orders.
- * It allows to sell Hive and buy HBD or sell HBD and buy Hive.
- * It is a way for a user to declare they want to sell {amount_to_sell} Hive/HBD for at least {min_to_receive} HBD/Hive.
+ * It allows to sell Hive and buy PXS or sell PXS and buy Hive.
+ * It is a way for a user to declare they want to sell {amount_to_sell} Hive/PXS for at least {min_to_receive} PXS/Hive.
  * The user may be a taker (if a user creates an order and the order matches some order(s))
  * or a maker (if a user creates an order and the order doesn’t match and the order is waiting for a match on the market).
  * If there is a partial match, a user may be a taker and maker for the same order. 

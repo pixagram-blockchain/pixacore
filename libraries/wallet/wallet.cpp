@@ -9,7 +9,7 @@
 #include <hive/protocol/crypto_memo.hpp>
 #include <hive/protocol/transaction_util.hpp>
 #include <hive/protocol/version.hpp>
-#include <hive/protocol/hive_collateral.hpp>
+#include <hive/protocol/pixa_collateral.hpp>
 #include <hive/wallet/wallet.hpp>
 #include <hive/wallet/api_documentation.hpp>
 #include <hive/wallet/reflect_util.hpp>
@@ -257,7 +257,7 @@ public:
     result["head_block_id"]             = dynamic_props.value.head_block_id;
     result["head_block_age"]            = fc::get_approximate_relative_time_string(dynamic_props.value.time, time_point_sec(time_point::now()), " old");
     result["participation"]             = (100*fc::uint128_popcount(dynamic_props.value.recent_slots_filled)) / 128.0;
-    result["median_hbd_price"]          = wallet_serializer_wrapper<protocol::price>{ _remote_wallet_bridge_api->get_current_median_history_price({}, LOCK) };
+    result["median_pxs_price"]          = wallet_serializer_wrapper<protocol::price>{ _remote_wallet_bridge_api->get_current_median_history_price({}, LOCK) };
     result["account_creation_fee"]      = wallet_serializer_wrapper<hive::protocol::asset>{ _remote_wallet_bridge_api->get_chain_properties({}, LOCK).account_creation_fee.to_asset() };
 
     protocol::hardfork_version current_hardfork_version;
@@ -1272,7 +1272,7 @@ wallet_signed_transaction wallet_api::create_funded_account_with_keys(
   */
 wallet_signed_transaction wallet_api::create_account_with_keys_delegated(
   const string& creator,
-  const wallet_serializer_wrapper<hive::protocol::asset>& hive_fee,
+  const wallet_serializer_wrapper<hive::protocol::asset>& pixa_fee,
   const wallet_serializer_wrapper<hive::protocol::asset>& delegated_vests,
   const string& new_account_name,
   const string& json_meta,
@@ -1294,7 +1294,7 @@ wallet_signed_transaction wallet_api::create_account_with_keys_delegated(
   op.posting = authority( 1, posting, 1 );
   op.memo_key = memo;
   op.json_metadata = json_meta;
-  op.fee = hive_fee.value;
+  op.fee = pixa_fee.value;
   op.delegation = delegated_vests.value;
 
   signed_transaction tx;
@@ -1754,7 +1754,7 @@ wallet_signed_transaction wallet_api::create_account(
   */
 wallet_signed_transaction wallet_api::create_account_delegated(
   const string& creator,
-  const wallet_serializer_wrapper<hive::protocol::asset>& hive_fee,
+  const wallet_serializer_wrapper<hive::protocol::asset>& pixa_fee,
   const wallet_serializer_wrapper<hive::protocol::asset>& delegated_vests,
   const string& new_account_name,
   const string& json_meta,
@@ -1769,7 +1769,7 @@ wallet_signed_transaction wallet_api::create_account_delegated(
   import_key( active.wif_priv_key );
   import_key( posting.wif_priv_key );
   import_key( memo.wif_priv_key );
-  return { create_account_with_keys_delegated( creator, hive_fee, delegated_vests, new_account_name, json_meta,  owner.pub_key, active.pub_key, posting.pub_key, memo.pub_key, broadcast ) };
+  return { create_account_with_keys_delegated( creator, pixa_fee, delegated_vests, new_account_name, json_meta,  owner.pub_key, active.pub_key, posting.pub_key, memo.pub_key, broadcast ) };
 } FC_CAPTURE_AND_RETHROW( (creator)(new_account_name)(json_meta) ) }
 
 
@@ -1932,8 +1932,8 @@ wallet_signed_transaction wallet_api::escrow_transfer(
   const string& to,
   const string& agent,
   uint32_t escrow_id,
-  const wallet_serializer_wrapper<hive::protocol::asset>& hbd_amount,
-  const wallet_serializer_wrapper<hive::protocol::asset>& hive_amount,
+  const wallet_serializer_wrapper<hive::protocol::asset>& pxs_amount,
+  const wallet_serializer_wrapper<hive::protocol::asset>& pixa_amount,
   const wallet_serializer_wrapper<hive::protocol::asset>& fee,
   const time_point_sec& ratification_deadline,
   const time_point_sec& escrow_expiration,
@@ -1946,8 +1946,8 @@ wallet_signed_transaction wallet_api::escrow_transfer(
   op.to = to;
   op.agent = agent;
   op.escrow_id = escrow_id;
-  op.hbd_amount = hbd_amount.value;
-  op.hive_amount = hive_amount.value;
+  op.pxs_amount = pxs_amount.value;
+  op.pixa_amount = pixa_amount.value;
   op.fee = fee.value;
   op.ratification_deadline = ratification_deadline;
   op.escrow_expiration = escrow_expiration;
@@ -2015,8 +2015,8 @@ wallet_signed_transaction wallet_api::escrow_release(
   const string& who,
   const string& receiver,
   uint32_t escrow_id,
-  const wallet_serializer_wrapper<hive::protocol::asset>& hbd_amount,
-  const wallet_serializer_wrapper<hive::protocol::asset>& hive_amount,
+  const wallet_serializer_wrapper<hive::protocol::asset>& pxs_amount,
+  const wallet_serializer_wrapper<hive::protocol::asset>& pixa_amount,
   bool broadcast )
 {
   FC_ASSERT( !is_locked() );
@@ -2027,8 +2027,8 @@ wallet_signed_transaction wallet_api::escrow_release(
   op.who = who;
   op.receiver = receiver;
   op.escrow_id = escrow_id;
-  op.hbd_amount = hbd_amount.value;
-  op.hive_amount = hive_amount.value;
+  op.pxs_amount = pxs_amount.value;
+  op.pixa_amount = pixa_amount.value;
 
   signed_transaction tx;
   tx.operations.push_back( op );
@@ -2184,7 +2184,7 @@ static std::atomic<uint32_t> convert_request_id_counter{
     static_cast<uint32_t>(fc::time_point::now().time_since_epoch().count())
 };
 
-wallet_signed_transaction wallet_api::convert_hbd(
+wallet_signed_transaction wallet_api::convert_pxs(
   const string& from,
   const wallet_serializer_wrapper<hive::protocol::asset>& amount,
   bool broadcast )
@@ -2203,7 +2203,7 @@ wallet_signed_transaction wallet_api::convert_hbd(
   return { my->sign_transaction( tx, broadcast ) };
 }
 
-wallet_signed_transaction wallet_api::convert_hive_with_collateral(
+wallet_signed_transaction wallet_api::convert_pixa_with_collateral(
   const string& from,
   const wallet_serializer_wrapper<hive::protocol::asset>& collateral_amount,
   bool broadcast )
@@ -2222,17 +2222,39 @@ wallet_signed_transaction wallet_api::convert_hive_with_collateral(
   return { my->sign_transaction( tx, broadcast ) };
 }
 
-wallet_serializer_wrapper<hive::protocol::asset> wallet_api::estimate_hive_collateral(
-  const wallet_serializer_wrapper<hive::protocol::asset>& hbd_amount_to_get )
+wallet_serializer_wrapper<hive::protocol::asset> wallet_api::estimate_pixa_collateral(
+  const wallet_serializer_wrapper<hive::protocol::asset>& pxs_amount_to_get )
 {
   //must reflect calculations from collateralized_convert_evaluator::do_apply
 
   auto fhistory = get_feed_history().value;
 
-  return { hive::protocol::hive_collateral::estimate_hive_collateral(
+  return { hive::protocol::pixa_collateral::estimate_pixa_collateral(
       fhistory.current_median_history,
       fhistory.current_min_history,
-      hbd_amount_to_get.value ) };
+      pxs_amount_to_get.value ) };
+}
+
+wallet_signed_transaction wallet_api::convert_hbd(
+  const string& from,
+  const wallet_serializer_wrapper<hive::protocol::asset>& amount,
+  bool broadcast )
+{
+  return convert_pxs( from, amount, broadcast );
+}
+
+wallet_signed_transaction wallet_api::convert_hive_with_collateral(
+  const string& from,
+  const wallet_serializer_wrapper<hive::protocol::asset>& collateral_amount,
+  bool broadcast )
+{
+  return convert_pixa_with_collateral( from, collateral_amount, broadcast );
+}
+
+wallet_serializer_wrapper<hive::protocol::asset> wallet_api::estimate_hive_collateral(
+  const wallet_serializer_wrapper<hive::protocol::asset>& pxs_amount_to_get )
+{
+  return estimate_pixa_collateral( pxs_amount_to_get );
 }
 
 wallet_signed_transaction wallet_api::publish_feed(
@@ -2298,16 +2320,16 @@ wallet_signed_transaction wallet_api::decline_voting_rights(
 
 wallet_signed_transaction wallet_api::claim_reward_balance(
   const string& account,
-  const wallet_serializer_wrapper<hive::protocol::asset>& reward_hive,
-  const wallet_serializer_wrapper<hive::protocol::asset>& reward_hbd,
+  const wallet_serializer_wrapper<hive::protocol::asset>& reward_pixa,
+  const wallet_serializer_wrapper<hive::protocol::asset>& reward_pxs,
   const wallet_serializer_wrapper<hive::protocol::asset>& reward_vests,
   bool broadcast )
 {
   FC_ASSERT( !is_locked() );
   claim_reward_balance_operation op;
   op.account = account;
-  op.reward_hive = reward_hive.value;
-  op.reward_hbd = reward_hbd.value;
+  op.reward_pixa = reward_pixa.value;
+  op.reward_pxs = reward_pxs.value;
   op.reward_vests = reward_vests.value;
 
   signed_transaction tx;

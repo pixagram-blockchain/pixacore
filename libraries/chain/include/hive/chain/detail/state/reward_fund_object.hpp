@@ -7,7 +7,7 @@
 
 namespace hive { namespace chain {
 
-using hive::protocol::HIVE_asset;
+using hive::protocol::PIXA_asset;
 
 typedef protocol::fixed_string< 16 > reward_fund_name_type;
 
@@ -18,7 +18,7 @@ class reward_fund_object : public object< reward_fund_object_type, reward_fund_o
 public:
   template< typename Allocator >
   reward_fund_object( allocator< Allocator > a, uint64_t _id,
-    const string& _name, temp_HIVE_balance&& _balance, const time_point_sec& _creation_time, const uint128_t& _claims = 0 )
+    const string& _name, temp_PIXA_balance&& _balance, const time_point_sec& _creation_time, const uint128_t& _claims = 0 )
   : id( _id ), name( _name ), reward_balance( std::move( _balance ) ), recent_claims( _claims ), last_update( _creation_time )
   {}
 
@@ -26,8 +26,8 @@ public:
 
   const reward_fund_name_type& get_name() const { return name; }
 
-  //amount of HIVE in reward fund
-  const HIVE_asset& get_reward_balance() const { return reward_balance; }
+  //amount of PIXA in reward fund
+  const PIXA_asset& get_reward_balance() const { return reward_balance; }
 
   uint128_t get_recent_claims() const { return recent_claims; }
   time_point_sec get_last_update() const { return last_update; }

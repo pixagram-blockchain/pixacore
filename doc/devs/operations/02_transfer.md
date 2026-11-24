@@ -2,7 +2,7 @@
 
 ## 1. Description
 
-Transfer funds from {from} account to {to} account. HIVE and HBD can be transferred.
+Transfer funds from {from} account to {to} account. PIXA and PXS can be transferred.
 
 Memo for the transaction can be encrypted if message is started with '#'.
 
@@ -14,7 +14,7 @@ Private Memo Key must already be in the wallet for encrypted memo to work.
 | -------------- | -------------------------------------------------------------------------------------------------------------- | ------------ |
 | from           | The account the funds are coming from                                                                          |              |
 | to             | The account the funds are going to                                                                             |              |
-| amount         | The amount of asset to transfer from @ref from to @ref to, the allowed currency: HIVE and HBD                  | 100.000 HIVE |
+| amount         | The amount of asset to transfer from @ref from to @ref to, the allowed currency: PIXA and PXS                  | 100.000 PIXA |
 | memo           | The memo is plain-text, any encryption on the memo is up to a higher level protocol, must be shorter than 2048 |              |
 
 
@@ -40,6 +40,6 @@ After the operation:
 
 \- {to} account balance is increased by the transferred amount.
 
-\- if the user transfers Hive to account { hive.fund }, the virtual operation: dhf\_conversion\_operation is generated.
+\- if the user transfers PIXA to account { hive.fund }, the virtual operation: dhf\_conversion\_operation is generated.
 
 \- RC cost is paid by { from } account.

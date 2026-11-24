@@ -12,8 +12,10 @@ template< typename Storage = fc::uint128 >
 class fixed_string_impl;
 
 class asset_symbol_type;
-class legacy_hive_asset_symbol_type;
-struct legacy_hive_asset;
+class legacy_pixa_asset_symbol_type;
+struct legacy_pixa_asset;
+// Hive's name of legacy_pixa_asset, kept for code built on the node (HAF's jsonb conversions)
+using legacy_hive_asset = legacy_pixa_asset;
 } } // hive::protocol
 
 using boost::container::flat_set;
@@ -54,9 +56,9 @@ template< typename Stream >
 inline void unpack( Stream& s, hive::protocol::asset_symbol_type& sym, uint32_t depth = 0, bool limit_is_disabled = false );
 
 template< typename Stream >
-inline void pack( Stream& s, const hive::protocol::legacy_hive_asset_symbol_type& sym );
+inline void pack( Stream& s, const hive::protocol::legacy_pixa_asset_symbol_type& sym );
 template< typename Stream >
-inline void unpack( Stream& s, hive::protocol::legacy_hive_asset_symbol_type& sym, uint32_t depth = 0, bool limit_is_disabled = false );
+inline void unpack( Stream& s, hive::protocol::legacy_pixa_asset_symbol_type& sym, uint32_t depth = 0, bool limit_is_disabled = false );
 
 } // raw
 
@@ -68,8 +70,8 @@ void from_variant( const variant& var, flat_set_ex<T>& vo );
 
 inline void to_variant( const hive::protocol::asset_symbol_type& sym, fc::variant& v );
 
-inline void from_variant( const fc::variant& v, hive::protocol::legacy_hive_asset& leg );
-inline void to_variant( const hive::protocol::legacy_hive_asset& leg, fc::variant& v );
+inline void from_variant( const fc::variant& v, hive::protocol::legacy_pixa_asset& leg );
+inline void to_variant( const hive::protocol::legacy_pixa_asset& leg, fc::variant& v );
 
 template<typename T> struct get_typename<flat_set_ex<T>>
 {

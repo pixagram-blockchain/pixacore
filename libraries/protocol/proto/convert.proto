@@ -4,7 +4,7 @@ import "asset.proto";
 
 package hive.protocol.buffers;
 
-/* This operation instructs the blockchain to start a conversion of HBD to Hive.  
+/* This operation instructs the blockchain to start a conversion of PXS to Hive.  
  * The funds are deposited after 3.5 days.
  *
  * Description https://gitlab.syncad.com/hive/hive/-/blob/develop/doc/devs/operations/08_convert.md?ref_type=heads
@@ -16,6 +16,6 @@ message convert {
   // @param {number} requestid - The number is given by a user. Should be unique for a user.
   required uint32 requestid = 2;
   
-  // @param {asset} amount - Amount > 0, have to be in HBD.
+  // @param {asset} amount - Amount > 0, have to be in PXS.
   required asset  amount = 3;
 }

@@ -5,7 +5,7 @@ import "asset.proto";
 package hive.protocol.buffers;
 
 /* Related to convert_operation.
- * Generated during block processing after conversion delay passes and HBD is converted to HIVE.
+ * Generated during block processing after conversion delay passes and PXS is converted to PIXA.
  */
 message fill_convert_request {
   // @param {string} owner - User that requested conversion (receiver of amount_out).
@@ -14,9 +14,9 @@ message fill_convert_request {
   // @param {number} requestid - id of the request.
   required uint32 requestid = 2;
 
-  // @param {asset} amount_in - (HBD) source of conversion.
+  // @param {asset} amount_in - (PXS) source of conversion.
   required asset  amount_in = 3 [json_name = "amount_in"];
 
-  // @param {asset} amount_out - (HIVE) effect of conversion.
+  // @param {asset} amount_out - (PIXA) effect of conversion.
   required asset  amount_out = 4 [json_name = "amount_out"];
 }

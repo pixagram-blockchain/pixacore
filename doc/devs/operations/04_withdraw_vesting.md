@@ -2,7 +2,7 @@
 
 ## 1.  Description
 
-This operation converts Hive Power (also called Vesting Fund Shares  or VESTS) into HIVE.
+This operation converts Pixa Power (also called Vesting Fund Shares  or VESTS) into PIXA.
 
 At any given point in time an account can be withdrawing from their vesting shares. A user may change the number of shares they wish to cash out at any time between 0 and their total vesting stake.
 
@@ -27,7 +27,7 @@ Before HF16, the global parameter: HIVE\_VESTING\_WITHDRAW\_INTERVALS\_PRE\_HF\_
 | Parameter name | Description | Example |                                                                                                                              
 | --------------- | ------------------------------------- | ------- |
 | account         | The account the funds are coming from |         |
-| vesting\_shares | Amount of VESTS (HP)                  |         |
+| vesting\_shares | Amount of VESTS (PXP)                  |         |
 
 
 ## 3.  Authority
@@ -39,7 +39,7 @@ Active
 
 You need:
 
-\- your balance in HP is equal or higher than withdraw amount.
+\- your balance in PXP is equal or higher than withdraw amount.
 
 \- enough Resource Credit (RC)  to make an operation.
 
@@ -48,9 +48,9 @@ You need:
 
 After the operation:
 
-\- the HP balance will be reduced by {vesting\_shares}/13 per week for 13 weeks starting one week after this operation is included in the blockchain.
+\- the PXP balance will be reduced by {vesting\_shares}/13 per week for 13 weeks starting one week after this operation is included in the blockchain.
 
-\- the Hive balance will be increased by {vesting\_shares}/13 converted into Hive per week.
+\- the PIXA balance will be increased by {vesting\_shares}/13 converted into PIXA per week.
 
 \- the virtual operation: fill\_vesting\_withdraw is generated when the vesting is withdrawn.
 

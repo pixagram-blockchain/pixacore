@@ -24,7 +24,7 @@ namespace hive { namespace protocol {
     public_key_type   memo_key;
     json_string       json_metadata;
 
-    HIVE_asset get_fee() const { return HIVE_asset( fee ); }
+    PIXA_asset get_fee() const { return PIXA_asset( fee ); }
 
     void validate()const;
     void get_required_active_authorities( flat_set<account_name_type>& a )const{ a.insert(creator); }
@@ -45,7 +45,7 @@ namespace hive { namespace protocol {
 
     extensions_type   extensions;
 
-    HIVE_asset get_fee() const { return HIVE_asset( fee ); }
+    PIXA_asset get_fee() const { return PIXA_asset( fee ); }
     VEST_asset get_delegation() const { return VEST_asset( delegation ); }
 
     void validate()const;
@@ -129,20 +129,20 @@ namespace hive { namespace protocol {
     *  operation allows authors to update properties associated with their post.
     *
     *  The max_accepted_payout may be decreased, but never increased.
-    *  The percent_hbd may be decreased, but never increased
+    *  The percent_pxs may be decreased, but never increased
     */
   struct comment_options_operation : public base_operation
   {
     account_name_type author;
     string            permlink;
 
-    asset             max_accepted_payout    = asset( 1000000000, HBD_SYMBOL ); /// HBD value of the maximum payout this post will receive
-    uint16_t          percent_hbd            = HIVE_100_PERCENT; /// the percent of HBD to key, unkept amounts will be received in form of VESTS
+    asset             max_accepted_payout    = asset( 1000000000, PXS_SYMBOL ); /// PXS value of the maximum payout this post will receive
+    uint16_t          percent_pxs            = HIVE_100_PERCENT; /// the percent of PXS to key, unkept amounts will be received in form of VESTS
     bool              allow_votes            = true; /// allows a post to receive votes
     bool              allow_curation_rewards = true; /// allows voters to receive curation rewards. Rewards return to reward fund.
     comment_options_extensions_type extensions;
 
-    HBD_asset get_max_accepted_payout() const { return HBD_asset( max_accepted_payout ); }
+    PXS_asset get_max_accepted_payout() const { return PXS_asset( max_accepted_payout ); }
 
     void validate()const;
     void get_required_posting_authorities( flat_set<account_name_type>& a )const{ a.insert(author); }
@@ -155,7 +155,7 @@ namespace hive { namespace protocol {
     asset             fee;
     extensions_type   extensions;
 
-    HIVE_asset get_fee() const { return HIVE_asset( fee ); }
+    PIXA_asset get_fee() const { return PIXA_asset( fee ); }
 
     void get_required_active_authorities( flat_set< account_name_type >& a ) const { a.insert( creator ); }
     void validate() const;
@@ -246,8 +246,8 @@ namespace hive { namespace protocol {
     account_name_type agent;
     uint32_t          escrow_id = 30;
 
-    asset             hbd_amount = asset( 0, HBD_SYMBOL );
-    asset             hive_amount = asset( 0, HIVE_SYMBOL );
+    asset             pxs_amount = asset( 0, PXS_SYMBOL );
+    asset             pixa_amount = asset( 0, PIXA_SYMBOL );
     asset             fee;
 
     time_point_sec    ratification_deadline;
@@ -255,8 +255,8 @@ namespace hive { namespace protocol {
 
     json_string       json_meta;
 
-    HBD_asset get_hbd_amount() const { return HBD_asset( hbd_amount ); }
-    HIVE_asset get_hive_amount() const { return HIVE_asset( hive_amount ); }
+    PXS_asset get_pxs_amount() const { return PXS_asset( pxs_amount ); }
+    PIXA_asset get_pixa_amount() const { return PIXA_asset( pixa_amount ); }
 
     void validate()const;
     void get_required_active_authorities( flat_set<account_name_type>& a )const{ a.insert(from); }
@@ -321,11 +321,11 @@ namespace hive { namespace protocol {
     account_name_type receiver; ///< the account that should receive funds (might be from, might be to)
 
     uint32_t          escrow_id = 30;
-    asset             hbd_amount = asset( 0, HBD_SYMBOL ); ///< the amount of HBD to release
-    asset             hive_amount = asset( 0, HIVE_SYMBOL ); ///< the amount of HIVE to release
+    asset             pxs_amount = asset( 0, PXS_SYMBOL ); ///< the amount of PXS to release
+    asset             pixa_amount = asset( 0, PIXA_SYMBOL ); ///< the amount of PIXA to release
 
-    HBD_asset get_hbd_amount() const { return HBD_asset( hbd_amount ); }
-    HIVE_asset get_hive_amount() const { return HIVE_asset( hive_amount ); }
+    PXS_asset get_pxs_amount() const { return PXS_asset( pxs_amount ); }
+    PIXA_asset get_pixa_amount() const { return PIXA_asset( pixa_amount ); }
 
     void validate()const;
     void get_required_active_authorities( flat_set<account_name_type>& a )const{ a.insert(who); }
@@ -333,7 +333,7 @@ namespace hive { namespace protocol {
 
 
   /**
-    *  This operation converts liquid token (only HIVE at the moment) into VFS (Vesting Fund Shares,
+    *  This operation converts liquid token (only PIXA at the moment) into VFS (Vesting Fund Shares,
     *  VESTS) at the current exchange rate. With this operation it is possible to
     *  give another account vesting shares so that faucets can pre-fund new accounts with vesting shares.
     */
@@ -341,9 +341,9 @@ namespace hive { namespace protocol {
   {
     account_name_type from;
     account_name_type to;      ///< if null, then same as from
-    asset             amount;  ///< must be HIVE
+    asset             amount;  ///< must be PIXA
 
-    HIVE_asset get_amount() const { return HIVE_asset( amount ); }
+    PIXA_asset get_amount() const { return PIXA_asset( amount ); }
 
     void validate()const;
     void get_required_active_authorities( flat_set<account_name_type>& a )const{ a.insert(from); }
@@ -378,7 +378,7 @@ namespace hive { namespace protocol {
     * request for the funds to be transferred directly to another account's
     * balance rather than the withdrawing account. In addition, those funds
     * can be immediately vested again, circumventing the conversion from
-    * VESTS to HIVE and back, guaranteeing they maintain their value.
+    * VESTS to PIXA and back, guaranteeing they maintain their value.
     */
   struct set_withdraw_vesting_route_operation : public base_operation
   {
@@ -400,19 +400,19 @@ namespace hive { namespace protocol {
   struct legacy_chain_properties
   {
     /**
-      *  This fee, paid in HIVE, is converted into VESTS for the new account. Accounts
+      *  This fee, paid in PIXA, is converted into VESTS for the new account. Accounts
       *  without vesting shares cannot earn usage rations and therefore are powerless. This minimum
       *  fee requires all accounts to have some kind of commitment to the network that includes the
       *  ability to vote and make transactions.
       */
-    legacy_hive_asset account_creation_fee = legacy_hive_asset::from_amount( HIVE_MIN_ACCOUNT_CREATION_FEE );
+    legacy_pixa_asset account_creation_fee = legacy_pixa_asset::from_amount( HIVE_MIN_ACCOUNT_CREATION_FEE );
 
     /**
       *  This witnesses vote for the maximum_block_size which is used by the network
       *  to tune rate limiting and capacity
       */
     uint32_t          maximum_block_size = HIVE_MIN_BLOCK_SIZE_LIMIT * 2;
-    uint16_t          hbd_interest_rate  = HIVE_DEFAULT_HBD_INTEREST_RATE;
+    uint16_t          pxs_interest_rate  = HIVE_DEFAULT_PXS_INTEREST_RATE;
 
     template< bool force_canon >
     void validate()const
@@ -429,10 +429,10 @@ namespace hive { namespace protocol {
       );
       HIVE_PROTOCOL_NUMBER_ASSERT( maximum_block_size >= HIVE_MIN_BLOCK_SIZE_LIMIT, "Maximum block size is set too low", ("subject", maximum_block_size)("min", HIVE_MIN_BLOCK_SIZE_LIMIT) );
       HIVE_PROTOCOL_NUMBER_ASSERT( maximum_block_size <= HIVE_MAX_BLOCK_SIZE, "Maximum block size is set too high", ("subject", maximum_block_size)("max", HIVE_MAX_BLOCK_SIZE) );
-      FC_ASSERT( hbd_interest_rate == 0u, "hbd_interest_rate is fixed at 0" );
+      FC_ASSERT( pxs_interest_rate == 0u, "pxs_interest_rate is fixed at 0" );
     }
 
-    HIVE_asset get_account_creation_fee() const { return HIVE_asset( account_creation_fee.amount ); }
+    PIXA_asset get_account_creation_fee() const { return PIXA_asset( account_creation_fee.amount ); }
   };
 
 
@@ -458,7 +458,7 @@ namespace hive { namespace protocol {
     legacy_chain_properties  props;
     asset             fee; ///< the fee paid to register a new witness, should be 10x current block production pay
 
-    HIVE_asset get_fee() const { return HIVE_asset( fee ); }
+    PIXA_asset get_fee() const { return PIXA_asset( fee ); }
 
     void validate()const;
     void get_required_active_authorities( flat_set<account_name_type>& a )const{ a.insert(owner); }
@@ -566,7 +566,7 @@ namespace hive { namespace protocol {
 
   /**
     *  Feeds can only be published by the top N witnesses which are included in every round and are
-    *  used to define the exchange rate between HIVE and the dollar (represented by HBD).
+    *  used to define the exchange rate between PIXA and the dollar (represented by PXS).
     */
   struct feed_publish_operation : public base_operation
   {
@@ -579,34 +579,34 @@ namespace hive { namespace protocol {
 
 
   /**
-    *  This operation instructs the blockchain to start a conversion of HBD to HIVE.
+    *  This operation instructs the blockchain to start a conversion of PXS to PIXA.
     *  The funds are deposited after HIVE_CONVERSION_DELAY
     */
   struct convert_operation : public base_operation
   {
     account_name_type owner;
     uint32_t          requestid = 0;
-    asset             amount; //in HBD
+    asset             amount; //in PXS
 
-    HBD_asset get_amount() const { return HBD_asset( amount ); }
+    PXS_asset get_amount() const { return PXS_asset( amount ); }
 
     void  validate()const;
     void  get_required_active_authorities( flat_set<account_name_type>& a )const{ a.insert(owner); }
   };
 
   /**
-    *  Similar to convert_operation, this operation instructs the blockchain to convert HIVE to HBD.
-    *  The operation is performed after HIVE_COLLATERALIZED_CONVERSION_DELAY, but owner gets HBD
-    *  immediately. The price risk is cussioned by extra HIVE (see HIVE_COLLATERAL_RATIO). After actual
-    *  conversion takes place the excess HIVE is returned to the owner.
+    *  Similar to convert_operation, this operation instructs the blockchain to convert PIXA to PXS.
+    *  The operation is performed after HIVE_COLLATERALIZED_CONVERSION_DELAY, but owner gets PXS
+    *  immediately. The price risk is cussioned by extra PIXA (see HIVE_COLLATERAL_RATIO). After actual
+    *  conversion takes place the excess PIXA is returned to the owner.
     */
   struct collateralized_convert_operation : public base_operation
   {
     account_name_type owner;
     uint32_t          requestid = 0;
-    asset             amount; //in HIVE
+    asset             amount; //in PIXA
 
-    HIVE_asset get_amount() const { return HIVE_asset( amount ); }
+    PIXA_asset get_amount() const { return PIXA_asset( amount ); }
 
     void  validate()const;
     void  get_required_active_authorities( flat_set<account_name_type>& a )const { a.insert( owner ); }
@@ -959,12 +959,12 @@ namespace hive { namespace protocol {
   struct claim_reward_balance_operation : public base_operation
   {
     account_name_type account;
-    asset             reward_hive;
-    asset             reward_hbd;
+    asset             reward_pixa;
+    asset             reward_pxs;
     asset             reward_vests;
 
-    HIVE_asset get_reward_hive() const { return HIVE_asset( reward_hive ); }
-    HBD_asset get_reward_hbd() const { return HBD_asset( reward_hbd ); }
+    PIXA_asset get_reward_pixa() const { return PIXA_asset( reward_pixa ); }
+    PXS_asset get_reward_pxs() const { return PXS_asset( reward_pxs ); }
     VEST_asset get_reward_vests() const { return VEST_asset( reward_vests ); }
 
     void get_required_posting_authorities( flat_set< account_name_type >& a )const{ a.insert( account ); }
@@ -1121,7 +1121,7 @@ FC_REFLECT( hive::protocol::equihash_pow, (input)(proof)(prev_block)(pow_summary
 FC_REFLECT( hive::protocol::legacy_chain_properties,
         (account_creation_fee)
         (maximum_block_size)
-        (hbd_interest_rate)
+        (pxs_interest_rate)
         )
 
 FC_REFLECT_TYPENAME( hive::protocol::pow2_work )
@@ -1190,19 +1190,19 @@ FC_REFLECT( hive::protocol::delete_comment_operation, (author)(permlink) );
 FC_REFLECT( hive::protocol::comment_payout_beneficiaries, (beneficiaries) )
 
 FC_REFLECT_TYPENAME( hive::protocol::comment_options_extension )
-FC_REFLECT( hive::protocol::comment_options_operation, (author)(permlink)(max_accepted_payout)(percent_hbd)(allow_votes)(allow_curation_rewards)(extensions) )
+FC_REFLECT( hive::protocol::comment_options_operation, (author)(permlink)(max_accepted_payout)(percent_pxs)(allow_votes)(allow_curation_rewards)(extensions) )
 
-FC_REFLECT( hive::protocol::escrow_transfer_operation, (from)(to)(hbd_amount)(hive_amount)(escrow_id)(agent)(fee)(json_meta)(ratification_deadline)(escrow_expiration) );
+FC_REFLECT( hive::protocol::escrow_transfer_operation, (from)(to)(pxs_amount)(pixa_amount)(escrow_id)(agent)(fee)(json_meta)(ratification_deadline)(escrow_expiration) );
 FC_REFLECT( hive::protocol::escrow_approve_operation, (from)(to)(agent)(who)(escrow_id)(approve) );
 FC_REFLECT( hive::protocol::escrow_dispute_operation, (from)(to)(agent)(who)(escrow_id) );
-FC_REFLECT( hive::protocol::escrow_release_operation, (from)(to)(agent)(who)(receiver)(escrow_id)(hbd_amount)(hive_amount) );
+FC_REFLECT( hive::protocol::escrow_release_operation, (from)(to)(agent)(who)(receiver)(escrow_id)(pxs_amount)(pixa_amount) );
 FC_REFLECT( hive::protocol::claim_account_operation, (creator)(fee)(extensions) );
 FC_REFLECT( hive::protocol::create_claimed_account_operation, (creator)(new_account_name)(owner)(active)(posting)(memo_key)(json_metadata)(extensions) );
 FC_REFLECT( hive::protocol::request_account_recovery_operation, (recovery_account)(account_to_recover)(new_owner_authority)(extensions) );
 FC_REFLECT( hive::protocol::recover_account_operation, (account_to_recover)(new_owner_authority)(recent_owner_authority)(extensions) );
 FC_REFLECT( hive::protocol::change_recovery_account_operation, (account_to_recover)(new_recovery_account)(extensions) );
 FC_REFLECT( hive::protocol::decline_voting_rights_operation, (account)(decline) );
-FC_REFLECT( hive::protocol::claim_reward_balance_operation, (account)(reward_hive)(reward_hbd)(reward_vests) );
+FC_REFLECT( hive::protocol::claim_reward_balance_operation, (account)(reward_pixa)(reward_pxs)(reward_vests) );
 FC_REFLECT( hive::protocol::delegate_vesting_shares_operation, (delegator)(delegatee)(vesting_shares) );
 FC_REFLECT( hive::protocol::recurrent_transfer_operation, (from)(to)(amount)(memo)(recurrence)(executions)(extensions) );
 FC_REFLECT_TYPENAME( hive::protocol::recurrent_transfer_extension )

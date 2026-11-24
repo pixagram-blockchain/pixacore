@@ -357,8 +357,8 @@ void database::apply_hardfork( uint32_t hardfork )
         {
           gpo.set_delegation_return_period( HIVE_DELEGATION_RETURN_PERIOD_HF20 );
           gpo.set_reverse_auction_seconds( HIVE_REVERSE_AUCTION_WINDOW_SECONDS_HF20 );
-          gpo.set_hbd_stop_percent( HIVE_HBD_STOP_PERCENT_HF20 );
-          gpo.set_hbd_start_percent( HIVE_HBD_START_PERCENT_HF20 );
+          gpo.set_pxs_stop_percent( HIVE_PXS_STOP_PERCENT_HF20 );
+          gpo.set_pxs_start_percent( HIVE_PXS_START_PERCENT_HF20 );
           gpo.set_available_account_subsidies( 0 );
         } );
 
@@ -370,14 +370,14 @@ void database::apply_hardfork( uint32_t hardfork )
           {
             modify( get< witness_object, by_name >( witness ), [&]( witness_object& w )
             {
-              w.props.account_creation_fee = w.props.account_creation_fee * HIVE_CREATE_ACCOUNT_WITH_HIVE_MODIFIER;
+              w.props.account_creation_fee = w.props.account_creation_fee * HIVE_CREATE_ACCOUNT_WITH_PIXA_MODIFIER;
             } );
           }
         }
 
         modify( wso, [&]( witness_schedule_object& wso )
         {
-          wso.median_props.account_creation_fee = wso.median_props.account_creation_fee * HIVE_CREATE_ACCOUNT_WITH_HIVE_MODIFIER;
+          wso.median_props.account_creation_fee = wso.median_props.account_creation_fee * HIVE_CREATE_ACCOUNT_WITH_PIXA_MODIFIER;
         } );
 
         // Initialize RC:
@@ -516,8 +516,8 @@ void database::apply_hardfork( uint32_t hardfork )
     {
       modify( get_dynamic_global_properties(), [&]( dynamic_global_property_object& gpo )
       {
-        gpo.set_hbd_stop_percent( HIVE_HBD_STOP_PERCENT_HF26 );
-        gpo.set_hbd_start_percent( HIVE_HBD_START_PERCENT_HF26 );
+        gpo.set_pxs_stop_percent( HIVE_PXS_STOP_PERCENT_HF26 );
+        gpo.set_pxs_start_percent( HIVE_PXS_START_PERCENT_HF26 );
       } );
       const auto& fwso = create<witness_schedule_object>( [&]( witness_schedule_object& future_witness_schedule )
       {
@@ -650,11 +650,11 @@ const hardfork_property_object& database::get_hardfork_property_object()const
   return get< hardfork_property_object >();
 } FC_CAPTURE_AND_RETHROW() }
 
-void database::gather_balance( const std::string& name, const HIVE_asset& hive_balance, const HBD_asset& hbd_balance )
+void database::gather_balance( const std::string& name, const PIXA_asset& pixa_balance, const PXS_asset& pxs_balance )
 {
   modify( get_hardfork_property_object(), [&]( hardfork_property_object& hfp )
   {
-    hfp.h23_balances.emplace( std::make_pair( name, hf23_item{ hive_balance, hbd_balance } ) );
+    hfp.h23_balances.emplace( std::make_pair( name, hf23_item{ pixa_balance, pxs_balance } ) );
   } );
 }
 

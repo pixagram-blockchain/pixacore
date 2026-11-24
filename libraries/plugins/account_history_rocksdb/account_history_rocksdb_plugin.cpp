@@ -393,20 +393,20 @@ private:
 
   struct saved_balances
   {
-    HIVE_asset hive_balance;
-    HIVE_asset savings_hive_balance;
+    PIXA_asset pixa_balance;
+    PIXA_asset savings_pixa_balance;
 
-    HBD_asset hbd_balance;
-    HBD_asset savings_hbd_balance;
+    PXS_asset pxs_balance;
+    PXS_asset savings_pxs_balance;
 
     VEST_asset vesting_shares;
     VEST_asset delegated_vesting_shares;
     VEST_asset received_vesting_shares;
 
-    HBD_asset reward_hbd_balance;
-    HIVE_asset reward_hive_balance;
+    PXS_asset reward_pxs_balance;
+    PIXA_asset reward_pixa_balance;
     VEST_asset reward_vesting_balance;
-    HIVE_asset reward_vesting_hive_balance;
+    PIXA_asset reward_vesting_pixa_balance;
   };
   optional<string>                 _balance_csv_filename;
   std::ofstream                    _balance_csv_file;
@@ -464,16 +464,16 @@ void account_history_rocksdb_plugin::impl::collectOptions(const boost::program_o
                       << "block_num" << ","
                       << "timestamp" << ","
                       << "hive" << ","
-                      << "savings_hive" << ","
-                      << "hbd" << ","
-                      << "savings_hbd" << ","
+                      << "savings_pixa" << ","
+                      << "pxs" << ","
+                      << "savings_pxs" << ","
                       << "vesting_shares" << ","
                       << "delegated_vesting_shares" << ","
                       << "received_vesting_shares" << ","
-                      << "reward_hive" << ","
-                      << "reward_hbd" << ","
+                      << "reward_pixa" << ","
+                      << "reward_pxs" << ","
                       << "reward_vesting_shares" << ","
-                      << "reward_vesting_hive" << "\n";
+                      << "reward_vesting_pixa" << "\n";
     _balance_csv_file.flush();
   }
 
@@ -1321,35 +1321,35 @@ void account_history_rocksdb_plugin::impl::on_post_apply_block(const block_notif
         bool balances_changed = saved_balance_iter == _saved_balances.end();
         saved_balances& saved_balance_record = _saved_balances[account_iter->get_name()];
 
-        if (saved_balance_record.hive_balance != account.get_hive_balance())
+        if (saved_balance_record.pixa_balance != account.get_pixa_balance())
         {
-          saved_balance_record.hive_balance = account.get_hive_balance();
+          saved_balance_record.pixa_balance = account.get_pixa_balance();
           balances_changed = true;
         }
-        if (saved_balance_record.savings_hive_balance != account.get_hive_savings())
+        if (saved_balance_record.savings_pixa_balance != account.get_pixa_savings())
         {
-          saved_balance_record.savings_hive_balance = account.get_hive_savings();
+          saved_balance_record.savings_pixa_balance = account.get_pixa_savings();
           balances_changed = true;
         }
-        if (saved_balance_record.hbd_balance != account.get_hbd_balance())
+        if (saved_balance_record.pxs_balance != account.get_pxs_balance())
         {
-          saved_balance_record.hbd_balance = account.get_hbd_balance();
+          saved_balance_record.pxs_balance = account.get_pxs_balance();
           balances_changed = true;
         }
-        if (saved_balance_record.savings_hbd_balance != account.get_hbd_savings())
+        if (saved_balance_record.savings_pxs_balance != account.get_pxs_savings())
         {
-          saved_balance_record.savings_hbd_balance = account.get_hbd_savings();
+          saved_balance_record.savings_pxs_balance = account.get_pxs_savings();
           balances_changed = true;
         }
 
-        if (saved_balance_record.reward_hbd_balance != account.get_hbd_rewards())
+        if (saved_balance_record.reward_pxs_balance != account.get_pxs_rewards())
         {
-          saved_balance_record.reward_hbd_balance = account.get_hbd_rewards();
+          saved_balance_record.reward_pxs_balance = account.get_pxs_rewards();
           balances_changed = true;
         }
-        if (saved_balance_record.reward_hive_balance != account.get_hive_rewards())
+        if (saved_balance_record.reward_pixa_balance != account.get_pixa_rewards())
         {
-          saved_balance_record.reward_hive_balance = account.get_hive_rewards();
+          saved_balance_record.reward_pixa_balance = account.get_pixa_rewards();
           balances_changed = true;
         }
         if (saved_balance_record.reward_vesting_balance != account.get_vest_rewards())
@@ -1357,9 +1357,9 @@ void account_history_rocksdb_plugin::impl::on_post_apply_block(const block_notif
           saved_balance_record.reward_vesting_balance = account.get_vest_rewards();
           balances_changed = true;
         }
-        if (saved_balance_record.reward_vesting_hive_balance != account.get_vest_rewards_as_hive())
+        if (saved_balance_record.reward_vesting_pixa_balance != account.get_vest_rewards_as_pixa())
         {
-          saved_balance_record.reward_vesting_hive_balance = account.get_vest_rewards_as_hive();
+          saved_balance_record.reward_vesting_pixa_balance = account.get_vest_rewards_as_pixa();
           balances_changed = true;
         }
 
@@ -1384,17 +1384,17 @@ void account_history_rocksdb_plugin::impl::on_post_apply_block(const block_notif
           _balance_csv_file << (string)account.get_name() << ","
                             << bn.block_num << ","
                             << bn.get_block_timestamp().to_iso_string() << ","
-                            << get_asset_amount(saved_balance_record.hive_balance.to_asset()) << ","
-                            << get_asset_amount(saved_balance_record.savings_hive_balance.to_asset()) << ","
-                            << get_asset_amount(saved_balance_record.hbd_balance.to_asset()) << ","
-                            << get_asset_amount(saved_balance_record.savings_hbd_balance.to_asset()) << ","
+                            << get_asset_amount(saved_balance_record.pixa_balance.to_asset()) << ","
+                            << get_asset_amount(saved_balance_record.savings_pixa_balance.to_asset()) << ","
+                            << get_asset_amount(saved_balance_record.pxs_balance.to_asset()) << ","
+                            << get_asset_amount(saved_balance_record.savings_pxs_balance.to_asset()) << ","
                             << get_asset_amount(saved_balance_record.vesting_shares.to_asset()) << ","
                             << get_asset_amount(saved_balance_record.delegated_vesting_shares.to_asset()) << ","
                             << get_asset_amount(saved_balance_record.received_vesting_shares.to_asset()) << ","
-                            << get_asset_amount(saved_balance_record.reward_hive_balance.to_asset()) << ","
-                            << get_asset_amount(saved_balance_record.reward_hbd_balance.to_asset()) << ","
+                            << get_asset_amount(saved_balance_record.reward_pixa_balance.to_asset()) << ","
+                            << get_asset_amount(saved_balance_record.reward_pxs_balance.to_asset()) << ","
                             << get_asset_amount(saved_balance_record.reward_vesting_balance.to_asset()) << ","
-                            << get_asset_amount(saved_balance_record.reward_vesting_hive_balance.to_asset()) << "\n";
+                            << get_asset_amount(saved_balance_record.reward_vesting_pixa_balance.to_asset()) << "\n";
           // flush every 10k lines
           ++_balance_csv_line_count;
           if (_balance_csv_line_count > 10000)

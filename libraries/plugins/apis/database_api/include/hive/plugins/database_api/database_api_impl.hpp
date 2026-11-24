@@ -61,6 +61,8 @@ class database_api_impl
       (find_vesting_delegations)
       (list_vesting_delegation_expirations)
       (find_vesting_delegation_expirations)
+      (list_pxs_conversion_requests)
+      (find_pxs_conversion_requests)
       (list_hbd_conversion_requests)
       (find_hbd_conversion_requests)
       (list_collateralized_conversion_requests)

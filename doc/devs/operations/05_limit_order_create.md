@@ -2,9 +2,9 @@
 
 ## 1. Description
 
-This operation creates a limit order and matches it against existing open orders. It allows to sell Hive and buy HBD or sell HBD and buy Hive.
+This operation creates a limit order and matches it against existing open orders. It allows to sell PIXA and buy PXS or sell PXS and buy PIXA.
 
-It is a way for a user to declare they want to sell {amount_to_sell} Hive/HBD for at least {min_to_receive} HBD/Hive.
+It is a way for a user to declare they want to sell {amount_to_sell} PIXA/PXS for at least {min_to_receive} PXS/Hive.
 
 The user may be a taker (if a user creates an order and the order matches some order(s)) or a maker (if a user creates an order and the order doesn’t match and the order is waiting for a match on the market). If there is a partial match, a user may be a taker and maker for the same order. 
 
@@ -35,7 +35,7 @@ Active
 
 You need:
 
-\- your balance in Hive/HBD is equal or higher than the {amount_to_sell}.
+\- your balance in PIXA/PXS is equal or higher than the {amount_to_sell}.
 
 \- enough Resource Credit (RC)  to make an operation.
 

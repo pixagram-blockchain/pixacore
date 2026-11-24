@@ -36,6 +36,7 @@ SET( STATIC_SOURCES authority_verification_tracer.cpp
    hive_custom_operations.cpp
    dhf_operations.cpp
    nft_operations.cpp
+   legacy_field_names.cpp
    types.cpp
    schema_types.cpp
    authority.cpp

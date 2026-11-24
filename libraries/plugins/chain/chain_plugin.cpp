@@ -1730,7 +1730,7 @@ void chain_plugin::plugin_initialize(const variables_map& options)
     idump((alternate_chain_spec));
 
     {
-      uint64_t hive = 0, hbd = 0, to_vest = 0;
+      uint64_t pixa = 0, pxs = 0, to_vest = 0;
       // default value somewhat close to mainnet - won't have any impact if to_vest remains zero
       // see comment for configuration::set_initial_asset_supply to see why the price looks so weird
       VEST_price vest_price( 1800, 1'000 );
@@ -1739,29 +1739,34 @@ void chain_plugin::plugin_initialize(const variables_map& options)
       if( alternate_chain_spec.get_object().contains("init_supply") )
       {
         set = true;
-        hive = alternate_chain_spec["init_supply"].as< uint64_t >();
+        pixa = alternate_chain_spec["init_supply"].as< uint64_t >();
       }
-      if( alternate_chain_spec.get_object().contains("hbd_init_supply") )
+      // the Pixa key, or Hive's name of it in specs written for the Hive test tools
+      const char* pxs_init_supply_key = alternate_chain_spec.get_object().contains( "pxs_init_supply" ) ? "pxs_init_supply" : "hbd_init_supply";
+      if( alternate_chain_spec.get_object().contains( pxs_init_supply_key ) )
       {
         set = true;
-        hbd = alternate_chain_spec["hbd_init_supply"].as< uint64_t >();
+        pxs = alternate_chain_spec[ pxs_init_supply_key ].as< uint64_t >();
       }
       if( alternate_chain_spec.get_object().contains( "initial_vesting" ) )
       {
         set = true;
 
         fc::variant initial_vesting = alternate_chain_spec[ "initial_vesting" ];
-        FC_ASSERT( initial_vesting.get_object().contains( "hive_amount" ) );
-        FC_ASSERT( initial_vesting.get_object().contains( "vests_per_hive" ) );
+        const auto& vesting_spec = initial_vesting.get_object();
+        const char* pixa_amount_key = vesting_spec.contains( "pixa_amount" ) ? "pixa_amount" : "hive_amount";
+        const char* vests_per_pixa_key = vesting_spec.contains( "vests_per_pixa" ) ? "vests_per_pixa" : "vests_per_hive";
+        FC_ASSERT( vesting_spec.contains( pixa_amount_key ), "initial_vesting needs pixa_amount" );
+        FC_ASSERT( vesting_spec.contains( vests_per_pixa_key ), "initial_vesting needs vests_per_pixa" );
 
-        to_vest = initial_vesting[ "hive_amount" ].as< uint64_t >();
-        uint64_t vests_per_hive = initial_vesting[ "vests_per_hive" ].as< uint64_t >();
+        to_vest = initial_vesting[ pixa_amount_key ].as< uint64_t >();
+        uint64_t vests_per_pixa = initial_vesting[ vests_per_pixa_key ].as< uint64_t >();
 
-        vest_price = VEST_price( vests_per_hive, 1'000 ); // see comment for configuration::set_initial_asset_supply
+        vest_price = VEST_price( vests_per_pixa, 1'000 ); // see comment for configuration::set_initial_asset_supply
       }
 
       if( set )
-        configuration_data.set_initial_asset_supply( HIVE_asset( hive ), HBD_asset( hbd ), HIVE_asset( to_vest ), vest_price );
+        configuration_data.set_initial_asset_supply( PIXA_asset( pixa ), PXS_asset( pxs ), PIXA_asset( to_vest ), vest_price );
     }
 
     if( alternate_chain_spec.get_object().contains("min_root_comment_interval") )

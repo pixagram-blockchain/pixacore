@@ -19,8 +19,8 @@ using hive::protocol::public_key_type;
 using hive::protocol::version;
 using hive::protocol::hardfork_version;
 using hive::protocol::price;
-using hive::protocol::HBD_asset;
-using hive::protocol::HIVE_asset;
+using hive::protocol::PXS_asset;
+using hive::protocol::PIXA_asset;
 using hive::protocol::VEST_asset;
 using hive::protocol::asset;
 using hive::protocol::asset_symbol_type;
@@ -34,19 +34,19 @@ using hive::chain::util::rd_dynamics_params;
 struct chain_properties
 {
   /**
-    *  This fee, paid in HIVE, is converted into VESTING SHARES for the new account. Accounts
+    *  This fee, paid in PIXA, is converted into VESTING SHARES for the new account. Accounts
     *  without vesting shares cannot earn usage rations and therefore are powerless. This minimum
     *  fee requires all accounts to have some kind of commitment to the network that includes the
     *  ability to vote and make transactions.
     */
-  HIVE_asset        account_creation_fee = HIVE_asset( HIVE_MIN_ACCOUNT_CREATION_FEE );
+  PIXA_asset        account_creation_fee = PIXA_asset( HIVE_MIN_ACCOUNT_CREATION_FEE );
 
   /**
     *  This witnesses vote for the maximum_block_size which is used by the network
     *  to tune rate limiting and capacity
     */
   uint32_t          maximum_block_size = HIVE_MIN_BLOCK_SIZE_LIMIT * 2;
-  uint16_t          hbd_interest_rate  = HIVE_DEFAULT_HBD_INTEREST_RATE;
+  uint16_t          pxs_interest_rate  = HIVE_DEFAULT_PXS_INTEREST_RATE;
   /**
     * How many free accounts should be created per elected witness block.
     * Scaled so that HIVE_ACCOUNT_SUBSIDY_PRECISION represents one account.
@@ -80,10 +80,10 @@ public:
 
   CHAINBASE_DEFAULT_CONSTRUCTOR( witness_object, (url) )
 
-  //HBD to HIVE ratio proposed by the witness
-  const price& get_hbd_exchange_rate() const { return hbd_exchange_rate; } // note: this has to return price
-  //time when HBD/HIVE price ratio was last confirmed (TODO: add routine to check if price feed is valid)
-  const time_point_sec& get_last_hbd_exchange_update() const { return last_hbd_exchange_update; }
+  //PXS to PIXA ratio proposed by the witness
+  const price& get_pxs_exchange_rate() const { return pxs_exchange_rate; } // note: this has to return price
+  //time when PXS/PIXA price ratio was last confirmed (TODO: add routine to check if price feed is valid)
+  const time_point_sec& get_last_pxs_exchange_update() const { return last_pxs_exchange_update; }
   //tells if witness is disabled (can't be chosen to schedule nor sign blocks)
   bool is_disabled() const { return signing_key == public_key_type(); }
 
@@ -109,8 +109,8 @@ public:
   public_key_type   signing_key;
 
   chain_properties  props;
-  price             hbd_exchange_rate; // note: this has to be price - see database::update_median_feed
-  time_point_sec    last_hbd_exchange_update;
+  price             pxs_exchange_rate; // note: this has to be price - see database::update_median_feed
+  time_point_sec    last_pxs_exchange_update;
 
   /**
     *  The total votes for this witness. This determines how the witness is ranked for
@@ -238,7 +238,7 @@ FC_REFLECT_ENUM( hive::chain::witness_object::witness_schedule_type, (elected)(t
 FC_REFLECT( hive::chain::chain_properties,
           (account_creation_fee)
           (maximum_block_size)
-          (hbd_interest_rate)
+          (pxs_interest_rate)
           (account_subsidy_budget)
           (account_subsidy_decay)
         )
@@ -250,7 +250,7 @@ FC_REFLECT( hive::chain::witness_object,
           (url)(votes)(schedule)(virtual_last_update)(virtual_position)(virtual_scheduled_time)(total_missed)
           (last_aslot)(last_confirmed_block_num)(pow_worker)(signing_key)
           (props)
-          (hbd_exchange_rate)(last_hbd_exchange_update)
+          (pxs_exchange_rate)(last_pxs_exchange_update)
           (last_work)
           (running_version)
           (hardfork_version_vote)(hardfork_time_vote)

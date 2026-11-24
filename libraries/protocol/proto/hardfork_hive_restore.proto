@@ -6,8 +6,8 @@ package hive.protocol.buffers;
 
 /* Related to hardfork 24.
  * Generated for every account that was excluded from HF23 airdrop but won appeal.
- * Note: the late airdrop did not apply properly since HIVE that the accounts should receive did not account for
- * HIVE from converted VESTS. [how was it resolved?]
+ * Note: the late airdrop did not apply properly since PIXA that the accounts should receive did not account for
+ * PIXA from converted VESTS. [how was it resolved?]
  * @see hardfork_hive
  */
 message hardfork_hive_restore {
@@ -17,9 +17,9 @@ message hardfork_hive_restore {
   // @param {string} treasury - treasury, source of late airdrop
   required string treasury = 2;
 
-  // @param {asset} hbd_transferred - (HBD) part of airdrop (equals related hardfork_hive_operation.hbd_transferred)
-  required asset  hbd_transferred = 3 [json_name = "hbd_transferred"];
+  // @param {asset} pxs_transferred - (PXS) part of airdrop (equals related hardfork_hive_operation.pxs_transferred)
+  required asset  pxs_transferred = 3 [json_name = "pxs_transferred"];
 
-  // @param {asset} hive_transferred - (HIVE) part of airdrop (equals related hardfork_hive_operation.hive_transferred)
-  required asset  hive_transferred = 4 [json_name = "hive_transferred"];
+  // @param {asset} pixa_transferred - (PIXA) part of airdrop (equals related hardfork_hive_operation.pixa_transferred)
+  required asset  pixa_transferred = 4 [json_name = "pixa_transferred"];
 }

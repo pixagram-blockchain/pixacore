@@ -53,7 +53,7 @@ _PRICE_PAIR_FIELDS: Final = (
 _WITNESS_PROPERTIES_FIELDS: Final = (
     ("account_subsidy_budget", "int", None),
     ("account_subsidy_decay", "int", None),
-    ("hbd_interest_rate", "int", None),
+    ("pxs_interest_rate", "int", None),
     ("maximum_block_size", "int", None),
     ("account_creation_fee", "NaiAsset", None),
 )

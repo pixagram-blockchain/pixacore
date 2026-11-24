@@ -26,49 +26,49 @@ full_transaction_ptr make_transfer( const account_name_type& from, const account
 };
 
 void direct_transfer( const account_name_type& from, const account_name_type& to,
-  const HIVE_asset& delta_from, const HIVE_asset& delta_to, database& db )
+  const PIXA_asset& delta_from, const PIXA_asset& delta_to, database& db )
 {
   ilog( "Transfering directly from ${from} to ${to}", ( from ) ( to ) );
-  temp_HIVE_balance transfer;
+  temp_PIXA_balance transfer;
   db.adjust_balance( from, transfer, delta_from );
   db.adjust_balance( to, transfer, delta_to );
 }
 
 BOOST_FIXTURE_TEST_SUITE( debug_node, clean_database_fixture )
 
-BOOST_AUTO_TEST_CASE( vests_hive_evaluation )
+BOOST_AUTO_TEST_CASE( vests_pixa_evaluation )
 {
   auto _calculate_modifiers = [ this ]( const VEST_price& _new_price,
-    const HIVE_asset& _total_vested_hive, const VEST_asset& _total_vests,
-    share_type hive_modifier, share_type vest_modifier )
+    const PIXA_asset& _total_vested_pixa, const VEST_asset& _total_vests,
+    share_type pixa_modifier, share_type vest_modifier )
   {
-    HIVE_asset _hive_modifier;
+    PIXA_asset _pixa_modifier;
     VEST_asset _vest_modifier;
 
-    db_plugin->calculate_modifiers_according_to_new_price( _new_price, _total_vested_hive, _total_vests, _hive_modifier, _vest_modifier );
+    db_plugin->calculate_modifiers_according_to_new_price( _new_price, _total_vested_pixa, _total_vests, _pixa_modifier, _vest_modifier );
 
     char _buffer[500];
-    sprintf( _buffer, "_hive_modifier: ( %ld == %ld ) _vest_modifier: ( %ld == %ld )", _hive_modifier.amount.value, hive_modifier.value, _vest_modifier.amount.value, vest_modifier.value );
+    sprintf( _buffer, "_pixa_modifier: ( %ld == %ld ) _vest_modifier: ( %ld == %ld )", _pixa_modifier.amount.value, pixa_modifier.value, _vest_modifier.amount.value, vest_modifier.value );
     BOOST_TEST_MESSAGE( _buffer );
-    BOOST_CHECK_EQUAL( _hive_modifier, HIVE_asset( hive_modifier ) );
+    BOOST_CHECK_EQUAL( _pixa_modifier, PIXA_asset( pixa_modifier ) );
     BOOST_CHECK_EQUAL( _vest_modifier, VEST_asset( vest_modifier ) );
   };
 
-  _calculate_modifiers( VEST_price( 500, 1 ), HIVE_asset( 13'044 ), VEST_asset( 12'863'762'116631 ), 25'727'511'189, 0 );
+  _calculate_modifiers( VEST_price( 500, 1 ), PIXA_asset( 13'044 ), VEST_asset( 12'863'762'116631 ), 25'727'511'189, 0 );
 
-  _calculate_modifiers( VEST_price( 1, 1 ), HIVE_asset( 1'000 ), VEST_asset( 1000 ), 0, 0 );
+  _calculate_modifiers( VEST_price( 1, 1 ), PIXA_asset( 1'000 ), VEST_asset( 1000 ), 0, 0 );
 
-  _calculate_modifiers( VEST_price( 2, 1 ), HIVE_asset( 1'000 ), VEST_asset( 1000 ), 0, 1'000 );
-  _calculate_modifiers( VEST_price( 1, 2 ), HIVE_asset( 1'000 ), VEST_asset( 1000 ), 1'000, 0 );
+  _calculate_modifiers( VEST_price( 2, 1 ), PIXA_asset( 1'000 ), VEST_asset( 1000 ), 0, 1'000 );
+  _calculate_modifiers( VEST_price( 1, 2 ), PIXA_asset( 1'000 ), VEST_asset( 1000 ), 1'000, 0 );
 
-  _calculate_modifiers( VEST_price( 1'000, 1 ), HIVE_asset( 1'000 ), VEST_asset( 500000 ), 0, 500'000 );
-  _calculate_modifiers( VEST_price( 1, 1'000 ), HIVE_asset( 500'000 ), VEST_asset( 1000 ), 500'000, 0 );
+  _calculate_modifiers( VEST_price( 1'000, 1 ), PIXA_asset( 1'000 ), VEST_asset( 500000 ), 0, 500'000 );
+  _calculate_modifiers( VEST_price( 1, 1'000 ), PIXA_asset( 500'000 ), VEST_asset( 1000 ), 500'000, 0 );
 
-  _calculate_modifiers( VEST_price( 400, 2 ), HIVE_asset( 1'000 ), VEST_asset( 1'000000 ), 4'000, 0 );
+  _calculate_modifiers( VEST_price( 400, 2 ), PIXA_asset( 1'000 ), VEST_asset( 1'000000 ), 4'000, 0 );
 
-  _calculate_modifiers( VEST_price( 500, 1 ), HIVE_asset( 800'000 ), VEST_asset( 100'000000 ), 0, 300'000'000 );
+  _calculate_modifiers( VEST_price( 500, 1 ), PIXA_asset( 800'000 ), VEST_asset( 100'000000 ), 0, 300'000'000 );
 
-  _calculate_modifiers( VEST_price( 3, 1 ), HIVE_asset( 1'000 ), VEST_asset( 5000 ), 666, 0 );
+  _calculate_modifiers( VEST_price( 3, 1 ), PIXA_asset( 1'000 ), VEST_asset( 5000 ), 666, 0 );
 }
 
 BOOST_AUTO_TEST_CASE( state_modification )
@@ -82,37 +82,37 @@ BOOST_AUTO_TEST_CASE( state_modification )
 
     char _buffer[500];
 
-    sprintf( _buffer, "dgpo.total_vesting_fund_hive (%ld) dgpo.total_vesting_shares (%ld)", _dgpo.get_total_vesting_fund_hive().amount.value, _dgpo.get_total_vesting_shares().amount.value );
+    sprintf( _buffer, "dgpo.total_vesting_fund_pixa (%ld) dgpo.total_vesting_shares (%ld)", _dgpo.get_total_vesting_fund_pixa().amount.value, _dgpo.get_total_vesting_shares().amount.value );
     BOOST_TEST_MESSAGE( _buffer );
 
-    HIVE_asset _old_current_supply = _dgpo.get_current_supply();
-    HIVE_asset _old_virtual_supply = _dgpo.get_virtual_supply();
+    PIXA_asset _old_current_supply = _dgpo.get_current_supply();
+    PIXA_asset _old_virtual_supply = _dgpo.get_virtual_supply();
 
-    HIVE_asset _old_total_vested_hive  = _dgpo.get_total_vesting_fund_hive();
+    PIXA_asset _old_total_vested_pixa  = _dgpo.get_total_vesting_fund_pixa();
     VEST_asset _old_total_vests = _dgpo.get_total_vesting_shares();
-    HIVE_asset _hive_modifier;
+    PIXA_asset _pixa_modifier;
     VEST_asset _vest_modifier;
 
-    db_plugin->calculate_modifiers_according_to_new_price( _new_price, _old_total_vested_hive, _old_total_vests, _hive_modifier, _vest_modifier );
+    db_plugin->calculate_modifiers_according_to_new_price( _new_price, _old_total_vested_pixa, _old_total_vests, _pixa_modifier, _vest_modifier );
 
     db_plugin->debug_set_vest_price( _new_price );
 
-    sprintf( _buffer, "dgpo.current_supply (%ld) == _old_current_supply (%ld) + _hive_modifier (%ld)", _dgpo.get_current_supply().amount.value, _old_current_supply.amount.value, _hive_modifier.amount.value );
+    sprintf( _buffer, "dgpo.current_supply (%ld) == _old_current_supply (%ld) + _pixa_modifier (%ld)", _dgpo.get_current_supply().amount.value, _old_current_supply.amount.value, _pixa_modifier.amount.value );
     BOOST_TEST_MESSAGE( _buffer );
 
-    sprintf( _buffer, "dgpo.virtual_supply (%ld) == _old_virtual_supply (%ld) + _hive_modifier (%ld)", _dgpo.get_virtual_supply().amount.value, _old_virtual_supply.amount.value, _hive_modifier.amount.value );
+    sprintf( _buffer, "dgpo.virtual_supply (%ld) == _old_virtual_supply (%ld) + _pixa_modifier (%ld)", _dgpo.get_virtual_supply().amount.value, _old_virtual_supply.amount.value, _pixa_modifier.amount.value );
     BOOST_TEST_MESSAGE( _buffer );
 
-    sprintf( _buffer, "dgpo.total_vesting_fund_hive (%ld) == _old_total_vested_hive (%ld) + _hive_modifier (%ld)", _dgpo.get_total_vesting_fund_hive().amount.value, _old_total_vested_hive.amount.value, _hive_modifier.amount.value );
+    sprintf( _buffer, "dgpo.total_vesting_fund_pixa (%ld) == _old_total_vested_pixa (%ld) + _pixa_modifier (%ld)", _dgpo.get_total_vesting_fund_pixa().amount.value, _old_total_vested_pixa.amount.value, _pixa_modifier.amount.value );
     BOOST_TEST_MESSAGE( _buffer );
 
     sprintf( _buffer, "dgpo.total_vesting_shares (%ld) == _old_total_vests (%ld) + _vest_modifier (%ld)", _dgpo.get_total_vesting_shares().amount.value, _old_total_vests.amount.value, _vest_modifier.amount.value );
     BOOST_TEST_MESSAGE( _buffer );
 
-    BOOST_CHECK_EQUAL( _dgpo.get_current_supply(), _old_current_supply + _hive_modifier );
-    BOOST_CHECK_EQUAL( _dgpo.get_virtual_supply(), _old_virtual_supply + _hive_modifier );
+    BOOST_CHECK_EQUAL( _dgpo.get_current_supply(), _old_current_supply + _pixa_modifier );
+    BOOST_CHECK_EQUAL( _dgpo.get_virtual_supply(), _old_virtual_supply + _pixa_modifier );
 
-    BOOST_CHECK_EQUAL( _dgpo.get_total_vesting_fund_hive(), _old_total_vested_hive + _hive_modifier );
+    BOOST_CHECK_EQUAL( _dgpo.get_total_vesting_fund_pixa(), _old_total_vested_pixa + _pixa_modifier );
     BOOST_CHECK_EQUAL( _dgpo.get_total_vesting_shares(), _old_total_vests + _vest_modifier );
 
     generate_block();
@@ -120,12 +120,12 @@ BOOST_AUTO_TEST_CASE( state_modification )
   };
 
   {
-    BOOST_TEST_MESSAGE( "hive_modifier == 0 and vest_modifier > 0" );
+    BOOST_TEST_MESSAGE( "pixa_modifier == 0 and vest_modifier > 0" );
     _check_state( VEST_price( 2'000'000, 1 ) );
   }
 
   {
-    BOOST_TEST_MESSAGE( "hive_modifier > 0 and vest_modifier == 0" );
+    BOOST_TEST_MESSAGE( "pixa_modifier > 0 and vest_modifier == 0" );
     _check_state( VEST_price( 10'000, 1 ) );
   }
 
@@ -192,85 +192,85 @@ BOOST_AUTO_TEST_CASE( debug_update_with_explicit_hook )
   auto carol_to_dan = make_transfer( "carol", "dan", ASSET( "6.000 TESTS" ), carol_private_key, *db );
 
   // everyone starts with zero balance
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 0 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 0 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), HIVE_asset( 0 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), HIVE_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), PIXA_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), PIXA_asset( 0 ) );
 
   // make bindings of callbacks to transactions out of order (to show they are not executed immediately)
 
   db_plugin->debug_update( [&]( database& db ) // if it executed now, bob would go negative
   {
-    HIVE_asset delta( 10 );
+    PIXA_asset delta( 10 );
     direct_transfer( "bob", "alice", -delta, delta, db );
   }, 0, bob_to_dan->get_transaction_id() );
 
   db_plugin->debug_update( [&]( database& db )
   {
-    HIVE_asset delta( 200 );
+    PIXA_asset delta( 200 );
     direct_transfer( "initminer", "carol", -delta, delta, db );
   }, 0, alice_to_carol->get_transaction_id() );
 
   db_plugin->debug_update( [&]( database& db ) // if it ever executed, validate_database would fail
   {
-    direct_transfer( "dan", "alice", -HIVE_asset( 100 ), HIVE_asset( 10'000 ), db );
+    direct_transfer( "dan", "alice", -PIXA_asset( 100 ), PIXA_asset( 10'000 ), db );
   }, 0, carol_to_dan->get_transaction_id() );
 
   db_plugin->debug_update( [&]( database& db )
   {
-    HIVE_asset delta( 3'100 );
+    PIXA_asset delta( 3'100 );
     direct_transfer( "initminer", "alice", -delta, delta, db );
   }, 0, alice_to_bob->get_transaction_id() );
 
   // none of above debug_updates was executed yet
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 0 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 0 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), HIVE_asset( 0 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), HIVE_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), PIXA_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), PIXA_asset( 0 ) );
 
   auto& cp = get_chain_plugin();
 
   cp.push_transaction( alice_to_bob );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 3100 - 1000 ) ); // direct from initminer / normal to bob
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 1000 ) ); // normal from alice
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), HIVE_asset( 0 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), HIVE_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 3100 - 1000 ) ); // direct from initminer / normal to bob
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 1000 ) ); // normal from alice
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), PIXA_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), PIXA_asset( 0 ) );
 
   cp.push_transaction( alice_to_carol );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 3100 - 1000 - 2000 ) ); // ... / normal to carol
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 1000 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), HIVE_asset( 200 + 2000 ) ); // direct from initminer / normal from alice
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), HIVE_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 3100 - 1000 - 2000 ) ); // ... / normal to carol
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 1000 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), PIXA_asset( 200 + 2000 ) ); // direct from initminer / normal from alice
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), PIXA_asset( 0 ) );
 
   generate_block();
 
   // direct transfers are properly reapplied when block is generated
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 3100 - 1000 - 2000 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 1000 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), HIVE_asset( 200 + 2000 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), HIVE_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 3100 - 1000 - 2000 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 1000 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), PIXA_asset( 200 + 2000 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), PIXA_asset( 0 ) );
 
   // since bob was already given tokens by alice, he can transfer now
   cp.push_transaction( bob_to_dan );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 3100 - 1000 - 2000 + 10 ) ); // ... / direct from bob
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 1000 - 10 - 700 ) ); // ... / direct to alice / normal to dan
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), HIVE_asset( 200 + 2000 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), HIVE_asset( 700 ) ); // normal from bob
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 3100 - 1000 - 2000 + 10 ) ); // ... / direct from bob
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 1000 - 10 - 700 ) ); // ... / direct to alice / normal to dan
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), PIXA_asset( 200 + 2000 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), PIXA_asset( 700 ) ); // normal from bob
 
   // carol has not enough balance to make transfer - hooked callback will also have no lasting effect
   BOOST_REQUIRE_THROW( cp.push_transaction( carol_to_dan ), fc::assert_exception );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 3100 - 1000 - 2000 + 10 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 1000 - 10 - 700 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), HIVE_asset( 200 + 2000 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), HIVE_asset( 700 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 3100 - 1000 - 2000 + 10 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 1000 - 10 - 700 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), PIXA_asset( 200 + 2000 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), PIXA_asset( 700 ) );
 
   generate_block();
 
   // once again, check balances after block generation
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 3100 - 1000 - 2000 + 10 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 1000 - 10 - 700 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), HIVE_asset( 200 + 2000 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), HIVE_asset( 700 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 3100 - 1000 - 2000 + 10 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 1000 - 10 - 700 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), PIXA_asset( 200 + 2000 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), PIXA_asset( 700 ) );
 
   validate_database();
 }
@@ -293,124 +293,124 @@ BOOST_AUTO_TEST_CASE( debug_update_transaction_order )
   // - greg to temp (direct on internal(3))
   // if the order is different than above one of the transfers will fail
 
-  const HIVE_asset token( 1'000 );
-  const HIVE_asset step( 1 );
-  const HIVE_asset zero( 0 );
+  const PIXA_asset token( 1'000 );
+  const PIXA_asset step( 1 );
+  const PIXA_asset zero( 0 );
 
   auto carol_to_dan = make_transfer( "carol", "dan", ( token - step * 6 ).to_asset(), carol_private_key, *db );
   db_plugin->debug_update( [&]( database& db )
   {
-    HIVE_asset delta = token - step * 3;
+    PIXA_asset delta = token - step * 3;
     direct_transfer( "bob", "carol", -delta, delta, db );
   }, 0, carol_to_dan->get_transaction_id() );
 
   // before any action
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "eric" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "frank" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "greg" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "eric" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "frank" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "greg" ), zero );
 
   // initminer -> alice
   fund( "alice", token );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), token );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "eric" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "frank" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "greg" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), token );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "eric" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "frank" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "greg" ), zero );
 
   // alice -> bob
   db_plugin->debug_update( [&]( database& db )
   {
-    HIVE_asset delta = token - step * 1;
+    PIXA_asset delta = token - step * 1;
     direct_transfer( "alice", "bob", -delta, delta, db );
   } );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), ( step * 1 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), ( token - step * 1 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "eric" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "frank" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "greg" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), ( step * 1 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), ( token - step * 1 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "eric" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "frank" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "greg" ), zero );
 
   // bob -> carol -> dan
   get_chain_plugin().push_transaction( carol_to_dan );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), ( step * 1 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), ( step * 2 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), ( step * 3 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), ( token - step * 6 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "eric" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "frank" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "greg" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), ( step * 1 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), ( step * 2 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), ( step * 3 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), ( token - step * 6 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "eric" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "frank" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "greg" ), zero );
 
   // dan -> eric
   db_plugin->debug_update( [&]( database& db )
   {
-    HIVE_asset delta = token - step * 10;
+    PIXA_asset delta = token - step * 10;
     direct_transfer( "dan", "eric", -delta, delta, db );
   } );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), ( step * 1 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), ( step * 2 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), ( step * 3 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), ( step * 4 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "eric" ), ( token - step * 10 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "frank" ), zero );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "greg" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), ( step * 1 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), ( step * 2 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), ( step * 3 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), ( step * 4 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "eric" ), ( token - step * 10 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "frank" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "greg" ), zero );
 
   // eric -> frank
   db_plugin->debug_update( [&]( database& db )
   {
-    HIVE_asset delta = token - step * 15;
+    PIXA_asset delta = token - step * 15;
     direct_transfer( "eric", "frank", -delta, delta, db );
   } );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), ( step * 1 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), ( step * 2 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), ( step * 3 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), ( step * 4 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "eric" ), ( step * 5 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "frank" ), ( token - step * 15 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "greg" ), zero );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), ( step * 1 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), ( step * 2 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), ( step * 3 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), ( step * 4 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "eric" ), ( step * 5 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "frank" ), ( token - step * 15 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "greg" ), zero );
 
   // frank -> greg
   transfer( "frank", "greg", ( token - step * 21 ).to_asset(), "almost done", frank_private_key);
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), ( step * 1 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), ( step * 2 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), ( step * 3 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), ( step * 4 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "eric" ), ( step * 5 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "frank" ), ( step * 6 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "greg" ), ( token - step * 21 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), ( step * 1 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), ( step * 2 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), ( step * 3 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), ( step * 4 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "eric" ), ( step * 5 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "frank" ), ( step * 6 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "greg" ), ( token - step * 21 ) );
 
   // greg -> temp
   db_plugin->debug_update( [&]( database& db )
   {
-    HIVE_asset delta = token - step * 28;
+    PIXA_asset delta = token - step * 28;
     direct_transfer( "greg", HIVE_TEMP_ACCOUNT, -delta, delta, db );
   } );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), ( step * 1 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), ( step * 2 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), ( step * 3 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), ( step * 4 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "eric" ), ( step * 5 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "frank" ), ( step * 6 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "greg" ), ( step * 7 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( HIVE_TEMP_ACCOUNT ), ( token - step * 28 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), ( step * 1 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), ( step * 2 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), ( step * 3 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), ( step * 4 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "eric" ), ( step * 5 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "frank" ), ( step * 6 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "greg" ), ( step * 7 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( HIVE_TEMP_ACCOUNT ), ( token - step * 28 ) );
 
   generate_block();
 
   // state of balances should be the same after generating block
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 1 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 2 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "carol" ), HIVE_asset( 3 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "dan" ), HIVE_asset( 4 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "eric" ), HIVE_asset( 5 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "frank" ), HIVE_asset( 6 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( "greg" ), HIVE_asset( 7 ) );
-  BOOST_REQUIRE_EQUAL( get_hive_balance( HIVE_TEMP_ACCOUNT ), HIVE_asset( 972 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 1 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 2 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "carol" ), PIXA_asset( 3 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "dan" ), PIXA_asset( 4 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "eric" ), PIXA_asset( 5 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "frank" ), PIXA_asset( 6 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( "greg" ), PIXA_asset( 7 ) );
+  BOOST_REQUIRE_EQUAL( get_pixa_balance( HIVE_TEMP_ACCOUNT ), PIXA_asset( 972 ) );
 
   validate_database();
 }

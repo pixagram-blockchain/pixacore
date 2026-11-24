@@ -10,7 +10,7 @@ A user may vote for as many proposals as they wants, but you cannot vote twice f
 
 If a proxy is specified then all existing votes are deactivated. When the proxy is removed, the votes will be activated.   
 
-Your vote power depends on your HP.    
+Your vote power depends on your PXP.    
 
 If the operation account\_witness\_vote\_operation or account\_witness\_proxy\_operation or update\_proposal\_votes\_operation is not executed in HIVE\_GOVERNANCE\_VOTE\_EXPIRATION\_PERIOD, the votes are removed and the virtual operation: expired\_account\_notification\_operation is generated.    
 

@@ -364,7 +364,7 @@ BOOST_AUTO_TEST_CASE( activation_at_voted_time_and_no_quorum_ratchet )
     const auto name = HIVE_INIT_MINER_NAME + fc::to_string( i );
     account_create( name, init_account_pub_key );
     fund( name, HIVE_MIN_PRODUCER_REWARD );
-    vest( name, HIVE_asset( 50'000 ) ); // RC for the witness_update
+    vest( name, PIXA_asset( 50'000 ) ); // RC for the witness_update
     witness_create( name, init_account_priv_key, "foo.bar", init_account_pub_key, HIVE_MIN_PRODUCER_REWARD );
   }
   generate_blocks( 3 * HIVE_MAX_WITNESSES );
@@ -392,8 +392,8 @@ BOOST_AUTO_TEST_CASE( cashouts_before_at_and_after_activation )
   ACTORS( DEFAULT_VESTING, (alice)(bob)(carol) );
   // Genuine votes above Pixagram's rshare dust threshold, within the fixture's supply.
   for( const auto& name : { "alice", "bob", "carol" } )
-    vest( name, HIVE_asset( 3'000'000'000 ) );
-  set_price_feed( HBD_price( 1000, 1000 ), true );
+    vest( name, PIXA_asset( 3'000'000'000 ) );
+  set_price_feed( PXS_price( 1000, 1000 ), true );
   tally_votes( 7 );
 
   const auto post_time = activation_time() - fc::seconds( HIVE_CASHOUT_WINDOW_SECONDS );
@@ -440,8 +440,8 @@ BOOST_AUTO_TEST_CASE( cashouts_before_at_and_after_activation )
   BOOST_REQUIRE( !db->has_hardfork( HIVE_HARDFORK_1_29 ) );
   BOOST_REQUIRE( post_reward_fund().get_recent_claims() > PIXA_HF29_RECENT_CLAIMS );
   BOOST_REQUIRE( db->find_comment_cashout( *db->get_comment( "alice", std::string( "hf29-boundary" ) ) ) == nullptr );
-  BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).get_hbd_rewards(), HBD_asset( 0 ) );
-  BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).get_hive_rewards(), HIVE_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).get_pxs_rewards(), PXS_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).get_pixa_rewards(), PIXA_asset( 0 ) );
   BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).get_vest_rewards(), VEST_asset( 0 ) );
 
   generate_at( at_time );
@@ -449,14 +449,14 @@ BOOST_AUTO_TEST_CASE( cashouts_before_at_and_after_activation )
   BOOST_REQUIRE( post_reward_fund().get_recent_claims() == PIXA_HF29_RECENT_CLAIMS );
   BOOST_REQUIRE( db->find_comment_cashout( *db->get_comment( "bob", std::string( "hf29-boundary" ) ) ) == nullptr );
   // Cashouts precede process_hardforks within this same block: this post is still dust.
-  BOOST_REQUIRE_EQUAL( db->get_account( "bob" ).get_hbd_rewards(), HBD_asset( 0 ) );
-  BOOST_REQUIRE_EQUAL( db->get_account( "bob" ).get_hive_rewards(), HIVE_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( db->get_account( "bob" ).get_pxs_rewards(), PXS_asset( 0 ) );
+  BOOST_REQUIRE_EQUAL( db->get_account( "bob" ).get_pixa_rewards(), PIXA_asset( 0 ) );
   BOOST_REQUIRE_EQUAL( db->get_account( "bob" ).get_vest_rewards(), VEST_asset( 0 ) );
 
   generate_at( after_time );
   BOOST_REQUIRE( db->has_hardfork( HIVE_HARDFORK_1_29 ) );
   BOOST_REQUIRE( db->find_comment_cashout( *db->get_comment( "carol", std::string( "hf29-boundary" ) ) ) == nullptr );
-  BOOST_REQUIRE_GT( db->get_account( "carol" ).get_hbd_rewards(), HBD_asset( 0 ) );
+  BOOST_REQUIRE_GT( db->get_account( "carol" ).get_pxs_rewards(), PXS_asset( 0 ) );
   BOOST_REQUIRE_GT( db->get_account( "carol" ).get_vest_rewards(), VEST_asset( 0 ) );
   // Earlier cashouts are consumed, not retried or compensated after the reset.
   BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).get_vest_rewards(), VEST_asset( 0 ) );

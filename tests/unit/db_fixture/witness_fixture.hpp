@@ -60,8 +60,8 @@ struct witness_fixture : public hived_fixture
     theApp.init_signals_handler();
 
     configuration_data.set_initial_asset_supply(
-      HIVE_asset( 200'000'000'000ll ), HBD_asset( 1'000'000'000ll ),
-      HIVE_asset( 100'000'000'000ll ), VEST_price( 1'800, 1'000 )
+      PIXA_asset( 200'000'000'000ll ), PXS_asset( 1'000'000'000ll ),
+      PIXA_asset( 100'000'000'000ll ), VEST_price( 1'800, 1'000 )
     );
     if( genesis_time == fc::time_point_sec() )
     {
@@ -334,7 +334,7 @@ public:
 
         db->with_read_lock( [&]()
         {
-          BOOST_REQUIRE_EQUAL( get_hbd_balance( "carol" ).amount.value, 2100 );
+          BOOST_REQUIRE_EQUAL( get_pxs_balance( "carol" ).amount.value, 2100 );
         } );
 
         ilog( "'API' thread finished" );

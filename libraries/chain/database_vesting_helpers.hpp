@@ -10,7 +10,7 @@ namespace hive { namespace chain {
 // we modify the database.
 // This allows us to implement virtual op pre-notifications in the Before function.
 template< typename Before >
-VEST_asset create_vesting2( database& db, const account_object& to_account, temp_HIVE_balance& liquid, bool is_reward, Before&& before_vesting_callback )
+VEST_asset create_vesting2( database& db, const account_object& to_account, temp_PIXA_balance& liquid, bool is_reward, Before&& before_vesting_callback )
 {
   VEST_asset new_vesting = db.adjust_account_vesting_balance( to_account, liquid, is_reward, std::forward<Before>( before_vesting_callback ) );
 

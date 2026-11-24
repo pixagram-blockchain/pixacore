@@ -22,24 +22,24 @@ using hive::protocol::tiny_asset;
 using hive::protocol::share_type;
 using hive::protocol::asset_symbol_type;
 
-using HBD_balance = tiny_balance< HIVE_ASSET_NUM_HBD >;
-using HIVE_balance = tiny_balance< HIVE_ASSET_NUM_HIVE >;
+using PXS_balance = tiny_balance< HIVE_ASSET_NUM_PXS >;
+using HIVE_balance = tiny_balance< HIVE_ASSET_NUM_PIXA >;
 using VEST_balance = tiny_balance< HIVE_ASSET_NUM_VESTS >;
 
 class balance_base;
 template< uint32_t _SYMBOL >
 class tiny_balance_base;
 
-using HBD_balance_base = tiny_balance_base< HIVE_ASSET_NUM_HBD >;
-using HIVE_balance_base = tiny_balance_base< HIVE_ASSET_NUM_HIVE >;
+using PXS_balance_base = tiny_balance_base< HIVE_ASSET_NUM_PXS >;
+using HIVE_balance_base = tiny_balance_base< HIVE_ASSET_NUM_PIXA >;
 using VEST_balance_base = tiny_balance_base< HIVE_ASSET_NUM_VESTS >;
 
 class temp_balance;
 template< uint32_t _SYMBOL >
 class temp_tiny_balance;
 
-using temp_HBD_balance = temp_tiny_balance< HIVE_ASSET_NUM_HBD >;
-using temp_HIVE_balance = temp_tiny_balance< HIVE_ASSET_NUM_HIVE >;
+using temp_PXS_balance = temp_tiny_balance< HIVE_ASSET_NUM_PXS >;
+using temp_PIXA_balance = temp_tiny_balance< HIVE_ASSET_NUM_PIXA >;
 using temp_VEST_balance = temp_tiny_balance< HIVE_ASSET_NUM_VESTS >;
 
 // classes allowed to contain members of type balance:
@@ -74,7 +74,7 @@ class balance_base
   asset funds;
 
 protected:
-  balance_base( asset_symbol_type id = HIVE_SYMBOL ) : funds( 0, id ) {}
+  balance_base( asset_symbol_type id = PIXA_SYMBOL ) : funds( 0, id ) {}
   balance_base( balance_base&& b ) : funds( b.funds ) { b.funds.amount = 0; }
   balance_base& operator=( balance_base&& b )
   {
@@ -273,7 +273,7 @@ class balance final : public balance_base
   friend class limit_order_object;
 
 protected:
-  balance( asset_symbol_type id = HIVE_SYMBOL ) : balance_base( id ) {} // default constructor is needed for deserialization
+  balance( asset_symbol_type id = PIXA_SYMBOL ) : balance_base( id ) {} // default constructor is needed for deserialization
   balance( balance&& b ) = default;
   balance& operator=( balance&& b ) = default;
   balance( const balance& ) = default;
@@ -411,18 +411,18 @@ void from_variant( const fc::variant& v, hive::chain::tiny_balance< _SYMBOL >& t
 
 FC_REFLECT( hive::chain::balance_base, (funds) )
 
-FC_REFLECT( hive::chain::HBD_balance_base, (funds) )
+FC_REFLECT( hive::chain::PXS_balance_base, (funds) )
 FC_REFLECT( hive::chain::HIVE_balance_base, (funds) )
 FC_REFLECT( hive::chain::VEST_balance_base, (funds) )
 
 FC_REFLECT_DERIVED( hive::chain::balance, (hive::chain::balance_base), BOOST_PP_SEQ_NIL )
 
-FC_REFLECT_DERIVED( hive::chain::HBD_balance, (hive::chain::HBD_balance_base), BOOST_PP_SEQ_NIL )
+FC_REFLECT_DERIVED( hive::chain::PXS_balance, (hive::chain::PXS_balance_base), BOOST_PP_SEQ_NIL )
 FC_REFLECT_DERIVED( hive::chain::HIVE_balance, (hive::chain::HIVE_balance_base), BOOST_PP_SEQ_NIL )
 FC_REFLECT_DERIVED( hive::chain::VEST_balance, (hive::chain::VEST_balance_base), BOOST_PP_SEQ_NIL )
 
 FC_REFLECT_DERIVED( hive::chain::temp_balance, (hive::chain::balance_base), BOOST_PP_SEQ_NIL )
 
-FC_REFLECT_DERIVED( hive::chain::temp_HBD_balance, (hive::chain::HBD_balance_base), BOOST_PP_SEQ_NIL )
-FC_REFLECT_DERIVED( hive::chain::temp_HIVE_balance, (hive::chain::HIVE_balance_base), BOOST_PP_SEQ_NIL )
+FC_REFLECT_DERIVED( hive::chain::temp_PXS_balance, (hive::chain::PXS_balance_base), BOOST_PP_SEQ_NIL )
+FC_REFLECT_DERIVED( hive::chain::temp_PIXA_balance, (hive::chain::HIVE_balance_base), BOOST_PP_SEQ_NIL )
 FC_REFLECT_DERIVED( hive::chain::temp_VEST_balance, (hive::chain::VEST_balance_base), BOOST_PP_SEQ_NIL )

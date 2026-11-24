@@ -23,12 +23,12 @@ message escrow_rejected {
   // @param {number} escrow_id - id of cancelled escrow transfer
   required uint32 escrow_id = 4 [json_name = "escrow_id"];
 
-  // @param {asset} hbd_amount - (HBD) funds from cancelled escrow transfer (same amount as in escrow_transfer_operation)
-  required asset  hbd_amount = 5 [json_name = "hbd_amount"];
+  // @param {asset} pxs_amount - (PXS) funds from cancelled escrow transfer (same amount as in escrow_transfer_operation)
+  required asset  pxs_amount = 5 [json_name = "pxs_amount"];
 
-  // @param {asset} hive_amount - (HIVE) funds from cancelled escrow transfer (same amount as in escrow_transfer_operation)
-  required asset  hive_amount = 6 [json_name = "hive_amount"];
+  // @param {asset} pixa_amount - (PIXA) funds from cancelled escrow transfer (same amount as in escrow_transfer_operation)
+  required asset  pixa_amount = 6 [json_name = "pixa_amount"];
 
-  // @param {asset} fee - (HIVE of HBD) fee from cancelled escrow transfer (same amount as in escrow_transfer_operation)
+  // @param {asset} fee - (PIXA of PXS) fee from cancelled escrow transfer (same amount as in escrow_transfer_operation)
   required asset  fee = 7;
 }

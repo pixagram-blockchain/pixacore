@@ -103,11 +103,11 @@ BOOST_AUTO_TEST_CASE( comment_payout_equalize )
     // A,B,D : posters
     // U,V,W : voters
 
-    // set a ridiculously high HIVE price ($1 / satoshi) to disable dust threshold
-    set_price_feed( HBD_price( 1000, 1 ) );
+    // set a ridiculously high PIXA price ($1 / satoshi) to disable dust threshold
+    set_price_feed( PXS_price( 1000, 1 ) );
 
     for( const auto& voter : voters )
-      vest( voter.name, HIVE_asset( 10'000 ) );
+      vest( voter.name, PIXA_asset( 10'000 ) );
 
     // authors all write in the same block, but Bob declines payout
     for( const auto& author : authors )
@@ -159,12 +159,12 @@ BOOST_AUTO_TEST_CASE( comment_payout_equalize )
     for( const auto& author : authors )
     {
       const account_object& a = db->get_account(author.name);
-      ilog( "${n} : ${hive} ${hbd}", ("n", author.name)("hive", a.get_hive_rewards())("hbd", a.get_hbd_rewards()) );
+      ilog( "${n} : ${hive} ${pxs}", ("n", author.name)("hive", a.get_pixa_rewards())("pxs", a.get_pxs_rewards()) );
     }
     for( const auto& voter : voters )
     {
       const account_object& a = db->get_account(voter.name);
-      ilog( "${n} : ${hive} ${hbd}", ("n", voter.name)("hive", a.get_hive_rewards())("hbd", a.get_hbd_rewards()) );
+      ilog( "${n} : ${hive} ${pxs}", ("n", voter.name)("hive", a.get_pixa_rewards())("pxs", a.get_pxs_rewards()) );
     }
     */
 
@@ -172,9 +172,9 @@ BOOST_AUTO_TEST_CASE( comment_payout_equalize )
     const account_object& bob_account   = db->get_account("bob");
     const account_object& dave_account  = db->get_account("dave");
 
-    BOOST_CHECK_EQUAL( alice_account.get_hbd_rewards(), HBD_asset( 250'000'000 ) );
-    BOOST_CHECK_EQUAL( bob_account.get_hbd_rewards(), HBD_asset( 0 ) );
-    BOOST_CHECK_EQUAL( dave_account.get_hbd_rewards(), alice_account.get_hbd_rewards() );
+    BOOST_CHECK_EQUAL( alice_account.get_pxs_rewards(), PXS_asset( 250'000'000 ) );
+    BOOST_CHECK_EQUAL( bob_account.get_pxs_rewards(), PXS_asset( 0 ) );
+    BOOST_CHECK_EQUAL( dave_account.get_pxs_rewards(), alice_account.get_pxs_rewards() );
   }
   FC_LOG_AND_RETHROW()
 }
@@ -188,12 +188,12 @@ BOOST_AUTO_TEST_CASE( comment_payout_dust )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    // Pixagram's vesting price needs substantially more HIVE than the original
+    // Pixagram's vesting price needs substantially more PIXA than the original
     // Hive fixture for both votes to exceed HIVE_VOTE_DUST_THRESHOLD.
-    vest( "alice", HIVE_asset( 3'000'000'000 ) );
-    vest( "bob", HIVE_asset( 3'000'000'000 ) );
+    vest( "alice", PIXA_asset( 3'000'000'000 ) );
+    vest( "bob", PIXA_asset( 3'000'000'000 ) );
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
 
     generate_block();
     validate_database();
@@ -249,11 +249,11 @@ BOOST_AUTO_TEST_CASE( comment_payout_dust )
 
     generate_blocks( db->find_comment_cashout( *db->get_comment( "alice", string( "test" ) ) )->get_cashout_time() );
 
-    // If comments are paid out independent of order, then the last satoshi of HIVE cannot be divided among them
+    // If comments are paid out independent of order, then the last satoshi of PIXA cannot be divided among them
     const auto& rf = db->get_reward_fund();
-    BOOST_REQUIRE_EQUAL( rf.get_reward_balance(), HIVE_asset( 1 ) );
-    BOOST_REQUIRE_GT( db->get_account( "alice" ).get_hbd_rewards(), HBD_asset( 0 ) );
-    BOOST_REQUIRE_GT( db->get_account( "bob" ).get_hbd_rewards(), HBD_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( rf.get_reward_balance(), PIXA_asset( 1 ) );
+    BOOST_REQUIRE_GT( db->get_account( "alice" ).get_pxs_rewards(), PXS_asset( 0 ) );
+    BOOST_REQUIRE_GT( db->get_account( "bob" ).get_pxs_rewards(), PXS_asset( 0 ) );
 
     validate_database();
 
@@ -272,7 +272,7 @@ BOOST_AUTO_TEST_CASE( reward_funds )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
 
     comment_operation comment;
@@ -310,8 +310,8 @@ BOOST_AUTO_TEST_CASE( reward_funds )
       const auto& post_rf = db->get_reward_fund();
 
       BOOST_REQUIRE_EQUAL( post_rf.reward_balance.amount, 0 );
-      BOOST_REQUIRE_GT( get_hbd_rewards( "alice" ).amount, 0 );
-      BOOST_REQUIRE_EQUAL( get_hbd_rewards( "bob" ).amount, 0 );
+      BOOST_REQUIRE_GT( get_pxs_rewards( "alice" ).amount, 0 );
+      BOOST_REQUIRE_EQUAL( get_pxs_rewards( "bob" ).amount, 0 );
       validate_database();
     }
 
@@ -321,8 +321,8 @@ BOOST_AUTO_TEST_CASE( reward_funds )
       const auto& post_rf = db->get_reward_fund();
 
       BOOST_REQUIRE_GT( post_rf.reward_balance.amount, 0 );
-      BOOST_REQUIRE_GT( get_hbd_rewards( "alice" ).amount, 0 );
-      BOOST_REQUIRE_GT( get_hbd_rewards( "bob" ).amount, 0 );
+      BOOST_REQUIRE_GT( get_pxs_rewards( "alice" ).amount, 0 );
+      BOOST_REQUIRE_GT( get_pxs_rewards( "bob" ).amount, 0 );
       validate_database();
     }
   }
@@ -338,7 +338,7 @@ BOOST_AUTO_TEST_CASE( recent_claims_decay )
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
     generate_block();
     const auto& post_rf = db->get_reward_fund();
 
@@ -404,12 +404,12 @@ BOOST_AUTO_TEST_CASE( comment_payout )
   try
   {
     ACTORS( DEFAULT_VESTING, (alice)(bob)(sam)(dave) );
-    vest( "alice", HIVE_asset( 10'000 ) );
-    vest( "bob", HIVE_asset( 7'500 ) );
-    vest( "sam", HIVE_asset( 8'000 ) );
-    vest( "dave", HIVE_asset( 5'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
+    vest( "bob", PIXA_asset( 7'500 ) );
+    vest( "sam", PIXA_asset( 8'000 ) );
+    vest( "dave", PIXA_asset( 5'000 ) );
 
-    HBD_price exchange_rate( 1000, 1000 );
+    PXS_price exchange_rate( 1000, 1000 );
     set_price_feed( exchange_rate );
 
     signed_transaction tx;
@@ -470,26 +470,26 @@ BOOST_AUTO_TEST_CASE( comment_payout )
 
     //generate_blocks( db->get_comment( "bob", string( "test" ) ).get_cashout_time() - HIVE_BLOCK_INTERVAL, true );
 
-    auto reward_hive = db->get_reward_fund().get_reward_balance() + HIVE_asset( 1'667 );
+    auto reward_pixa = db->get_reward_fund().get_reward_balance() + PIXA_asset( 1'667 );
     auto total_rshares2 = db->get_reward_fund().get_recent_claims();
     auto bob_comment_rshares = db->get_comment( "bob", string( "test" ) ).get_net_rshares();
     auto bob_vest_shares = get_vesting( "bob" );
-    auto bob_hbd_balance = get_hbd_balance( "bob" );
+    auto bob_pxs_balance = get_pxs_balance( "bob" );
 
-    auto bob_comment_payout = asset( ( ( uint128_t( bob_comment_rshares.value ) * bob_comment_rshares.value * reward_hive.amount.value ) / total_rshares2 ).to_uint64(), HIVE_SYMBOL );
-    auto bob_comment_discussion_rewards = asset( bob_comment_payout.amount / 4, HIVE_SYMBOL );
+    auto bob_comment_payout = asset( ( ( uint128_t( bob_comment_rshares.value ) * bob_comment_rshares.value * reward_pixa.amount.value ) / total_rshares2 ).to_uint64(), PIXA_SYMBOL );
+    auto bob_comment_discussion_rewards = asset( bob_comment_payout.amount / 4, PIXA_SYMBOL );
     bob_comment_payout -= bob_comment_discussion_rewards;
-    auto bob_comment_hbd_reward = db->to_hbd( HIVE_asset( bob_comment_payout.amount / 2 ) );
-    auto bob_comment_vesting_reward = ( bob_comment_payout - asset( bob_comment_payout.amount / 2, HIVE_SYMBOL) ) * db->get_dynamic_global_properties().get_vesting_share_price().to_price();
+    auto bob_comment_pxs_reward = db->to_pxs( PIXA_asset( bob_comment_payout.amount / 2 ) );
+    auto bob_comment_vesting_reward = ( bob_comment_payout - asset( bob_comment_payout.amount / 2, PIXA_SYMBOL) ) * db->get_dynamic_global_properties().get_vesting_share_price().to_price();
 
     BOOST_TEST_MESSAGE( "Cause first payout" );
 
     generate_block();
 
-    BOOST_REQUIRE_EQUAL( db->get_reward_fund().get_reward_balance(), reward_hive - bob_comment_payout );
-    BOOST_REQUIRE_EQUAL( db->get_comment( "bob", string( "test" ) ).total_payout_value, bob_comment_vesting_reward * db->get_dynamic_global_properties().get_vesting_share_price().to_price() + bob_comment_hbd_reward * exchange_rate );
+    BOOST_REQUIRE_EQUAL( db->get_reward_fund().get_reward_balance(), reward_pixa - bob_comment_payout );
+    BOOST_REQUIRE_EQUAL( db->get_comment( "bob", string( "test" ) ).total_payout_value, bob_comment_vesting_reward * db->get_dynamic_global_properties().get_vesting_share_price().to_price() + bob_comment_pxs_reward * exchange_rate );
     BOOST_REQUIRE_EQUAL( get_vesting( "bob" ), bob_vest_shares + bob_comment_vesting_reward );
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "bob" ), bob_hbd_balance + bob_comment_hbd_reward );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "bob" ), bob_pxs_balance + bob_comment_pxs_reward );
 
     BOOST_TEST_MESSAGE( "Testing no payout when less than $0.02" );
 
@@ -528,14 +528,14 @@ BOOST_AUTO_TEST_CASE( comment_payout )
     push_transaction( tx, dave_private_key );
 
     bob_vest_shares = get_vesting( "bob" );
-    bob_hbd_balance = get_hbd_balance( "bob" );
+    bob_pxs_balance = get_pxs_balance( "bob" );
 
     validate_database();
 
     generate_block();
 
     BOOST_REQUIRE_EQUAL( bob_vest_shares, get_vesting( "bob" ) );
-    BOOST_REQUIRE_EQUAL( bob_hbd_balance, get_hbd_balance( "bob" ) );
+    BOOST_REQUIRE_EQUAL( bob_pxs_balance, get_pxs_balance( "bob" ) );
     validate_database();
   }
   FC_LOG_AND_RETHROW()
@@ -547,12 +547,12 @@ BOOST_AUTO_TEST_CASE( comment_payout )
   try
   {
     ACTORS( DEFAULT_VESTING, (alice)(bob)(sam)(dave) );
-    vest( "alice", HIVE_asset( 10'000 ) );
-    vest( "bob", HIVE_asset( 7'500 ) );
-    vest( "sam", HIVE_asset( 8'000 ) );
-    vest( "dave", HIVE_asset( 5'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
+    vest( "bob", PIXA_asset( 7'500 ) );
+    vest( "sam", PIXA_asset( 8'000 ) );
+    vest( "dave", PIXA_asset( 5'000 ) );
 
-    HBD_price exchange_rate( 1000, 1000 );
+    PXS_price exchange_rate( 1000, 1000 );
     set_price_feed( exchange_rate );
 
     auto& gpo = db->get_dynamic_global_properties();
@@ -646,27 +646,27 @@ BOOST_AUTO_TEST_CASE( comment_payout )
     BOOST_REQUIRE( db->get_comment( "bob", string( "test" ) ).get_net_rshares() > 0 );
     validate_database();
 
-    auto reward_hive = db->get_reward_fund().get_reward_balance() + HIVE_asset( 2'000 );
+    auto reward_pixa = db->get_reward_fund().get_reward_balance() + PIXA_asset( 2'000 );
     auto total_rshares2 = db->get_reward_fund().get_recent_claims();
     auto bob_comment_vote_total = db->get_comment( "bob", string( "test" ) ).get_total_vote_weight();
     auto bob_comment_rshares = db->get_comment( "bob", string( "test" ) ).get_net_rshares();
-    auto bob_hbd_balance = get_hbd_balance( "bob" );
+    auto bob_pxs_balance = get_pxs_balance( "bob" );
     auto alice_vest_shares = get_vesting( "alice" );
     auto bob_vest_shares = get_vesting( "bob" );
     auto sam_vest_shares = get_vesting( "sam" );
     auto dave_vest_shares = get_vesting( "dave" );
 
-    auto bob_comment_payout = asset( ( ( uint128_t( bob_comment_rshares.value ) * bob_comment_rshares.value * reward_hive.amount.value ) / total_rshares2 ).to_uint64(), HIVE_SYMBOL );
-    auto bob_comment_vote_rewards = asset( bob_comment_payout.amount / 2, HIVE_SYMBOL );
+    auto bob_comment_payout = asset( ( ( uint128_t( bob_comment_rshares.value ) * bob_comment_rshares.value * reward_pixa.amount.value ) / total_rshares2 ).to_uint64(), PIXA_SYMBOL );
+    auto bob_comment_vote_rewards = asset( bob_comment_payout.amount / 2, PIXA_SYMBOL );
     bob_comment_payout -= bob_comment_vote_rewards;
-    auto bob_comment_hbd_reward = HIVE_asset( bob_comment_payout.amount / 2 ) * exchange_rate;
-    auto bob_comment_vesting_reward = ( bob_comment_payout - asset( bob_comment_payout.amount / 2, HIVE_SYMBOL ) ) * db->get_dynamic_global_properties().get_vesting_share_price().to_price();
+    auto bob_comment_pxs_reward = PIXA_asset( bob_comment_payout.amount / 2 ) * exchange_rate;
+    auto bob_comment_vesting_reward = ( bob_comment_payout - asset( bob_comment_payout.amount / 2, PIXA_SYMBOL ) ) * db->get_dynamic_global_properties().get_vesting_share_price().to_price();
     auto unclaimed_payments = bob_comment_vote_rewards;
-    auto alice_vote_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "bob", string( "test" ).id, db->get_account( "alice" ) ).get_id() ) )->get_weight() ) * bob_comment_vote_rewards.amount.value ) / bob_comment_vote_total ), HIVE_SYMBOL );
+    auto alice_vote_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "bob", string( "test" ).id, db->get_account( "alice" ) ).get_id() ) )->get_weight() ) * bob_comment_vote_rewards.amount.value ) / bob_comment_vote_total ), PIXA_SYMBOL );
     auto alice_vote_vesting = alice_vote_reward * db->get_dynamic_global_properties().get_vesting_share_price().to_price();
-    auto bob_vote_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "bob", string( "test" ).id, db->get_account( "bob" ) ).get_id() ) )->get_weight() ) * bob_comment_vote_rewards.amount.value ) / bob_comment_vote_total ), HIVE_SYMBOL );
+    auto bob_vote_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "bob", string( "test" ).id, db->get_account( "bob" ) ).get_id() ) )->get_weight() ) * bob_comment_vote_rewards.amount.value ) / bob_comment_vote_total ), PIXA_SYMBOL );
     auto bob_vote_vesting = bob_vote_reward * db->get_dynamic_global_properties().get_vesting_share_price().to_price();
-    auto sam_vote_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "bob", string( "test" ).id, db->get_account( "sam" ) ).get_id() ) )->get_weight() ) * bob_comment_vote_rewards.amount.value ) / bob_comment_vote_total ), HIVE_SYMBOL );
+    auto sam_vote_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "bob", string( "test" ).id, db->get_account( "sam" ) ).get_id() ) )->get_weight() ) * bob_comment_vote_rewards.amount.value ) / bob_comment_vote_total ), PIXA_SYMBOL );
     auto sam_vote_vesting = sam_vote_reward * db->get_dynamic_global_properties().get_vesting_share_price().to_price();
     unclaimed_payments -= ( alice_vote_reward + bob_vote_reward + sam_vote_reward );
 
@@ -676,9 +676,9 @@ BOOST_AUTO_TEST_CASE( comment_payout )
 
     auto bob_comment_reward = get_last_operations( 1 )[0].get< comment_reward_operation >();
 
-    BOOST_REQUIRE_EQUAL( db->get_reward_fund().get_reward_balance(), reward_hive - ( bob_comment_payout + bob_comment_vote_rewards - unclaimed_payments ) );
-    BOOST_REQUIRE_EQUAL( db->get_comment( "bob", string( "test" ) ).total_payout_value, ( ( bob_comment_vesting_reward * db->get_dynamic_global_properties().get_vesting_share_price().to_price() ) + ( bob_comment_hbd_reward * exchange_rate ) ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "bob" ), bob_hbd_balance + bob_comment_hbd_reward );
+    BOOST_REQUIRE_EQUAL( db->get_reward_fund().get_reward_balance(), reward_pixa - ( bob_comment_payout + bob_comment_vote_rewards - unclaimed_payments ) );
+    BOOST_REQUIRE_EQUAL( db->get_comment( "bob", string( "test" ) ).total_payout_value, ( ( bob_comment_vesting_reward * db->get_dynamic_global_properties().get_vesting_share_price().to_price() ) + ( bob_comment_pxs_reward * exchange_rate ) ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "bob" ), bob_pxs_balance + bob_comment_pxs_reward );
     BOOST_REQUIRE( db->get_comment( "alice", string( "test" ) ).get_net_rshares() > 0 );
     BOOST_REQUIRE_EQUAL( db->get_comment( "bob", string( "test" ) ).get_net_rshares(), 0 );
     BOOST_REQUIRE_EQUAL( get_vesting( "alice" ), alice_vest_shares + alice_vote_vesting );
@@ -687,7 +687,7 @@ BOOST_AUTO_TEST_CASE( comment_payout )
     BOOST_REQUIRE_EQUAL( get_vesting( "dave" ), dave_vest_shares );
     BOOST_REQUIRE_EQUAL( bob_comment_reward.author, "bob" );
     BOOST_REQUIRE_EQUAL( bob_comment_reward.permlink, "test" );
-    BOOST_REQUIRE_EQUAL( bob_comment_reward.payout, bob_comment_hbd_reward );
+    BOOST_REQUIRE_EQUAL( bob_comment_reward.payout, bob_comment_pxs_reward );
     BOOST_REQUIRE_EQUAL( bob_comment_reward.vesting_payout, bob_comment_vesting_reward );
     BOOST_REQUIRE( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "alice" ) ).id ) ) != vote_idx.end() );
     BOOST_REQUIRE( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "bob" ) ).id   ) ) != vote_idx.end() );
@@ -715,44 +715,44 @@ BOOST_AUTO_TEST_CASE( comment_payout )
 
     BOOST_TEST_MESSAGE( "Generate block to cause payout" );
 
-    reward_hive = db->get_reward_fund().get_reward_balance() + HIVE_asset( 2'000 );
+    reward_pixa = db->get_reward_fund().get_reward_balance() + PIXA_asset( 2'000 );
     total_rshares2 = db->get_reward_fund().get_recent_claims();
     auto alice_comment_vote_total = db->get_comment( "alice", string( "test" ) ).get_total_vote_weight();
     auto alice_comment_rshares = db->get_comment( "alice", string( "test" ) ).get_net_rshares();
-    auto alice_hbd_balance = get_hbd_balance( "alice" );
+    auto alice_pxs_balance = get_pxs_balance( "alice" );
     alice_vest_shares = get_vesting( "alice" );
     bob_vest_shares = get_vesting( "bob" );
     sam_vest_shares = get_vesting( "sam" );
     dave_vest_shares = get_vesting( "dave" );
 
     u256 rs( alice_comment_rshares.value );
-    u256 rf( reward_hive.amount.value );
+    u256 rf( reward_pixa.amount.value );
     u256 trs2 = total_rshares2.hi;
     trs2 = ( trs2 << 64 ) + total_rshares2.lo;
     auto rs2 = rs*rs;
 
-    auto alice_comment_payout = asset( static_cast< uint64_t >( ( rf * rs2 ) / trs2 ), HIVE_SYMBOL );
-    auto alice_comment_vote_rewards = asset( alice_comment_payout.amount / 2, HIVE_SYMBOL );
+    auto alice_comment_payout = asset( static_cast< uint64_t >( ( rf * rs2 ) / trs2 ), PIXA_SYMBOL );
+    auto alice_comment_vote_rewards = asset( alice_comment_payout.amount / 2, PIXA_SYMBOL );
     alice_comment_payout -= alice_comment_vote_rewards;
-    auto alice_comment_hbd_reward = HIVE_asset( alice_comment_payout.amount / 2 ) * exchange_rate;
-    auto alice_comment_vesting_reward = ( alice_comment_payout - asset( alice_comment_payout.amount / 2, HIVE_SYMBOL ) ) * db->get_dynamic_global_properties().get_vesting_share_price().to_price();
+    auto alice_comment_pxs_reward = PIXA_asset( alice_comment_payout.amount / 2 ) * exchange_rate;
+    auto alice_comment_vesting_reward = ( alice_comment_payout - asset( alice_comment_payout.amount / 2, PIXA_SYMBOL ) ) * db->get_dynamic_global_properties().get_vesting_share_price().to_price();
     unclaimed_payments = alice_comment_vote_rewards;
-    alice_vote_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "alice" ) ).get_id() ) )->get_weight() ) * alice_comment_vote_rewards.amount.value ) / alice_comment_vote_total ), HIVE_SYMBOL );
+    alice_vote_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "alice" ) ).get_id() ) )->get_weight() ) * alice_comment_vote_rewards.amount.value ) / alice_comment_vote_total ), PIXA_SYMBOL );
     alice_vote_vesting = alice_vote_reward * db->get_dynamic_global_properties().get_vesting_share_price().to_price();
-    bob_vote_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "bob" ) ).get_id() ) )->get_weight() ) * alice_comment_vote_rewards.amount.value ) / alice_comment_vote_total ), HIVE_SYMBOL );
+    bob_vote_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "bob" ) ).get_id() ) )->get_weight() ) * alice_comment_vote_rewards.amount.value ) / alice_comment_vote_total ), PIXA_SYMBOL );
     bob_vote_vesting = bob_vote_reward * db->get_dynamic_global_properties().get_vesting_share_price().to_price();
-    sam_vote_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "sam" ) ).get_id() ) )->get_weight() ) * alice_comment_vote_rewards.amount.value ) / alice_comment_vote_total ), HIVE_SYMBOL );
+    sam_vote_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "sam" ) ).get_id() ) )->get_weight() ) * alice_comment_vote_rewards.amount.value ) / alice_comment_vote_total ), PIXA_SYMBOL );
     sam_vote_vesting = sam_vote_reward * db->get_dynamic_global_properties().get_vesting_share_price().to_price();
-    auto dave_vote_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "dave" ) ).get_id() ) )->get_weight() ) * alice_comment_vote_rewards.amount.value ) / alice_comment_vote_total ), HIVE_SYMBOL );
+    auto dave_vote_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "dave" ) ).get_id() ) )->get_weight() ) * alice_comment_vote_rewards.amount.value ) / alice_comment_vote_total ), PIXA_SYMBOL );
     auto dave_vote_vesting = dave_vote_reward * db->get_dynamic_global_properties().get_vesting_share_price().to_price();
     unclaimed_payments -= ( alice_vote_reward + bob_vote_reward + sam_vote_reward + dave_vote_reward );
 
     generate_block();
     auto alice_comment_reward = get_last_operations( 1 )[0].get< comment_reward_operation >();
 
-    BOOST_REQUIRE_EQUAL( db->get_reward_fund().get_reward_balance() + alice_comment_payout + alice_comment_vote_rewards - unclaimed_payments, reward_hive );
-    BOOST_REQUIRE_EQUAL( db->get_comment( "alice", string( "test" ) ).total_payout_value, ( alice_comment_vesting_reward * db->get_dynamic_global_properties().get_vesting_share_price().to_price() ) + ( alice_comment_hbd_reward * exchange_rate ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "alice" ), alice_hbd_balance + alice_comment_hbd_reward );
+    BOOST_REQUIRE_EQUAL( db->get_reward_fund().get_reward_balance() + alice_comment_payout + alice_comment_vote_rewards - unclaimed_payments, reward_pixa );
+    BOOST_REQUIRE_EQUAL( db->get_comment( "alice", string( "test" ) ).total_payout_value, ( alice_comment_vesting_reward * db->get_dynamic_global_properties().get_vesting_share_price().to_price() ) + ( alice_comment_pxs_reward * exchange_rate ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "alice" ), alice_pxs_balance + alice_comment_pxs_reward );
     BOOST_REQUIRE_EQUAL( db->get_comment( "alice", string( "test" ) ).get_net_rshares(), 0 );
     BOOST_REQUIRE_EQUAL( db->get_comment( "alice", string( "test" ) ).get_net_rshares(), 0 );
     BOOST_REQUIRE_EQUAL( get_vesting( "alice" ), alice_vest_shares + alice_vote_vesting + alice_comment_vesting_reward );
@@ -761,7 +761,7 @@ BOOST_AUTO_TEST_CASE( comment_payout )
     BOOST_REQUIRE_EQUAL( get_vesting( "dave" ), dave_vest_shares + dave_vote_vesting );
     BOOST_REQUIRE_EQUAL( alice_comment_reward.author, "alice" );
     BOOST_REQUIRE_EQUAL( alice_comment_reward.permlink, "test" );
-    BOOST_REQUIRE_EQUAL( alice_comment_reward.payout, alice_comment_hbd_reward );
+    BOOST_REQUIRE_EQUAL( alice_comment_reward.payout, alice_comment_pxs_reward );
     BOOST_REQUIRE_EQUAL( alice_comment_reward.vesting_payout, alice_comment_vesting_reward );
     BOOST_REQUIRE( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "alice" ) ).id ) ) == vote_idx.end() );
     BOOST_REQUIRE( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "bob" ) ).id   ) ) == vote_idx.end() );
@@ -809,7 +809,7 @@ BOOST_AUTO_TEST_CASE( comment_payout )
     push_transaction( tx, dave_private_key );
 
     bob_vest_shares = get_vesting( "bob" );
-    auto bob_hbd = get_hbd_balance( "bob" );
+    auto bob_pxs = get_pxs_balance( "bob" );
 
     BOOST_REQUIRE( vote_idx.find( boost::make_tuple( db->get_comment( "bob", string( "test" ).id, db->get_account( "dave" ) ).id ) ) != vote_idx.end() );
     validate_database();
@@ -818,7 +818,7 @@ BOOST_AUTO_TEST_CASE( comment_payout )
 
     BOOST_REQUIRE( vote_idx.find( boost::make_tuple( db->get_comment( "bob", string( "test" ).id, db->get_account( "dave" ) ).id ) ) == vote_idx.end() );
     BOOST_REQUIRE_EQUAL( bob_vest_shares, get_vesting( "bob" ) );
-    BOOST_REQUIRE_EQUAL( bob_hbd, get_hbd_balance( "bob" ) );
+    BOOST_REQUIRE_EQUAL( bob_pxs, get_pxs_balance( "bob" ) );
     validate_database();
   }
   FC_LOG_AND_RETHROW()
@@ -829,12 +829,12 @@ OOST_AUTO_TEST_CASE( nested_comments )
   try
   {
     ACTORS( DEFAULT_VESTING, (alice)(bob)(sam)(dave) );
-    vest( "alice", HIVE_asset( 10'000 ) );
-    vest( "bob", HIVE_asset( 10'000 ) );
-    vest( "sam", HIVE_asset( 10'000 ) );
-    vest( "dave", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
+    vest( "bob", PIXA_asset( 10'000 ) );
+    vest( "sam", PIXA_asset( 10'000 ) );
+    vest( "dave", PIXA_asset( 10'000 ) );
 
-    HBD_price exchange_rate( 1000, 1000 );
+    PXS_price exchange_rate( 1000, 1000 );
     set_price_feed( exchange_rate );
 
     signed_transaction tx;
@@ -902,7 +902,7 @@ OOST_AUTO_TEST_CASE( nested_comments )
     generate_blocks( db->get_comment( "alice", string( "test" ) ).get_cashout_time() - fc::seconds( HIVE_BLOCK_INTERVAL ), true );
 
     auto& gpo = db->get_dynamic_global_properties();
-    uint128_t reward_hive = ( db->get_reward_fund().get_reward_balance() + HIVE_asset( 2'000 ) ).amount.value;
+    uint128_t reward_pixa = ( db->get_reward_fund().get_reward_balance() + PIXA_asset( 2'000 ) ).amount.value;
     uint128_t total_rshares2 = db->get_reward_fund().get_recent_claims();
 
     auto alice_comment = db->get_comment( "alice", string( "test" ) );
@@ -913,79 +913,79 @@ OOST_AUTO_TEST_CASE( nested_comments )
     const auto& vote_idx = db->get_index< comment_vote_index >().indices().get< by_comment_voter >();
 
     // Calculate total comment rewards and voting rewards.
-    auto alice_comment_reward = ( ( reward_hive * alice_comment.get_net_rshares() * alice_comment.get_net_rshares() ) / total_rshares2 ).to_uint64();
+    auto alice_comment_reward = ( ( reward_pixa * alice_comment.get_net_rshares() * alice_comment.get_net_rshares() ) / total_rshares2 ).to_uint64();
     total_rshares2 -= uint128_t( alice_comment.get_net_rshares() ) * ( alice_comment.get_net_rshares() );
-    reward_hive -= alice_comment_reward;
+    reward_pixa -= alice_comment_reward;
     auto alice_comment_vote_rewards = alice_comment_reward / 2;
     alice_comment_reward -= alice_comment_vote_rewards;
 
-    auto alice_vote_alice_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "alice" ) ).get_id() ) )->get_weight() ) * alice_comment_vote_rewards ) / alice_comment.get_total_vote_weight() ), HIVE_SYMBOL );
-    auto bob_vote_alice_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "bob" ) ).get_id() ) )->get_weight() ) * alice_comment_vote_rewards ) / alice_comment.get_total_vote_weight() ), HIVE_SYMBOL );
-    reward_hive += alice_comment_vote_rewards - ( alice_vote_alice_reward + bob_vote_alice_reward ).amount.value;
+    auto alice_vote_alice_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "alice" ) ).get_id() ) )->get_weight() ) * alice_comment_vote_rewards ) / alice_comment.get_total_vote_weight() ), PIXA_SYMBOL );
+    auto bob_vote_alice_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "alice", string( "test" ).id, db->get_account( "bob" ) ).get_id() ) )->get_weight() ) * alice_comment_vote_rewards ) / alice_comment.get_total_vote_weight() ), PIXA_SYMBOL );
+    reward_pixa += alice_comment_vote_rewards - ( alice_vote_alice_reward + bob_vote_alice_reward ).amount.value;
 
-    auto bob_comment_reward = ( ( reward_hive * bob_comment.get_net_rshares() * bob_comment.get_net_rshares() ) / total_rshares2 ).to_uint64();
+    auto bob_comment_reward = ( ( reward_pixa * bob_comment.get_net_rshares() * bob_comment.get_net_rshares() ) / total_rshares2 ).to_uint64();
     total_rshares2 -= uint128_t( bob_comment.get_net_rshares() ) * bob_comment.get_net_rshares();
-    reward_hive -= bob_comment_reward;
+    reward_pixa -= bob_comment_reward;
     auto bob_comment_vote_rewards = bob_comment_reward / 2;
     bob_comment_reward -= bob_comment_vote_rewards;
 
-    auto alice_vote_bob_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "bob", string( "test" ).id, db->get_account( "alice" ) ).get_id() ) )->get_weight() ) * bob_comment_vote_rewards ) / bob_comment.get_total_vote_weight() ), HIVE_SYMBOL );
-    auto bob_vote_bob_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "bob", string( "test" ).id, db->get_account( "bob" ) ).get_id() ) )->get_weight() ) * bob_comment_vote_rewards ) / bob_comment.get_total_vote_weight() ), HIVE_SYMBOL );
-    auto sam_vote_bob_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "bob", string( "test" ).id, db->get_account( "sam" ) ).get_id() ) )->get_weight() ) * bob_comment_vote_rewards ) / bob_comment.get_total_vote_weight() ), HIVE_SYMBOL );
-    reward_hive += bob_comment_vote_rewards - ( alice_vote_bob_reward + bob_vote_bob_reward + sam_vote_bob_reward ).amount.value;
+    auto alice_vote_bob_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "bob", string( "test" ).id, db->get_account( "alice" ) ).get_id() ) )->get_weight() ) * bob_comment_vote_rewards ) / bob_comment.get_total_vote_weight() ), PIXA_SYMBOL );
+    auto bob_vote_bob_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "bob", string( "test" ).id, db->get_account( "bob" ) ).get_id() ) )->get_weight() ) * bob_comment_vote_rewards ) / bob_comment.get_total_vote_weight() ), PIXA_SYMBOL );
+    auto sam_vote_bob_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "bob", string( "test" ).id, db->get_account( "sam" ) ).get_id() ) )->get_weight() ) * bob_comment_vote_rewards ) / bob_comment.get_total_vote_weight() ), PIXA_SYMBOL );
+    reward_pixa += bob_comment_vote_rewards - ( alice_vote_bob_reward + bob_vote_bob_reward + sam_vote_bob_reward ).amount.value;
 
-    auto dave_comment_reward = ( ( reward_hive * dave_comment.get_net_rshares() * dave_comment.get_net_rshares() ) / total_rshares2 ).to_uint64();
+    auto dave_comment_reward = ( ( reward_pixa * dave_comment.get_net_rshares() * dave_comment.get_net_rshares() ) / total_rshares2 ).to_uint64();
     total_rshares2 -= uint128_t( dave_comment.get_net_rshares() ) * dave_comment.get_net_rshares();
-    reward_hive -= dave_comment_reward;
+    reward_pixa -= dave_comment_reward;
     auto dave_comment_vote_rewards = dave_comment_reward / 2;
     dave_comment_reward -= dave_comment_vote_rewards;
 
-    auto bob_vote_dave_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "dave", string( "test" ).id, db->get_account( "bob" ) ).get_id() ) )->get_weight() ) * dave_comment_vote_rewards ) / dave_comment.get_total_vote_weight() ), HIVE_SYMBOL );
-    reward_hive += dave_comment_vote_rewards - bob_vote_dave_reward.amount.value;
+    auto bob_vote_dave_reward = asset( static_cast< uint64_t >( ( u256( vote_idx.find( boost::make_tuple( db->get_comment( "dave", string( "test" ).id, db->get_account( "bob" ) ).get_id() ) )->get_weight() ) * dave_comment_vote_rewards ) / dave_comment.get_total_vote_weight() ), PIXA_SYMBOL );
+    reward_pixa += dave_comment_vote_rewards - bob_vote_dave_reward.amount.value;
 
     // Calculate rewards paid to parent posts
-    auto alice_pays_alice_hbd = alice_comment_reward / 2;
-    auto alice_pays_alice_vest = alice_comment_reward - alice_pays_alice_hbd;
-    auto bob_pays_bob_hbd = bob_comment_reward / 2;
-    auto bob_pays_bob_vest = bob_comment_reward - bob_pays_bob_hbd;
-    auto dave_pays_dave_hbd = dave_comment_reward / 2;
-    auto dave_pays_dave_vest = dave_comment_reward - dave_pays_dave_hbd;
+    auto alice_pays_alice_pxs = alice_comment_reward / 2;
+    auto alice_pays_alice_vest = alice_comment_reward - alice_pays_alice_pxs;
+    auto bob_pays_bob_pxs = bob_comment_reward / 2;
+    auto bob_pays_bob_vest = bob_comment_reward - bob_pays_bob_pxs;
+    auto dave_pays_dave_pxs = dave_comment_reward / 2;
+    auto dave_pays_dave_vest = dave_comment_reward - dave_pays_dave_pxs;
 
-    auto bob_pays_alice_hbd = bob_pays_bob_hbd / 2;
+    auto bob_pays_alice_pxs = bob_pays_bob_pxs / 2;
     auto bob_pays_alice_vest = bob_pays_bob_vest / 2;
-    bob_pays_bob_hbd -= bob_pays_alice_hbd;
+    bob_pays_bob_pxs -= bob_pays_alice_pxs;
     bob_pays_bob_vest -= bob_pays_alice_vest;
 
-    auto dave_pays_sam_hbd = dave_pays_dave_hbd / 2;
+    auto dave_pays_sam_pxs = dave_pays_dave_pxs / 2;
     auto dave_pays_sam_vest = dave_pays_dave_vest / 2;
-    dave_pays_dave_hbd -= dave_pays_sam_hbd;
+    dave_pays_dave_pxs -= dave_pays_sam_pxs;
     dave_pays_dave_vest -= dave_pays_sam_vest;
-    auto dave_pays_bob_hbd = dave_pays_sam_hbd / 2;
+    auto dave_pays_bob_pxs = dave_pays_sam_pxs / 2;
     auto dave_pays_bob_vest = dave_pays_sam_vest / 2;
-    dave_pays_sam_hbd -= dave_pays_bob_hbd;
+    dave_pays_sam_pxs -= dave_pays_bob_pxs;
     dave_pays_sam_vest -= dave_pays_bob_vest;
-    auto dave_pays_alice_hbd = dave_pays_bob_hbd / 2;
+    auto dave_pays_alice_pxs = dave_pays_bob_pxs / 2;
     auto dave_pays_alice_vest = dave_pays_bob_vest / 2;
-    dave_pays_bob_hbd -= dave_pays_alice_hbd;
+    dave_pays_bob_pxs -= dave_pays_alice_pxs;
     dave_pays_bob_vest -= dave_pays_alice_vest;
 
     // Calculate total comment payouts
-    auto alice_comment_total_payout = db->to_hbd( HIVE_asset( alice_pays_alice_hbd + alice_pays_alice_vest ) );
-    alice_comment_total_payout += db->to_hbd( HIVE_asset( bob_pays_alice_hbd + bob_pays_alice_vest ) );
-    alice_comment_total_payout += db->to_hbd( HIVE_asset( dave_pays_alice_hbd + dave_pays_alice_vest ) );
-    auto bob_comment_total_payout = db->to_hbd( HIVE_asset( bob_pays_bob_hbd + bob_pays_bob_vest ) );
-    bob_comment_total_payout += db->to_hbd( HIVE_asset( dave_pays_bob_hbd + dave_pays_bob_vest ) );
-    auto sam_comment_total_payout = db->to_hbd( HIVE_asset( dave_pays_sam_hbd + dave_pays_sam_vest ) );
-    auto dave_comment_total_payout = db->to_hbd( HIVE_asset( dave_pays_dave_hbd + dave_pays_dave_vest ) );
+    auto alice_comment_total_payout = db->to_pxs( PIXA_asset( alice_pays_alice_pxs + alice_pays_alice_vest ) );
+    alice_comment_total_payout += db->to_pxs( PIXA_asset( bob_pays_alice_pxs + bob_pays_alice_vest ) );
+    alice_comment_total_payout += db->to_pxs( PIXA_asset( dave_pays_alice_pxs + dave_pays_alice_vest ) );
+    auto bob_comment_total_payout = db->to_pxs( PIXA_asset( bob_pays_bob_pxs + bob_pays_bob_vest ) );
+    bob_comment_total_payout += db->to_pxs( PIXA_asset( dave_pays_bob_pxs + dave_pays_bob_vest ) );
+    auto sam_comment_total_payout = db->to_pxs( PIXA_asset( dave_pays_sam_pxs + dave_pays_sam_vest ) );
+    auto dave_comment_total_payout = db->to_pxs( PIXA_asset( dave_pays_dave_pxs + dave_pays_dave_vest ) );
 
     auto alice_starting_vesting = get_vesting( "alice" );
-    auto alice_starting_hbd = get_hbd_balance( "alice" );
+    auto alice_starting_pxs = get_pxs_balance( "alice" );
     auto bob_starting_vesting = get_vesting( "bob" );
-    auto bob_starting_hbd = get_hbd_balance( "bob" );
+    auto bob_starting_pxs = get_pxs_balance( "bob" );
     auto sam_starting_vesting = get_vesting( "sam" );
-    auto sam_starting_hbd = get_hbd_balance( "sam" );
+    auto sam_starting_pxs = get_pxs_balance( "sam" );
     auto dave_starting_vesting = get_vesting( "dave" );
-    auto dave_starting_hbd = get_hbd_balance( "dave" );
+    auto dave_starting_pxs = get_pxs_balance( "dave" );
 
     generate_block();
 
@@ -1014,7 +1014,7 @@ OOST_AUTO_TEST_CASE( nested_comments )
     BOOST_REQUIRE_EQUAL( com_vop.permlink, "test" );
     BOOST_REQUIRE_EQUAL( com_vop.originating_author, "dave" );
     BOOST_REQUIRE_EQUAL( com_vop.originating_permlink, "test" );
-    BOOST_REQUIRE_EQUAL( com_vop.payout.amount.value, dave_pays_alice_hbd );
+    BOOST_REQUIRE_EQUAL( com_vop.payout.amount.value, dave_pays_alice_pxs );
     BOOST_REQUIRE_EQUAL( ( com_vop.vesting_payout * gpo.get_vesting_share_price().to_price() ).amount.value, dave_pays_alice_vest );
 
     com_vop = ops[1].get< comment_reward_operation >();
@@ -1022,7 +1022,7 @@ OOST_AUTO_TEST_CASE( nested_comments )
     BOOST_REQUIRE_EQUAL( com_vop.permlink, "test" );
     BOOST_REQUIRE_EQUAL( com_vop.originating_author, "dave" );
     BOOST_REQUIRE_EQUAL( com_vop.originating_permlink, "test" );
-    BOOST_REQUIRE_EQUAL( com_vop.payout.amount.value, dave_pays_bob_hbd );
+    BOOST_REQUIRE_EQUAL( com_vop.payout.amount.value, dave_pays_bob_pxs );
     BOOST_REQUIRE_EQUAL( ( com_vop.vesting_payout * gpo.get_vesting_share_price().to_price() ).amount.value, dave_pays_bob_vest );
 
     com_vop = ops[2].get< comment_reward_operation >();
@@ -1030,7 +1030,7 @@ OOST_AUTO_TEST_CASE( nested_comments )
     BOOST_REQUIRE_EQUAL( com_vop.permlink, "test" );
     BOOST_REQUIRE_EQUAL( com_vop.originating_author, "dave" );
     BOOST_REQUIRE_EQUAL( com_vop.originating_permlink, "test" );
-    BOOST_REQUIRE_EQUAL( com_vop.payout.amount.value, dave_pays_sam_hbd );
+    BOOST_REQUIRE_EQUAL( com_vop.payout.amount.value, dave_pays_sam_pxs );
     BOOST_REQUIRE_EQUAL( ( com_vop.vesting_payout * gpo.get_vesting_share_price().to_price() ).amount.value, dave_pays_sam_vest );
 
     com_vop = ops[3].get< comment_reward_operation >();
@@ -1038,7 +1038,7 @@ OOST_AUTO_TEST_CASE( nested_comments )
     BOOST_REQUIRE_EQUAL( com_vop.permlink, "test" );
     BOOST_REQUIRE_EQUAL( com_vop.originating_author, "dave" );
     BOOST_REQUIRE_EQUAL( com_vop.originating_permlink, "test" );
-    BOOST_REQUIRE_EQUAL( com_vop.payout.amount.value, dave_pays_dave_hbd );
+    BOOST_REQUIRE_EQUAL( com_vop.payout.amount.value, dave_pays_dave_pxs );
     BOOST_REQUIRE_EQUAL( ( com_vop.vesting_payout * gpo.get_vesting_share_price().to_price() ).amount.value, dave_pays_dave_vest );
 
     cur_vop = ops[4].get< curate_reward_operation >();
@@ -1052,7 +1052,7 @@ OOST_AUTO_TEST_CASE( nested_comments )
     BOOST_REQUIRE_EQUAL( com_vop.permlink, "test" );
     BOOST_REQUIRE_EQUAL( com_vop.originating_author, "bob" );
     BOOST_REQUIRE_EQUAL( com_vop.originating_permlink, "test" );
-    BOOST_REQUIRE_EQUAL( com_vop.payout.amount.value, bob_pays_alice_hbd );
+    BOOST_REQUIRE_EQUAL( com_vop.payout.amount.value, bob_pays_alice_pxs );
     BOOST_REQUIRE_EQUAL( ( com_vop.vesting_payout * gpo.get_vesting_share_price().to_price() ).amount.value, bob_pays_alice_vest );
 
     com_vop = ops[6].get< comment_reward_operation >();
@@ -1060,7 +1060,7 @@ OOST_AUTO_TEST_CASE( nested_comments )
     BOOST_REQUIRE_EQUAL( com_vop.permlink, "test" );
     BOOST_REQUIRE_EQUAL( com_vop.originating_author, "bob" );
     BOOST_REQUIRE_EQUAL( com_vop.originating_permlink, "test" );
-    BOOST_REQUIRE_EQUAL( com_vop.payout.amount.value, bob_pays_bob_hbd );
+    BOOST_REQUIRE_EQUAL( com_vop.payout.amount.value, bob_pays_bob_pxs );
     BOOST_REQUIRE_EQUAL( ( com_vop.vesting_payout * gpo.get_vesting_share_price().to_price() ).amount.value, bob_pays_bob_vest );
 
     cur_vop = ops[7].get< curate_reward_operation >();
@@ -1086,7 +1086,7 @@ OOST_AUTO_TEST_CASE( nested_comments )
     BOOST_REQUIRE_EQUAL( com_vop.permlink, "test" );
     BOOST_REQUIRE_EQUAL( com_vop.originating_author, "alice" );
     BOOST_REQUIRE_EQUAL( com_vop.originating_permlink, "test" );
-    BOOST_REQUIRE_EQUAL( com_vop.payout.amount.value, alice_pays_alice_hbd );
+    BOOST_REQUIRE_EQUAL( com_vop.payout.amount.value, alice_pays_alice_pxs );
     BOOST_REQUIRE_EQUAL( ( com_vop.vesting_payout * gpo.get_vesting_share_price().to_price() ).amount.value, alice_pays_alice_vest );
 
     cur_vop = ops[11].get< curate_reward_operation >();
@@ -1103,24 +1103,24 @@ OOST_AUTO_TEST_CASE( nested_comments )
 
     BOOST_TEST_MESSAGE( "Checking account balances" );
 
-    auto alice_total_hbd = alice_starting_hbd + HIVE_asset( alice_pays_alice_hbd + bob_pays_alice_hbd + dave_pays_alice_hbd ) * exchange_rate;
-    auto alice_total_vesting = alice_starting_vesting + asset( alice_pays_alice_vest + bob_pays_alice_vest + dave_pays_alice_vest + alice_vote_alice_reward.amount + alice_vote_bob_reward.amount, HIVE_SYMBOL ) * gpo.get_vesting_share_price().to_price();
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "alice" ), alice_total_hbd );
+    auto alice_total_pxs = alice_starting_pxs + PIXA_asset( alice_pays_alice_pxs + bob_pays_alice_pxs + dave_pays_alice_pxs ) * exchange_rate;
+    auto alice_total_vesting = alice_starting_vesting + asset( alice_pays_alice_vest + bob_pays_alice_vest + dave_pays_alice_vest + alice_vote_alice_reward.amount + alice_vote_bob_reward.amount, PIXA_SYMBOL ) * gpo.get_vesting_share_price().to_price();
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "alice" ), alice_total_pxs );
     BOOST_REQUIRE_EQUAL( get_vesting( "alice" ), alice_total_vesting );
 
-    auto bob_total_hbd = bob_starting_hbd + HIVE_asset( bob_pays_bob_hbd + dave_pays_bob_hbd ) * exchange_rate;
-    auto bob_total_vesting = bob_starting_vesting + asset( bob_pays_bob_vest + dave_pays_bob_vest + bob_vote_alice_reward.amount + bob_vote_bob_reward.amount + bob_vote_dave_reward.amount, HIVE_SYMBOL ) * gpo.get_vesting_share_price().to_price();
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "bob" ), bob_total_hbd );
+    auto bob_total_pxs = bob_starting_pxs + PIXA_asset( bob_pays_bob_pxs + dave_pays_bob_pxs ) * exchange_rate;
+    auto bob_total_vesting = bob_starting_vesting + asset( bob_pays_bob_vest + dave_pays_bob_vest + bob_vote_alice_reward.amount + bob_vote_bob_reward.amount + bob_vote_dave_reward.amount, PIXA_SYMBOL ) * gpo.get_vesting_share_price().to_price();
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "bob" ), bob_total_pxs );
     BOOST_REQUIRE_EQUAL( get_vesting( "bob" ), bob_total_vesting );
 
-    auto sam_total_hbd = sam_starting_hbd + HIVE_asset( dave_pays_sam_hbd ) * exchange_rate;
-    auto sam_total_vesting = bob_starting_vesting + asset( dave_pays_sam_vest + sam_vote_bob_reward.amount, HIVE_SYMBOL ) * gpo.get_vesting_share_price().to_price();
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "sam" ), sam_total_hbd );
+    auto sam_total_pxs = sam_starting_pxs + PIXA_asset( dave_pays_sam_pxs ) * exchange_rate;
+    auto sam_total_vesting = bob_starting_vesting + asset( dave_pays_sam_vest + sam_vote_bob_reward.amount, PIXA_SYMBOL ) * gpo.get_vesting_share_price().to_price();
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "sam" ), sam_total_pxs );
     BOOST_REQUIRE_EQUAL( get_vesting( "sam" ), sam_total_vesting );
 
-    auto dave_total_hbd = dave_starting_hbd + HIVE_asset( dave_pays_dave_hbd ) * exchange_rate;
-    auto dave_total_vesting = dave_starting_vesting + asset( dave_pays_dave_vest, HIVE_SYMBOL ) * gpo.get_vesting_share_price().to_price();
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "dave" ), dave_total_hbd );
+    auto dave_total_pxs = dave_starting_pxs + PIXA_asset( dave_pays_dave_pxs ) * exchange_rate;
+    auto dave_total_vesting = dave_starting_vesting + asset( dave_pays_dave_vest, PIXA_SYMBOL ) * gpo.get_vesting_share_price().to_price();
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "dave" ), dave_total_pxs );
     BOOST_REQUIRE_EQUAL( get_vesting( "dave" ), dave_total_vesting );
   }
   FC_LOG_AND_RETHROW()
@@ -1135,7 +1135,7 @@ BOOST_AUTO_TEST_CASE( vesting_withdrawals )
     auto auto_reset( set_mainnet_cashout_values() ); // Test on mainnet values
 
     ACTORS( DEFAULT_VESTING, (alice) );
-    vest( "alice", HIVE_asset( 100'000 ) );
+    vest( "alice", PIXA_asset( 100'000 ) );
 
     const auto& new_alice = db->get_account( "alice" );
 
@@ -1166,7 +1166,7 @@ BOOST_AUTO_TEST_CASE( vesting_withdrawals )
     auto& gpo = db->get_dynamic_global_properties();
 
     BOOST_REQUIRE_EQUAL( get_vesting( "alice" ), ( vesting_shares - withdraw_rate ) );
-    BOOST_REQUIRE_LE( withdraw_rate * gpo.get_vesting_share_price() - get_hive_balance( "alice" ), HIVE_asset( 1 ) ); // Check a range due to differences in the share price
+    BOOST_REQUIRE_LE( withdraw_rate * gpo.get_vesting_share_price() - get_pixa_balance( "alice" ), PIXA_asset( 1 ) ); // Check a range due to differences in the share price
     BOOST_REQUIRE_EQUAL( fill_op.from_account, "alice" );
     BOOST_REQUIRE_EQUAL( fill_op.to_account, "alice" );
     BOOST_REQUIRE_EQUAL( fill_op.withdrawn, withdraw_rate );
@@ -1176,7 +1176,7 @@ BOOST_AUTO_TEST_CASE( vesting_withdrawals )
     BOOST_TEST_MESSAGE( "Generating the rest of the blocks in the withdrawal" );
 
     vesting_shares = get_vesting( "alice" );
-    auto balance = get_hive_balance( "alice" );
+    auto balance = get_pixa_balance( "alice" );
     auto old_next_vesting = db->get_account( "alice" ).next_vesting_withdrawal;
 
     for( int i = 1; i < HIVE_VESTING_WITHDRAW_INTERVALS - 1; i++ )
@@ -1188,7 +1188,7 @@ BOOST_AUTO_TEST_CASE( vesting_withdrawals )
       fill_op = get_last_operations( 2 )[ 1 ].get< fill_vesting_withdraw_operation >();
 
       BOOST_REQUIRE_EQUAL( alice.get_vesting(), ( vesting_shares - withdraw_rate ) );
-      BOOST_REQUIRE_LE( balance + withdraw_rate * gpo.get_vesting_share_price() - alice.get_hive_balance(), HIVE_asset( 1 ) );
+      BOOST_REQUIRE_LE( balance + withdraw_rate * gpo.get_vesting_share_price() - alice.get_pixa_balance(), PIXA_asset( 1 ) );
       BOOST_REQUIRE_EQUAL( fill_op.from_account, "alice" );
       BOOST_REQUIRE_EQUAL( fill_op.to_account, "alice" );
       BOOST_REQUIRE_EQUAL( fill_op.withdrawn, withdraw_rate );
@@ -1202,7 +1202,7 @@ BOOST_AUTO_TEST_CASE( vesting_withdrawals )
       validate_database();
 
       vesting_shares = alice.get_vesting();
-      balance = alice.get_hive_balance();
+      balance = alice.get_pixa_balance();
       old_next_vesting = alice.next_vesting_withdrawal;
     }
 
@@ -1231,7 +1231,7 @@ BOOST_AUTO_TEST_CASE( vesting_withdraw_route )
 
     auto original_vesting = alice.get_vesting();
 
-    vest( "alice", HIVE_asset( 1'040'000 ) );
+    vest( "alice", PIXA_asset( 1'040'000 ) );
 
     auto withdraw_amount = alice.get_vesting() - original_vesting;
     // Round the withdrawal down so that the per-interval withdraw rate is even. This guarantees
@@ -1272,11 +1272,11 @@ BOOST_AUTO_TEST_CASE( vesting_withdraw_route )
     BOOST_TEST_MESSAGE( "Setting up first withdraw" );
 
     auto vesting_withdraw_rate = alice.vesting_withdraw_rate;
-    auto old_alice_balance = alice.get_hive_balance();
+    auto old_alice_balance = alice.get_pixa_balance();
     auto old_alice_vesting = alice.get_vesting();
-    auto old_bob_balance = bob.get_hive_balance();
+    auto old_bob_balance = bob.get_pixa_balance();
     auto old_bob_vesting = bob.get_vesting();
-    auto old_sam_balance = sam.get_hive_balance();
+    auto old_sam_balance = sam.get_pixa_balance();
     auto old_sam_vesting = sam.get_vesting();
 
     generate_blocks( alice.next_vesting_withdrawal - HIVE_BLOCK_INTERVAL, true );
@@ -1297,17 +1297,17 @@ BOOST_AUTO_TEST_CASE( vesting_withdraw_route )
       BOOST_REQUIRE_EQUAL( implied_route.withdrawn, ( vesting_withdraw_rate - route_sam.withdrawn - route_bob.withdrawn ) );
 
       BOOST_REQUIRE_EQUAL( alice.get_vesting(), old_alice_vesting - vesting_withdraw_rate );
-      BOOST_REQUIRE_EQUAL( alice.get_hive_balance(), old_alice_balance + ( ( vesting_withdraw_rate * HIVE_1_PERCENT * 20 ) / HIVE_100_PERCENT ) * db->get_dynamic_global_properties().get_vesting_share_price() );
+      BOOST_REQUIRE_EQUAL( alice.get_pixa_balance(), old_alice_balance + ( ( vesting_withdraw_rate * HIVE_1_PERCENT * 20 ) / HIVE_100_PERCENT ) * db->get_dynamic_global_properties().get_vesting_share_price() );
       BOOST_REQUIRE_EQUAL( bob.get_vesting(), old_bob_vesting + ( ( vesting_withdraw_rate * HIVE_1_PERCENT * 50 ) / HIVE_100_PERCENT ) );
-      BOOST_REQUIRE_EQUAL( bob.get_hive_balance(), old_bob_balance );
+      BOOST_REQUIRE_EQUAL( bob.get_pixa_balance(), old_bob_balance );
       BOOST_REQUIRE_EQUAL( sam.get_vesting(), old_sam_vesting );
-      BOOST_REQUIRE_EQUAL( sam.get_hive_balance(), old_sam_balance + ( ( vesting_withdraw_rate * HIVE_1_PERCENT * 30 ) / HIVE_100_PERCENT ) * db->get_dynamic_global_properties().get_vesting_share_price() );
+      BOOST_REQUIRE_EQUAL( sam.get_pixa_balance(), old_sam_balance + ( ( vesting_withdraw_rate * HIVE_1_PERCENT * 30 ) / HIVE_100_PERCENT ) * db->get_dynamic_global_properties().get_vesting_share_price() );
 
-      old_alice_balance = alice.get_hive_balance();
+      old_alice_balance = alice.get_pixa_balance();
       old_alice_vesting = alice.get_vesting();
-      old_bob_balance = bob.get_hive_balance();
+      old_bob_balance = bob.get_pixa_balance();
       old_bob_vesting = bob.get_vesting();
-      old_sam_balance = sam.get_hive_balance();
+      old_sam_balance = sam.get_pixa_balance();
       old_sam_vesting = sam.get_vesting();
     }
 
@@ -1346,11 +1346,11 @@ BOOST_AUTO_TEST_CASE( vesting_withdraw_route )
       BOOST_REQUIRE_EQUAL( route_bob.withdrawn + route_sam.withdrawn, vesting_withdraw_rate );
 
       BOOST_REQUIRE_EQUAL( alice.get_vesting(), old_alice_vesting - vesting_withdraw_rate );
-      BOOST_REQUIRE_EQUAL( alice.get_hive_balance(), old_alice_balance );
+      BOOST_REQUIRE_EQUAL( alice.get_pixa_balance(), old_alice_balance );
       BOOST_REQUIRE_EQUAL( bob.get_vesting(), old_bob_vesting + ( ( vesting_withdraw_rate * HIVE_1_PERCENT * 50 ) / HIVE_100_PERCENT ) );
-      BOOST_REQUIRE_EQUAL( bob.get_hive_balance(), old_bob_balance );
+      BOOST_REQUIRE_EQUAL( bob.get_pixa_balance(), old_bob_balance );
       BOOST_REQUIRE_EQUAL( sam.get_vesting(), old_sam_vesting );
-      BOOST_REQUIRE_EQUAL( sam.get_hive_balance(), old_sam_balance + ( ( vesting_withdraw_rate * HIVE_1_PERCENT * 50 ) / HIVE_100_PERCENT ) * db->get_dynamic_global_properties().get_vesting_share_price() );
+      BOOST_REQUIRE_EQUAL( sam.get_pixa_balance(), old_sam_balance + ( ( vesting_withdraw_rate * HIVE_1_PERCENT * 50 ) / HIVE_100_PERCENT ) * db->get_dynamic_global_properties().get_vesting_share_price() );
     }
   }
   FC_LOG_AND_RETHROW()
@@ -1363,7 +1363,7 @@ BOOST_AUTO_TEST_CASE( feed_publish_mean )
     // Testing mainnet feed values here.
     auto auto_reset( set_mainnet_feed_values() );
 
-    ACTORS( HIVE_asset( 20'000 ), (alice0)(alice1)(alice2)(alice3)(alice4)(alice5)(alice6) ); // extra RC for witness work
+    ACTORS( PIXA_asset( 20'000 ), (alice0)(alice1)(alice2)(alice3)(alice4)(alice5)(alice6) ); // extra RC for witness work
 
     BOOST_TEST_MESSAGE( "Setup" );
 
@@ -1393,8 +1393,8 @@ BOOST_AUTO_TEST_CASE( feed_publish_mean )
     // Upgrade accounts to witnesses
     for( int i = 0; i < 7; i++ )
     {
-      fund( accounts[i], HIVE_asset( 10'000 ) );
-      witness_create( accounts[i], keys[i], "foo.bar", keys[i].get_public_key(), HIVE_asset( 1000 ) );
+      fund( accounts[i], PIXA_asset( 10'000 ) );
+      witness_create( accounts[i], keys[i], "foo.bar", keys[i].get_public_key(), PIXA_asset( 1000 ) );
       witness_plugin->add_signing_key( keys[i] );
 
       ops.push_back( feed_publish_operation() );
@@ -1403,13 +1403,13 @@ BOOST_AUTO_TEST_CASE( feed_publish_mean )
       txs.push_back( signed_transaction() );
     }
 
-    ops[0].exchange_rate = price( asset( 1000, HBD_SYMBOL ), asset( 100000, HIVE_SYMBOL ) );
-    ops[1].exchange_rate = price( asset( 1000, HBD_SYMBOL ), asset( 105000, HIVE_SYMBOL ) );
-    ops[2].exchange_rate = price( asset( 1000, HBD_SYMBOL ), asset(  98000, HIVE_SYMBOL ) );
-    ops[3].exchange_rate = price( asset( 1000, HBD_SYMBOL ), asset(  97000, HIVE_SYMBOL ) );
-    ops[4].exchange_rate = price( asset( 1000, HBD_SYMBOL ), asset(  99000, HIVE_SYMBOL ) );
-    ops[5].exchange_rate = price( asset( 1000, HBD_SYMBOL ), asset(  97500, HIVE_SYMBOL ) );
-    ops[6].exchange_rate = price( asset( 1000, HBD_SYMBOL ), asset( 102000, HIVE_SYMBOL ) );
+    ops[0].exchange_rate = price( asset( 1000, PXS_SYMBOL ), asset( 100000, PIXA_SYMBOL ) );
+    ops[1].exchange_rate = price( asset( 1000, PXS_SYMBOL ), asset( 105000, PIXA_SYMBOL ) );
+    ops[2].exchange_rate = price( asset( 1000, PXS_SYMBOL ), asset(  98000, PIXA_SYMBOL ) );
+    ops[3].exchange_rate = price( asset( 1000, PXS_SYMBOL ), asset(  97000, PIXA_SYMBOL ) );
+    ops[4].exchange_rate = price( asset( 1000, PXS_SYMBOL ), asset(  99000, PIXA_SYMBOL ) );
+    ops[5].exchange_rate = price( asset( 1000, PXS_SYMBOL ), asset(  97500, PIXA_SYMBOL ) );
+    ops[6].exchange_rate = price( asset( 1000, PXS_SYMBOL ), asset( 102000, PIXA_SYMBOL ) );
 
     for( int i = 0; i < 7; i++ )
     {
@@ -1425,7 +1425,7 @@ BOOST_AUTO_TEST_CASE( feed_publish_mean )
     auto& feed_history = db->get_feed_history();
     BOOST_TEST_MESSAGE( "Check state" );
     {
-      HBD_price expected_price( 1000, 99000 );
+      PXS_price expected_price( 1000, 99000 );
       BOOST_REQUIRE_EQUAL( feed_history.current_median_history, expected_price );
       BOOST_REQUIRE_EQUAL( feed_history.price_history[ 0 ], expected_price );
     }
@@ -1438,7 +1438,7 @@ BOOST_AUTO_TEST_CASE( feed_publish_mean )
       for( int j = 0; j < 7; j++ )
       {
         txs[j].operations.clear();
-        ops[j].exchange_rate = price( ops[j].exchange_rate.base, asset( ops[j].exchange_rate.quote.amount + 10, HIVE_SYMBOL ) );
+        ops[j].exchange_rate = price( ops[j].exchange_rate.base, asset( ops[j].exchange_rate.quote.amount + 10, PIXA_SYMBOL ) );
         txs[j].set_expiration( db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
         txs[j].operations.push_back( ops[j] );
         push_transaction( txs[j], keys[j] );
@@ -1452,7 +1452,7 @@ BOOST_AUTO_TEST_CASE( feed_publish_mean )
 
       auto& feed_history = db->get(feed_history_id_type());
       BOOST_REQUIRE_EQUAL( feed_history.current_median_history, feed_history.price_history[ ( i + 1 ) / 2 ] );
-      BOOST_REQUIRE_EQUAL( feed_history.price_history[ i + 1 ], HBD_price( ops[4].exchange_rate ) );
+      BOOST_REQUIRE_EQUAL( feed_history.price_history[ i + 1 ], PXS_price( ops[4].exchange_rate ) );
       validate_database();
     }
   }
@@ -1465,20 +1465,20 @@ BOOST_AUTO_TEST_CASE( convert_delay )
   {
     ACTORS( DEFAULT_VESTING, (alice) );
     generate_block();
-    vest( "alice", HIVE_asset( 10'000 ) );
-    issue_funds( "alice", HBD_asset( 25'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
+    issue_funds( "alice", PXS_asset( 25'000 ) );
 
-    set_price_feed( HBD_price( 1000, 1250 ) );
+    set_price_feed( PXS_price( 1000, 1250 ) );
 
     convert_operation op;
     signed_transaction tx;
 
-    HBD_asset start_balance( 25'000 );
+    PXS_asset start_balance( 25'000 );
 
     BOOST_TEST_MESSAGE( "Setup conversion to TESTS" );
     tx.operations.clear();
     op.owner = "alice";
-    op.amount = asset( 2000, HBD_SYMBOL );
+    op.amount = asset( 2000, PXS_SYMBOL );
     op.requestid = 2;
     tx.operations.push_back( op );
     tx.set_expiration( db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
@@ -1493,8 +1493,8 @@ BOOST_AUTO_TEST_CASE( convert_delay )
     auto convert_request = convert_request_idx.find( boost::make_tuple( alice_2.get_id(), 2 ) );
 
     BOOST_REQUIRE( convert_request != convert_request_idx.end() );
-    BOOST_REQUIRE_EQUAL( alice_2.get_hive_balance(), HIVE_asset( 0 ) );
-    BOOST_REQUIRE_EQUAL( alice_2.get_hbd_balance(), ( start_balance - HBD_asset( op.amount ) ) );
+    BOOST_REQUIRE_EQUAL( alice_2.get_pixa_balance(), PIXA_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( alice_2.get_pxs_balance(), ( start_balance - PXS_asset( op.amount ) ) );
     validate_database();
 
     BOOST_TEST_MESSAGE( "Generate one more block" );
@@ -1506,55 +1506,55 @@ BOOST_AUTO_TEST_CASE( convert_delay )
 
     convert_request = convert_request_idx.find( boost::make_tuple( alice_3.get_id(), 2 ) );
     BOOST_REQUIRE( convert_request == convert_request_idx.end() );
-    BOOST_REQUIRE_EQUAL( alice_3.get_hive_balance(), HIVE_asset( 2500 ) );
-    BOOST_REQUIRE_EQUAL( alice_3.get_hbd_balance(), ( start_balance - HBD_asset( op.amount ) ) );
+    BOOST_REQUIRE_EQUAL( alice_3.get_pixa_balance(), PIXA_asset( 2500 ) );
+    BOOST_REQUIRE_EQUAL( alice_3.get_pxs_balance(), ( start_balance - PXS_asset( op.amount ) ) );
     BOOST_REQUIRE_EQUAL( vop.owner, "alice" );
     BOOST_REQUIRE_EQUAL( vop.requestid, 2 );
-    BOOST_REQUIRE_EQUAL( vop.amount_in, HBD_asset( 2'000 ) );
-    BOOST_REQUIRE_EQUAL( vop.amount_out, HIVE_asset( 2'500 ) );
+    BOOST_REQUIRE_EQUAL( vop.amount_in, PXS_asset( 2'000 ) );
+    BOOST_REQUIRE_EQUAL( vop.amount_out, PIXA_asset( 2'500 ) );
     validate_database();
   }
   FC_LOG_AND_RETHROW();
 }
 
-BOOST_AUTO_TEST_CASE( hive_inflation )
+BOOST_AUTO_TEST_CASE( pixa_inflation )
 {
   try
   {
   /*
-    BOOST_TEST_MESSAGE( "Testing HIVE Inflation until the vesting start block" );
+    BOOST_TEST_MESSAGE( "Testing PIXA Inflation until the vesting start block" );
 
     auto& gpo = db->get_dynamic_global_properties();
     auto virtual_supply = gpo.get_virtual_supply();
     auto witness_name = db->get_scheduled_witness(1);
-    auto old_witness_balance = get_hive_balance( witness_name );
+    auto old_witness_balance = get_pixa_balance( witness_name );
     auto old_witness_shares = get_vesting( witness_name );
 
-    auto new_rewards = std::max( HIVE_MIN_CONTENT_REWARD, asset( ( HIVE_CONTENT_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), HIVE_SYMBOL ) )
-      + std::max( HIVE_MIN_CURATE_REWARD, asset( ( HIVE_CURATE_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), HIVE_SYMBOL ) );
-    auto witness_pay = std::max( HIVE_MIN_PRODUCER_REWARD, asset( ( HIVE_PRODUCER_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), HIVE_SYMBOL ) );
+    auto new_rewards = std::max( HIVE_MIN_CONTENT_REWARD, asset( ( HIVE_CONTENT_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), PIXA_SYMBOL ) )
+      + std::max( HIVE_MIN_CURATE_REWARD, asset( ( HIVE_CURATE_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), PIXA_SYMBOL ) );
+    auto witness_pay = std::max( HIVE_MIN_PRODUCER_REWARD, asset( ( HIVE_PRODUCER_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), PIXA_SYMBOL ) );
     auto witness_pay_shares = asset( 0, VESTS_SYMBOL );
-    auto new_vesting_hive = asset( 0, HIVE_SYMBOL );
+    auto new_vesting_pixa = asset( 0, PIXA_SYMBOL );
     auto new_vesting_shares = gpo.get_total_vesting_shares();
 
     if ( get_vesting( witness_name ) == VEST_asset( 0 ) )
     {
-      new_vesting_hive += witness_pay;
-      new_vesting_shares += witness_pay * ( gpo.get_total_vesting_shares() / gpo.get_total_vesting_fund_hive() );
+      new_vesting_pixa += witness_pay;
+      new_vesting_shares += witness_pay * ( gpo.get_total_vesting_shares() / gpo.get_total_vesting_fund_pixa() );
     }
 
-    auto new_supply = gpo.get_current_supply() + new_rewards + witness_pay + new_vesting_hive;
+    auto new_supply = gpo.get_current_supply() + new_rewards + witness_pay + new_vesting_pixa;
     new_rewards += db->get_reward_fund().get_reward_balance();
-    new_vesting_hive += gpo.get_total_vesting_fund_hive();
+    new_vesting_pixa += gpo.get_total_vesting_fund_pixa();
 
     generate_block();
 
     BOOST_REQUIRE_EQUAL( gpo.get_current_supply(), new_supply );
     BOOST_REQUIRE_EQUAL( gpo.get_virtual_supply(), new_supply );
     BOOST_REQUIRE_EQUAL( db->get_reward_fund().get_reward_balance(), new_rewards );
-    BOOST_REQUIRE_EQUAL( gpo.get_total_vesting_fund_hive(), new_vesting_hive );
+    BOOST_REQUIRE_EQUAL( gpo.get_total_vesting_fund_pixa(), new_vesting_pixa );
     BOOST_REQUIRE_EQUAL( gpo.get_total_vesting_shares(), new_vesting_shares );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( witness_name ), old_witness_balance + witness_pay );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( witness_name ), old_witness_balance + witness_pay );
 
     validate_database();
 
@@ -1562,37 +1562,37 @@ BOOST_AUTO_TEST_CASE( hive_inflation )
     {
       virtual_supply = gpo.get_virtual_supply();
       witness_name = db->get_scheduled_witness(1);
-      old_witness_balance = get_hive_balance( witness_name );
+      old_witness_balance = get_pixa_balance( witness_name );
       old_witness_shares = get_vesting( witness_name );
 
 
-      new_rewards = std::max( HIVE_MIN_CONTENT_REWARD, asset( ( HIVE_CONTENT_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), HIVE_SYMBOL ) )
-        + std::max( HIVE_MIN_CURATE_REWARD, asset( ( HIVE_CURATE_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), HIVE_SYMBOL ) );
-      witness_pay = std::max( HIVE_MIN_PRODUCER_REWARD, asset( ( HIVE_PRODUCER_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), HIVE_SYMBOL ) );
-      new_vesting_hive = asset( 0, HIVE_SYMBOL );
+      new_rewards = std::max( HIVE_MIN_CONTENT_REWARD, asset( ( HIVE_CONTENT_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), PIXA_SYMBOL ) )
+        + std::max( HIVE_MIN_CURATE_REWARD, asset( ( HIVE_CURATE_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), PIXA_SYMBOL ) );
+      witness_pay = std::max( HIVE_MIN_PRODUCER_REWARD, asset( ( HIVE_PRODUCER_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), PIXA_SYMBOL ) );
+      new_vesting_pixa = asset( 0, PIXA_SYMBOL );
       new_vesting_shares = gpo.get_total_vesting_shares();
 
       if ( get_vesting( witness_name ) == VEST_asset( 0 ) )
       {
-        new_vesting_hive += witness_pay;
+        new_vesting_pixa += witness_pay;
         witness_pay_shares = witness_pay * gpo.get_vesting_share_price().to_price();
         new_vesting_shares += witness_pay_shares;
         new_supply += witness_pay;
-        witness_pay = asset( 0, HIVE_SYMBOL );
+        witness_pay = asset( 0, PIXA_SYMBOL );
       }
 
-      new_supply = gpo.get_current_supply() + new_rewards + witness_pay + new_vesting_hive;
+      new_supply = gpo.get_current_supply() + new_rewards + witness_pay + new_vesting_pixa;
       new_rewards += db->get_reward_fund().get_reward_balance();
-      new_vesting_hive += gpo.get_total_vesting_fund_hive();
+      new_vesting_pixa += gpo.get_total_vesting_fund_pixa();
 
       generate_block();
 
       BOOST_REQUIRE_EQUAL( gpo.get_current_supply(), new_supply );
       BOOST_REQUIRE_EQUAL( gpo.get_virtual_supply(), new_supply );
       BOOST_REQUIRE_EQUAL( db->get_reward_fund().get_reward_balance(), new_rewards );
-      BOOST_REQUIRE_EQUAL( gpo.get_total_vesting_fund_hive(), new_vesting_hive );
+      BOOST_REQUIRE_EQUAL( gpo.get_total_vesting_fund_pixa(), new_vesting_pixa );
       BOOST_REQUIRE_EQUAL( gpo.get_total_vesting_shares(), new_vesting_shares );
-      BOOST_REQUIRE_EQUAL( get_hive_balance( witness_name ), old_witness_balance + witness_pay );
+      BOOST_REQUIRE_EQUAL( get_pixa_balance( witness_name ), old_witness_balance + witness_pay );
       BOOST_REQUIRE_EQUAL( get_vesting( witness_name ), old_witness_shares + witness_pay_shares );
 
       validate_database();
@@ -1604,36 +1604,36 @@ BOOST_AUTO_TEST_CASE( hive_inflation )
     {
       virtual_supply = gpo.get_virtual_supply();
       witness_name = db->get_scheduled_witness(1);
-      old_witness_balance = get_hive_balance( witness_name );
+      old_witness_balance = get_pixa_balance( witness_name );
 
-      new_rewards = std::max( HIVE_MIN_CONTENT_REWARD, asset( ( HIVE_CONTENT_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), HIVE_SYMBOL ) )
-        + std::max( HIVE_MIN_CURATE_REWARD, asset( ( HIVE_CURATE_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), HIVE_SYMBOL ) );
-      witness_pay = std::max( HIVE_MIN_PRODUCER_REWARD, asset( ( HIVE_PRODUCER_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), HIVE_SYMBOL ) );
+      new_rewards = std::max( HIVE_MIN_CONTENT_REWARD, asset( ( HIVE_CONTENT_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), PIXA_SYMBOL ) )
+        + std::max( HIVE_MIN_CURATE_REWARD, asset( ( HIVE_CURATE_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), PIXA_SYMBOL ) );
+      witness_pay = std::max( HIVE_MIN_PRODUCER_REWARD, asset( ( HIVE_PRODUCER_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), PIXA_SYMBOL ) );
       auto witness_pay_shares = asset( 0, VESTS_SYMBOL );
-      new_vesting_hive = asset( ( witness_pay + new_rewards ).amount * 9, HIVE_SYMBOL );
+      new_vesting_pixa = asset( ( witness_pay + new_rewards ).amount * 9, PIXA_SYMBOL );
       new_vesting_shares = gpo.get_total_vesting_shares();
 
       if ( get_vesting( witness_name ) == VEST_asset( 0 ) )
       {
-        new_vesting_hive += witness_pay;
+        new_vesting_pixa += witness_pay;
         witness_pay_shares = witness_pay * gpo.get_vesting_share_price().to_price();
         new_vesting_shares += witness_pay_shares;
         new_supply += witness_pay;
-        witness_pay = asset( 0, HIVE_SYMBOL );
+        witness_pay = asset( 0, PIXA_SYMBOL );
       }
 
-      new_supply = gpo.get_current_supply() + new_rewards + witness_pay + new_vesting_hive;
+      new_supply = gpo.get_current_supply() + new_rewards + witness_pay + new_vesting_pixa;
       new_rewards += db->get_reward_fund().get_reward_balance();
-      new_vesting_hive += gpo.get_total_vesting_fund_hive();
+      new_vesting_pixa += gpo.get_total_vesting_fund_pixa();
 
       generate_block();
 
       BOOST_REQUIRE_EQUAL( gpo.get_current_supply(), new_supply );
       BOOST_REQUIRE_EQUAL( gpo.get_virtual_supply(), new_supply );
       BOOST_REQUIRE_EQUAL( db->get_reward_fund().get_reward_balance(), new_rewards );
-      BOOST_REQUIRE_EQUAL( gpo.get_total_vesting_fund_hive(), new_vesting_hive );
+      BOOST_REQUIRE_EQUAL( gpo.get_total_vesting_fund_pixa(), new_vesting_pixa );
       BOOST_REQUIRE_EQUAL( gpo.get_total_vesting_shares(), new_vesting_shares );
-      BOOST_REQUIRE_EQUAL( get_hive_balance( witness_name ), old_witness_balance + witness_pay );
+      BOOST_REQUIRE_EQUAL( get_pixa_balance( witness_name ), old_witness_balance + witness_pay );
       BOOST_REQUIRE_EQUAL( get_vesting( witness_name ), old_witness_shares + witness_pay_shares );
 
       validate_database();
@@ -1643,24 +1643,24 @@ BOOST_AUTO_TEST_CASE( hive_inflation )
     {
       virtual_supply = gpo.get_virtual_supply();
       witness_name = db->get_scheduled_witness(1);
-      old_witness_balance = get_hive_balance( witness_name );
+      old_witness_balance = get_pixa_balance( witness_name );
 
-      new_rewards = std::max( HIVE_MIN_CONTENT_REWARD, asset( ( HIVE_CONTENT_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), HIVE_SYMBOL ) )
-        + std::max( HIVE_MIN_CURATE_REWARD, asset( ( HIVE_CURATE_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), HIVE_SYMBOL ) );
-      witness_pay = std::max( HIVE_MIN_PRODUCER_REWARD, asset( ( HIVE_PRODUCER_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), HIVE_SYMBOL ) );
+      new_rewards = std::max( HIVE_MIN_CONTENT_REWARD, asset( ( HIVE_CONTENT_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), PIXA_SYMBOL ) )
+        + std::max( HIVE_MIN_CURATE_REWARD, asset( ( HIVE_CURATE_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), PIXA_SYMBOL ) );
+      witness_pay = std::max( HIVE_MIN_PRODUCER_REWARD, asset( ( HIVE_PRODUCER_APR * gpo.get_virtual_supply().amount ) / ( HIVE_BLOCKS_PER_YEAR * 100 ), PIXA_SYMBOL ) );
       witness_pay_shares = witness_pay * gpo.get_vesting_share_price().to_price();
-      new_vesting_hive = asset( ( witness_pay + new_rewards ).amount * 9, HIVE_SYMBOL ) + witness_pay;
+      new_vesting_pixa = asset( ( witness_pay + new_rewards ).amount * 9, PIXA_SYMBOL ) + witness_pay;
       new_vesting_shares = gpo.get_total_vesting_shares() + witness_pay_shares;
-      new_supply = gpo.get_current_supply() + new_rewards + new_vesting_hive;
+      new_supply = gpo.get_current_supply() + new_rewards + new_vesting_pixa;
       new_rewards += db->get_reward_fund().get_reward_balance();
-      new_vesting_hive += gpo.get_total_vesting_fund_hive();
+      new_vesting_pixa += gpo.get_total_vesting_fund_pixa();
 
       generate_block();
 
       BOOST_REQUIRE_EQUAL( gpo.get_current_supply(), new_supply );
       BOOST_REQUIRE_EQUAL( gpo.get_virtual_supply(), new_supply );
       BOOST_REQUIRE_EQUAL( db->get_reward_fund().get_reward_balance(), new_rewards );
-      BOOST_REQUIRE_EQUAL( gpo.get_total_vesting_fund_hive(), new_vesting_hive );
+      BOOST_REQUIRE_EQUAL( gpo.get_total_vesting_fund_pixa(), new_vesting_pixa );
       BOOST_REQUIRE_EQUAL( gpo.get_total_vesting_shares(), new_vesting_shares );
       BOOST_REQUIRE_EQUAL( get_vesting( witness_name ), old_witness_shares + witness_pay_shares );
 
@@ -1669,8 +1669,8 @@ BOOST_AUTO_TEST_CASE( hive_inflation )
 
     virtual_supply = gpo.get_virtual_supply();
     vesting_shares = gpo.get_total_vesting_shares();
-    vesting_hive = gpo.get_total_vesting_fund_hive();
-    reward_hive = db->get_reward_fund().get_reward_balance();
+    vesting_pixa = gpo.get_total_vesting_fund_pixa();
+    reward_pixa = db->get_reward_fund().get_reward_balance();
 
     witness_name = db->get_scheduled_witness(1);
     old_witness_shares = get_vesting( witness_name );
@@ -1679,30 +1679,30 @@ BOOST_AUTO_TEST_CASE( hive_inflation )
 
     gpo = db->get_dynamic_global_properties();
 
-    BOOST_REQUIRE_EQUAL( gpo.get_total_vesting_fund_hive().amount.value,
-      ( vesting_hive.amount.value
+    BOOST_REQUIRE_EQUAL( gpo.get_total_vesting_fund_pixa().amount.value,
+      ( vesting_pixa.amount.value
         + ( ( ( uint128_t( virtual_supply.amount.value ) / 10 ) / HIVE_BLOCKS_PER_YEAR ) * 9 )
         + ( uint128_t( virtual_supply.amount.value ) / 100 / HIVE_BLOCKS_PER_YEAR ) ).to_uint64() );
     BOOST_REQUIRE_EQUAL( db->get_reward_fund().get_reward_balance().amount.value,
-      reward_hive.amount.value + virtual_supply.amount.value / 10 / HIVE_BLOCKS_PER_YEAR + virtual_supply.amount.value / 10 / HIVE_BLOCKS_PER_DAY );
+      reward_pixa.amount.value + virtual_supply.amount.value / 10 / HIVE_BLOCKS_PER_YEAR + virtual_supply.amount.value / 10 / HIVE_BLOCKS_PER_DAY );
     BOOST_REQUIRE_EQUAL( get_vesting( witness_name ).amount.value,
-      old_witness_shares.amount.value + ( asset( ( ( virtual_supply.amount.value / HIVE_BLOCKS_PER_YEAR ) * HIVE_1_PERCENT ) / HIVE_100_PERCENT, HIVE_SYMBOL ) * ( vesting_shares / vesting_hive ) ).amount.value );
+      old_witness_shares.amount.value + ( asset( ( ( virtual_supply.amount.value / HIVE_BLOCKS_PER_YEAR ) * HIVE_1_PERCENT ) / HIVE_100_PERCENT, PIXA_SYMBOL ) * ( vesting_shares / vesting_pixa ) ).amount.value );
     validate_database();
     */
   }
   FC_LOG_AND_RETHROW();
 }
 
-BOOST_AUTO_TEST_CASE( hbd_interest )
+BOOST_AUTO_TEST_CASE( pxs_interest )
 {
   try
   {
     ACTORS( DEFAULT_VESTING, (alice)(bob) );
     generate_block();
-    vest( "alice", HIVE_asset( 10'000 ) );
-    vest( "bob", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
+    vest( "bob", PIXA_asset( 10'000 ) );
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
 
     BOOST_TEST_MESSAGE( "Testing interest over smallest interest period" );
 
@@ -1721,11 +1721,11 @@ BOOST_AUTO_TEST_CASE( hbd_interest )
       }
     };
 
-    issue_funds( "alice", HBD_asset( 31'903 ) );
+    issue_funds( "alice", PXS_asset( 31'903 ) );
 
-    auto alice_hbd = get_hbd_balance( "alice" );
+    auto alice_pxs = get_pxs_balance( "alice" );
 
-    generate_blocks( db->head_block_time() + fc::seconds( HIVE_HBD_INTEREST_COMPOUND_INTERVAL_SEC ), true );
+    generate_blocks( db->head_block_time() + fc::seconds( HIVE_PXS_INTEREST_COMPOUND_INTERVAL_SEC ), true );
 
     transfer_operation transfer;
     transfer.to = "bob";
@@ -1739,16 +1739,16 @@ BOOST_AUTO_TEST_CASE( hbd_interest )
     assert_no_new_interest_operations( ops_before_first_trigger );
 
     auto& gpo = db->get_dynamic_global_properties();
-    BOOST_REQUIRE_EQUAL( gpo.get_hbd_interest_rate(), 0 );
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "alice" ), alice_hbd - HBD_asset( 1'000 ) );
+    BOOST_REQUIRE_EQUAL( gpo.get_pxs_interest_rate(), 0 );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "alice" ), alice_pxs - PXS_asset( 1'000 ) );
 
     validate_database();
 
     BOOST_TEST_MESSAGE( "Testing interest under interest period" );
 
-    alice_hbd = get_hbd_balance( "alice" );
+    alice_pxs = get_pxs_balance( "alice" );
 
-    generate_blocks( db->head_block_time() + fc::seconds( HIVE_HBD_INTEREST_COMPOUND_INTERVAL_SEC / 2 ), true );
+    generate_blocks( db->head_block_time() + fc::seconds( HIVE_PXS_INTEREST_COMPOUND_INTERVAL_SEC / 2 ), true );
 
     tx.operations.clear();
     tx.operations.push_back( transfer );
@@ -1757,15 +1757,15 @@ BOOST_AUTO_TEST_CASE( hbd_interest )
     push_transaction( tx, alice_private_key );
     assert_no_new_interest_operations( ops_before_second_trigger );
 
-    BOOST_REQUIRE_EQUAL( gpo.get_hbd_interest_rate(), 0 );
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "alice" ), alice_hbd - HBD_asset( 1'000 ) );
+    BOOST_REQUIRE_EQUAL( gpo.get_pxs_interest_rate(), 0 );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "alice" ), alice_pxs - PXS_asset( 1'000 ) );
     validate_database();
 
-    alice_hbd = get_hbd_balance( "alice" );
+    alice_pxs = get_pxs_balance( "alice" );
 
     BOOST_TEST_MESSAGE( "Testing longer interest period" );
 
-    generate_blocks( db->head_block_time() + fc::seconds( ( HIVE_HBD_INTEREST_COMPOUND_INTERVAL_SEC * 7 ) / 3 ), true );
+    generate_blocks( db->head_block_time() + fc::seconds( ( HIVE_PXS_INTEREST_COMPOUND_INTERVAL_SEC * 7 ) / 3 ), true );
 
     tx.operations.clear();
     tx.operations.push_back( transfer );
@@ -1774,43 +1774,43 @@ BOOST_AUTO_TEST_CASE( hbd_interest )
     push_transaction( tx, alice_private_key );
     assert_no_new_interest_operations( ops_before_third_trigger );
 
-    BOOST_REQUIRE_EQUAL( gpo.get_hbd_interest_rate(), 0 );
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "alice" ), alice_hbd - HBD_asset( 1'000 ) );
+    BOOST_REQUIRE_EQUAL( gpo.get_pxs_interest_rate(), 0 );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "alice" ), alice_pxs - PXS_asset( 1'000 ) );
 
     validate_database();
   }
   FC_LOG_AND_RETHROW();
 }
 
-BOOST_AUTO_TEST_CASE(hbd_savings_interest)
+BOOST_AUTO_TEST_CASE(pxs_savings_interest)
 {
   try
   {
     ACTORS( DEFAULT_VESTING, (alice) );
       generate_block();
-    vest("alice", HIVE_asset( 10'000 ));
+    vest("alice", PIXA_asset( 10'000 ));
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
 
     BOOST_TEST_MESSAGE("Testing savings interest over smallest interest period");
 
-    HBD_asset alice_funds( 31'903 );
+    PXS_asset alice_funds( 31'903 );
     issue_funds("alice", alice_funds);
 
     transfer_to_savings( "alice", "alice", alice_funds.to_asset(), "New Tesla fund", alice_private_key);
 
-    issue_funds("alice", HBD_asset( 3'000 ));
+    issue_funds("alice", PXS_asset( 3'000 ));
 
-    auto alice_hbd = get_hbd_balance("alice");
+    auto alice_pxs = get_pxs_balance("alice");
 
-    BOOST_REQUIRE_EQUAL( alice_hbd, HBD_asset( 3'000 ) );
+    BOOST_REQUIRE_EQUAL( alice_pxs, PXS_asset( 3'000 ) );
 
-    auto alice_hbd_savings = get_hbd_savings("alice");
-    BOOST_REQUIRE_EQUAL( alice_hbd_savings, alice_funds );
+    auto alice_pxs_savings = get_pxs_savings("alice");
+    BOOST_REQUIRE_EQUAL( alice_pxs_savings, alice_funds );
 
-    generate_blocks(db->head_block_time() + fc::seconds(HIVE_HBD_INTEREST_COMPOUND_INTERVAL_SEC), true);
+    generate_blocks(db->head_block_time() + fc::seconds(HIVE_PXS_INTEREST_COMPOUND_INTERVAL_SEC), true);
 
-    BOOST_REQUIRE_EQUAL( get_hbd_balance("alice"), HBD_asset( 3'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance("alice"), PXS_asset( 3'000 ) );
 
     transfer_to_savings_operation transfer;
     auto assert_no_new_interest_operations = [&]( size_t ops_before )
@@ -1839,39 +1839,39 @@ BOOST_AUTO_TEST_CASE(hbd_savings_interest)
     assert_no_new_interest_operations( ops_before_first_trigger );
 
     auto& gpo = db->get_dynamic_global_properties();
-    BOOST_REQUIRE_EQUAL( gpo.get_hbd_interest_rate(), 0 );
-    BOOST_REQUIRE_EQUAL( get_hbd_savings( "alice" ), alice_hbd_savings + HBD_asset( 1'000 ) );
+    BOOST_REQUIRE_EQUAL( gpo.get_pxs_interest_rate(), 0 );
+    BOOST_REQUIRE_EQUAL( get_pxs_savings( "alice" ), alice_pxs_savings + PXS_asset( 1'000 ) );
 
     validate_database();
 
     BOOST_TEST_MESSAGE("Testing savings interest under interest period");
 
-    alice_hbd_savings = get_hbd_savings("alice");
+    alice_pxs_savings = get_pxs_savings("alice");
 
-    generate_blocks(db->head_block_time() + fc::seconds(HIVE_HBD_INTEREST_COMPOUND_INTERVAL_SEC / 2), true);
+    generate_blocks(db->head_block_time() + fc::seconds(HIVE_PXS_INTEREST_COMPOUND_INTERVAL_SEC / 2), true);
     
     /// This op is needed to trigger interest payment...
     const auto ops_before_second_trigger = db->get_index< hive::plugins::account_history_rocksdb::volatile_operation_index, by_id >().size();
     push_transaction(transfer, alice_private_key);
     assert_no_new_interest_operations( ops_before_second_trigger );
 
-    BOOST_REQUIRE_EQUAL( get_hbd_savings("alice"), alice_hbd_savings + HBD_asset( 1'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_savings("alice"), alice_pxs_savings + PXS_asset( 1'000 ) );
 
     validate_database();
 
-    alice_hbd_savings = get_hbd_savings("alice");
+    alice_pxs_savings = get_pxs_savings("alice");
 
     BOOST_TEST_MESSAGE("Testing savings interest for longer period");
 
-    generate_blocks(db->head_block_time() + fc::seconds((HIVE_HBD_INTEREST_COMPOUND_INTERVAL_SEC * 7) / 3), true);
+    generate_blocks(db->head_block_time() + fc::seconds((HIVE_PXS_INTEREST_COMPOUND_INTERVAL_SEC * 7) / 3), true);
     
     /// This op is needed to trigger interest payment...
     const auto ops_before_third_trigger = db->get_index< hive::plugins::account_history_rocksdb::volatile_operation_index, by_id >().size();
     push_transaction(transfer, alice_private_key);
     assert_no_new_interest_operations( ops_before_third_trigger );
 
-    BOOST_REQUIRE_EQUAL( gpo.get_hbd_interest_rate(), 0 );
-    BOOST_REQUIRE_EQUAL( get_hbd_savings( "alice" ), alice_hbd_savings + HBD_asset( 1'000 ) );
+    BOOST_REQUIRE_EQUAL( gpo.get_pxs_interest_rate(), 0 );
+    BOOST_REQUIRE_EQUAL( get_pxs_savings( "alice" ), alice_pxs_savings + PXS_asset( 1'000 ) );
 
     validate_database();
   }
@@ -1888,46 +1888,46 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
 
     ACTORS( DEFAULT_VESTING, (alice)(bob)(sam)(dave) );
     generate_block();
-    vest( "alice", HIVE_asset( 10'000 ) );
-    vest( "bob", HIVE_asset( 10'000 ) );
-    vest( "sam", HIVE_asset( 10'000 ) );
-    vest( "dave", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
+    vest( "bob", PIXA_asset( 10'000 ) );
+    vest( "sam", PIXA_asset( 10'000 ) );
+    vest( "dave", PIXA_asset( 10'000 ) );
 
     BOOST_TEST_MESSAGE( "Rewarding Bob with TESTS" );
 
-    HBD_price exchange_rate( 1000, 1250 );
+    PXS_price exchange_rate( 1000, 1250 );
     set_price_feed( exchange_rate );
 
     signed_transaction tx;
 
-    issue_funds( "alice", HBD_asset( 25'522 ) );
-    HBD_asset alice_hbd = get_hbd_balance( "alice" );
+    issue_funds( "alice", PXS_asset( 25'522 ) );
+    PXS_asset alice_pxs = get_pxs_balance( "alice" );
 
     generate_block();
 
-    fund( "alice", HIVE_asset( alice_hbd.amount ) );
-    fund( "bob", HIVE_asset( alice_hbd.amount ) );
-    fund( "sam", HIVE_asset( alice_hbd.amount ) );
-    fund( "dave", HIVE_asset( alice_hbd.amount ) );
+    fund( "alice", PIXA_asset( alice_pxs.amount ) );
+    fund( "bob", PIXA_asset( alice_pxs.amount ) );
+    fund( "sam", PIXA_asset( alice_pxs.amount ) );
+    fund( "dave", PIXA_asset( alice_pxs.amount ) );
 
-    int64_t alice_hbd_volume = 0;
-    int64_t alice_hive_volume = 0;
+    int64_t alice_pxs_volume = 0;
+    int64_t alice_pixa_volume = 0;
     time_point_sec alice_reward_last_update = fc::time_point_sec::min();
-    int64_t bob_hbd_volume = 0;
-    int64_t bob_hive_volume = 0;
+    int64_t bob_pxs_volume = 0;
+    int64_t bob_pixa_volume = 0;
     time_point_sec bob_reward_last_update = fc::time_point_sec::min();
-    int64_t sam_hbd_volume = 0;
-    int64_t sam_hive_volume = 0;
+    int64_t sam_pxs_volume = 0;
+    int64_t sam_pixa_volume = 0;
     time_point_sec sam_reward_last_update = fc::time_point_sec::min();
-    int64_t dave_hbd_volume = 0;
-    int64_t dave_hive_volume = 0;
+    int64_t dave_pxs_volume = 0;
+    int64_t dave_pixa_volume = 0;
     time_point_sec dave_reward_last_update = fc::time_point_sec::min();
 
-    BOOST_TEST_MESSAGE( "Creating Limit Order for HIVE that will stay on the books for 30 minutes exactly." );
+    BOOST_TEST_MESSAGE( "Creating Limit Order for PIXA that will stay on the books for 30 minutes exactly." );
 
     limit_order_create_operation op;
     op.owner = "alice";
-    op.amount_to_sell = asset( alice_hbd.amount.value / 20, HBD_SYMBOL ) ;
+    op.amount_to_sell = asset( alice_pxs.amount.value / 20, PXS_SYMBOL ) ;
     op.min_to_receive = op.amount_to_sell * exchange_rate.to_price();
     op.expiration = db->head_block_time() + fc::seconds( HIVE_MAX_LIMIT_ORDER_EXPIRATION );
     op.orderid = 1;
@@ -1941,7 +1941,7 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
 
     generate_blocks( db->head_block_time() + HIVE_MIN_LIQUIDITY_REWARD_PERIOD_SEC_HF10, true );
 
-    BOOST_TEST_MESSAGE( "Creating Limit Order for HBD that will be filled immediately." );
+    BOOST_TEST_MESSAGE( "Creating Limit Order for PXS that will be filled immediately." );
 
     op.owner = "bob";
     op.min_to_receive = op.amount_to_sell;
@@ -1955,9 +1955,9 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
     push_transaction( tx, bob_private_key );
     generate_block();
 
-    alice_hive_volume += ( asset( alice_hbd.amount / 20, HBD_SYMBOL ) * exchange_rate.to_price() ).amount.value;
+    alice_pixa_volume += ( asset( alice_pxs.amount / 20, PXS_SYMBOL ) * exchange_rate.to_price() ).amount.value;
     alice_reward_last_update = db->head_block_time();
-    bob_hive_volume -= ( asset( alice_hbd.amount / 20, HBD_SYMBOL ) * exchange_rate.to_price() ).amount.value;
+    bob_pixa_volume -= ( asset( alice_pxs.amount / 20, PXS_SYMBOL ) * exchange_rate.to_price() ).amount.value;
     bob_reward_last_update = db->head_block_time();
 
     auto ops = get_last_operations( 2 );
@@ -1967,34 +1967,34 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
     auto reward = liquidity_idx.find( get_account_id( "alice" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "alice" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), alice_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), alice_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), alice_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), alice_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, alice_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "bob" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "bob" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), bob_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), bob_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), bob_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), bob_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, bob_reward_last_update );*/
 
     auto fill_order_op = ops[1].get< fill_order_operation >();
 
     BOOST_REQUIRE_EQUAL( fill_order_op.open_owner, "alice" );
     BOOST_REQUIRE_EQUAL( fill_order_op.open_orderid, 1 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays, asset( alice_hbd.amount / 20, HBD_SYMBOL ) );
+    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays, asset( alice_pxs.amount / 20, PXS_SYMBOL ) );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_owner, "bob" );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_orderid, 2 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays, asset( alice_hbd.amount / 20, HBD_SYMBOL ) * exchange_rate.to_price() );
+    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays, asset( alice_pxs.amount / 20, PXS_SYMBOL ) * exchange_rate.to_price() );
 
     BOOST_CHECK( limit_order_idx.find( boost::make_tuple( "alice", 1 ) ) == limit_order_idx.end() );
     BOOST_CHECK( limit_order_idx.find( boost::make_tuple( "bob", 2 ) ) == limit_order_idx.end() );
 
-    BOOST_TEST_MESSAGE( "Creating Limit Order for HBD that will stay on the books for 60 minutes." );
+    BOOST_TEST_MESSAGE( "Creating Limit Order for PXS that will stay on the books for 60 minutes." );
 
     op.owner = "sam";
-    op.amount_to_sell = asset( ( alice_hbd.amount.value / 20 ), HIVE_SYMBOL );
-    op.min_to_receive = asset( ( alice_hbd.amount.value / 20 ), HBD_SYMBOL );
+    op.amount_to_sell = asset( ( alice_pxs.amount.value / 20 ), PIXA_SYMBOL );
+    op.min_to_receive = asset( ( alice_pxs.amount.value / 20 ), PXS_SYMBOL );
     op.orderid = 3;
 
     tx.operations.clear();
@@ -2005,12 +2005,12 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
 
     generate_blocks( db->head_block_time() + HIVE_MIN_LIQUIDITY_REWARD_PERIOD_SEC_HF10, true );
 
-    BOOST_TEST_MESSAGE( "Creating Limit Order for HBD that will stay on the books for 30 minutes." );
+    BOOST_TEST_MESSAGE( "Creating Limit Order for PXS that will stay on the books for 30 minutes." );
 
     op.owner = "bob";
     op.orderid = 4;
-    op.amount_to_sell = asset( ( alice_hbd.amount.value / 10 ) * 3 - alice_hbd.amount.value / 20, HIVE_SYMBOL );
-    op.min_to_receive = asset( ( alice_hbd.amount.value / 10 ) * 3 - alice_hbd.amount.value / 20, HBD_SYMBOL );
+    op.amount_to_sell = asset( ( alice_pxs.amount.value / 10 ) * 3 - alice_pxs.amount.value / 20, PIXA_SYMBOL );
+    op.min_to_receive = asset( ( alice_pxs.amount.value / 10 ) * 3 - alice_pxs.amount.value / 20, PXS_SYMBOL );
 
     tx.operations.clear();
     tx.set_expiration( db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
@@ -2025,8 +2025,8 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
 
     op.owner = "alice";
     op.orderid = 5;
-    op.amount_to_sell = asset( ( alice_hbd.amount.value / 10 ) * 3, HBD_SYMBOL );
-    op.min_to_receive = asset( ( alice_hbd.amount.value / 10 ) * 3, HIVE_SYMBOL );
+    op.amount_to_sell = asset( ( alice_pxs.amount.value / 10 ) * 3, PXS_SYMBOL );
+    op.min_to_receive = asset( ( alice_pxs.amount.value / 10 ) * 3, PIXA_SYMBOL );
 
     tx.operations.clear();
     tx.set_expiration( db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
@@ -2034,56 +2034,56 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
     push_transaction( tx, alice_private_key );
     generate_block();
 
-    alice_hbd_volume -= ( alice_hbd.amount.value / 10 ) * 3;
+    alice_pxs_volume -= ( alice_pxs.amount.value / 10 ) * 3;
     alice_reward_last_update = db->head_block_time();
-    sam_hbd_volume += alice_hbd.amount.value / 20;
+    sam_pxs_volume += alice_pxs.amount.value / 20;
     sam_reward_last_update = db->head_block_time();
-    bob_hbd_volume += ( alice_hbd.amount.value / 10 ) * 3 - ( alice_hbd.amount.value / 20 );
+    bob_pxs_volume += ( alice_pxs.amount.value / 10 ) * 3 - ( alice_pxs.amount.value / 20 );
     bob_reward_last_update = db->head_block_time();
     ops = get_last_operations( 3 );
 
     fill_order_op = ops[1].get< fill_order_operation >();
     BOOST_REQUIRE_EQUAL( fill_order_op.open_owner, "bob" );
     BOOST_REQUIRE_EQUAL( fill_order_op.open_orderid, 4 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays, asset( ( alice_hbd.amount.value / 10 ) * 3 - alice_hbd.amount.value / 20, HIVE_SYMBOL ) );
+    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays, asset( ( alice_pxs.amount.value / 10 ) * 3 - alice_pxs.amount.value / 20, PIXA_SYMBOL ) );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_owner, "alice" );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_orderid, 5 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays, asset( ( alice_hbd.amount.value / 10 ) * 3 - alice_hbd.amount.value / 20, HBD_SYMBOL ) );
+    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays, asset( ( alice_pxs.amount.value / 10 ) * 3 - alice_pxs.amount.value / 20, PXS_SYMBOL ) );
 
     fill_order_op = ops[2].get< fill_order_operation >();
     BOOST_REQUIRE_EQUAL( fill_order_op.open_owner, "sam" );
     BOOST_REQUIRE_EQUAL( fill_order_op.open_orderid, 3 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays, asset( alice_hbd.amount.value / 20, HIVE_SYMBOL ) );
+    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays, asset( alice_pxs.amount.value / 20, PIXA_SYMBOL ) );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_owner, "alice" );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_orderid, 5 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays, asset( alice_hbd.amount.value / 20, HBD_SYMBOL ) );
+    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays, asset( alice_pxs.amount.value / 20, PXS_SYMBOL ) );
 
     reward = liquidity_idx.find( get_account_id( "alice" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "alice" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), alice_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), alice_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), alice_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), alice_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, alice_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "bob" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "bob" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), bob_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), bob_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), bob_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), bob_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, bob_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "sam" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "sam" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), sam_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), sam_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, sam_reward_last_update );*/
 
     BOOST_TEST_MESSAGE( "Testing a partial fill before minimum time and full fill after minimum time" );
 
     op.orderid = 6;
-    op.amount_to_sell = asset( alice_hbd.amount.value / 20 * 2, HBD_SYMBOL );
-    op.min_to_receive = asset( alice_hbd.amount.value / 20 * 2, HIVE_SYMBOL );
+    op.amount_to_sell = asset( alice_pxs.amount.value / 20 * 2, PXS_SYMBOL );
+    op.min_to_receive = asset( alice_pxs.amount.value / 20 * 2, PIXA_SYMBOL );
 
     tx.operations.clear();
     tx.set_expiration( db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
@@ -2094,8 +2094,8 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
 
     op.owner = "bob";
     op.orderid = 7;
-    op.amount_to_sell = asset( alice_hbd.amount.value / 20, HIVE_SYMBOL );
-    op.min_to_receive = asset( alice_hbd.amount.value / 20, HBD_SYMBOL );
+    op.amount_to_sell = asset( alice_pxs.amount.value / 20, PIXA_SYMBOL );
+    op.min_to_receive = asset( alice_pxs.amount.value / 20, PXS_SYMBOL );
 
     tx.operations.clear();
     tx.set_expiration( db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
@@ -2110,30 +2110,30 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
 
     BOOST_REQUIRE_EQUAL( fill_order_op.open_owner, "alice" );
     BOOST_REQUIRE_EQUAL( fill_order_op.open_orderid, 6 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays, asset( alice_hbd.amount.value / 20, HBD_SYMBOL ) );
+    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays, asset( alice_pxs.amount.value / 20, PXS_SYMBOL ) );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_owner, "bob" );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_orderid, 7 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays, asset( alice_hbd.amount.value / 20, HIVE_SYMBOL ) );
+    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays, asset( alice_pxs.amount.value / 20, PIXA_SYMBOL ) );
 
     reward = liquidity_idx.find( get_account_id( "alice" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "alice" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), alice_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), alice_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), alice_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), alice_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, alice_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "bob" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "bob" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), bob_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), bob_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), bob_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), bob_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, bob_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "sam" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "sam" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), sam_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), sam_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, sam_reward_last_update );*/
 
     generate_blocks( db->head_block_time() + HIVE_MIN_LIQUIDITY_REWARD_PERIOD_SEC_HF10, true );
@@ -2147,9 +2147,9 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
     push_transaction( tx, sam_private_key );
     generate_block();
 
-    alice_hive_volume += alice_hbd.amount.value / 20;
+    alice_pixa_volume += alice_pxs.amount.value / 20;
     alice_reward_last_update = db->head_block_time();
-    sam_hive_volume -= alice_hbd.amount.value / 20;
+    sam_pixa_volume -= alice_pxs.amount.value / 20;
     sam_reward_last_update = db->head_block_time();
 
     ops = get_last_operations( 2 );
@@ -2157,30 +2157,30 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
 
     BOOST_REQUIRE_EQUAL( fill_order_op.open_owner, "alice" );
     BOOST_REQUIRE_EQUAL( fill_order_op.open_orderid, 6 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays, asset( alice_hbd.amount.value / 20, HBD_SYMBOL ) );
+    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays, asset( alice_pxs.amount.value / 20, PXS_SYMBOL ) );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_owner, "sam" );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_orderid, 8 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays, asset( alice_hbd.amount.value / 20, HIVE_SYMBOL ) );
+    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays, asset( alice_pxs.amount.value / 20, PIXA_SYMBOL ) );
 
     reward = liquidity_idx.find( get_account_id( "alice" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "alice" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), alice_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), alice_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), alice_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), alice_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, alice_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "bob" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "bob" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), bob_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), bob_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), bob_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), bob_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, bob_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "sam" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "sam" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), sam_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), sam_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, sam_reward_last_update );*/
 
     BOOST_TEST_MESSAGE( "Trading to give Alice and Bob positive volumes to receive rewards" );
@@ -2188,7 +2188,7 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
     transfer_operation transfer;
     transfer.to = "dave";
     transfer.from = "alice";
-    transfer.amount = asset( alice_hbd.amount / 2, HBD_SYMBOL );
+    transfer.amount = asset( alice_pxs.amount / 2, PXS_SYMBOL );
 
     tx.operations.clear();
     tx.operations.push_back( transfer );
@@ -2196,8 +2196,8 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
     push_transaction( tx, alice_private_key );
 
     op.owner = "alice";
-    op.amount_to_sell = asset( 8 * ( alice_hbd.amount.value / 20 ), HIVE_SYMBOL );
-    op.min_to_receive = asset( op.amount_to_sell.amount, HBD_SYMBOL );
+    op.amount_to_sell = asset( 8 * ( alice_pxs.amount.value / 20 ), PIXA_SYMBOL );
+    op.min_to_receive = asset( op.amount_to_sell.amount, PXS_SYMBOL );
     op.orderid = 9;
     tx.operations.clear();
     tx.operations.push_back( op );
@@ -2206,8 +2206,8 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
     generate_blocks( db->head_block_time() + HIVE_MIN_LIQUIDITY_REWARD_PERIOD_SEC_HF10, true );
 
     op.owner = "dave";
-    op.amount_to_sell = asset( 7 * ( alice_hbd.amount.value / 20 ), HBD_SYMBOL );;
-    op.min_to_receive = asset( op.amount_to_sell.amount, HIVE_SYMBOL );
+    op.amount_to_sell = asset( 7 * ( alice_pxs.amount.value / 20 ), PXS_SYMBOL );;
+    op.min_to_receive = asset( op.amount_to_sell.amount, PIXA_SYMBOL );
     op.orderid = 10;
     tx.operations.clear();
     tx.operations.push_back( op );
@@ -2215,9 +2215,9 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
     push_transaction( tx, dave_private_key );
     generate_block();
 
-    alice_hbd_volume += op.amount_to_sell.amount.value;
+    alice_pxs_volume += op.amount_to_sell.amount.value;
     alice_reward_last_update = db->head_block_time();
-    dave_hbd_volume -= op.amount_to_sell.amount.value;
+    dave_pxs_volume -= op.amount_to_sell.amount.value;
     dave_reward_last_update = db->head_block_time();
 
     ops = get_last_operations( 2 );
@@ -2225,41 +2225,41 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
 
     BOOST_REQUIRE_EQUAL( fill_order_op.open_owner, "alice" );
     BOOST_REQUIRE_EQUAL( fill_order_op.open_orderid, 9 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays.amount.value, 7 * ( alice_hbd.amount.value / 20 ) );
+    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays.amount.value, 7 * ( alice_pxs.amount.value / 20 ) );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_owner, "dave" );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_orderid, 10 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays.amount.value, 7 * ( alice_hbd.amount.value / 20 ) );
+    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays.amount.value, 7 * ( alice_pxs.amount.value / 20 ) );
 
     reward = liquidity_idx.find( get_account_id( "alice" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "alice" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), alice_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), alice_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), alice_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), alice_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, alice_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "bob" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "bob" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), bob_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), bob_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), bob_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), bob_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, bob_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "sam" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "sam" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), sam_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), sam_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, sam_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "dave" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "dave" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), dave_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), dave_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), dave_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), dave_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, dave_reward_last_update );*/
 
     op.owner = "bob";
-    op.amount_to_sell.amount = alice_hbd.amount / 20;
+    op.amount_to_sell.amount = alice_pxs.amount / 20;
     op.min_to_receive.amount = op.amount_to_sell.amount;
     op.orderid = 11;
     tx.operations.clear();
@@ -2267,9 +2267,9 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
     push_transaction( tx, bob_private_key );
     generate_block();
 
-    alice_hbd_volume += op.amount_to_sell.amount.value;
+    alice_pxs_volume += op.amount_to_sell.amount.value;
     alice_reward_last_update = db->head_block_time();
-    bob_hbd_volume -= op.amount_to_sell.amount.value;
+    bob_pxs_volume -= op.amount_to_sell.amount.value;
     bob_reward_last_update = db->head_block_time();
 
     ops = get_last_operations( 2 );
@@ -2277,42 +2277,42 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
 
     BOOST_REQUIRE_EQUAL( fill_order_op.open_owner, "alice" );
     BOOST_REQUIRE_EQUAL( fill_order_op.open_orderid, 9 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays.amount.value, alice_hbd.amount.value / 20 );
+    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays.amount.value, alice_pxs.amount.value / 20 );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_owner, "bob" );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_orderid, 11 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays.amount.value, alice_hbd.amount.value / 20 );
+    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays.amount.value, alice_pxs.amount.value / 20 );
 
     reward = liquidity_idx.find( get_account_id( "alice" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "alice" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), alice_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), alice_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), alice_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), alice_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, alice_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "bob" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "bob" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), bob_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), bob_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), bob_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), bob_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, bob_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "sam" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "sam" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), sam_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), sam_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, sam_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "dave" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "dave" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), dave_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), dave_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), dave_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), dave_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, dave_reward_last_update );*/
 
     transfer.to = "bob";
     transfer.from = "alice";
-    transfer.amount = asset( alice_hbd.amount / 5, HBD_SYMBOL );
+    transfer.amount = asset( alice_pxs.amount / 5, PXS_SYMBOL );
     tx.operations.clear();
     tx.operations.push_back( transfer );
     tx.set_expiration( db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
@@ -2320,8 +2320,8 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
 
     op.owner = "bob";
     op.orderid = 12;
-    op.amount_to_sell = asset( 3 * ( alice_hbd.amount / 40 ), HBD_SYMBOL );
-    op.min_to_receive = asset( op.amount_to_sell.amount, HIVE_SYMBOL );
+    op.amount_to_sell = asset( 3 * ( alice_pxs.amount / 40 ), PXS_SYMBOL );
+    op.min_to_receive = asset( op.amount_to_sell.amount, PIXA_SYMBOL );
     tx.operations.clear();
     tx.operations.push_back( op );
     push_transaction( tx, bob_private_key );
@@ -2331,15 +2331,15 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
     op.owner = "dave";
     op.orderid = 13;
     op.amount_to_sell = op.min_to_receive;
-    op.min_to_receive.symbol = HBD_SYMBOL;
+    op.min_to_receive.symbol = PXS_SYMBOL;
     tx.operations.clear();
     tx.operations.push_back( op );
     push_transaction( tx, dave_private_key );
     generate_block();
 
-    bob_hive_volume += op.amount_to_sell.amount.value;
+    bob_pixa_volume += op.amount_to_sell.amount.value;
     bob_reward_last_update = db->head_block_time();
-    dave_hive_volume -= op.amount_to_sell.amount.value;
+    dave_pixa_volume -= op.amount_to_sell.amount.value;
     dave_reward_last_update = db->head_block_time();
 
     ops = get_last_operations( 2 );
@@ -2347,43 +2347,43 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
 
     BOOST_REQUIRE_EQUAL( fill_order_op.open_owner, "bob" );
     BOOST_REQUIRE_EQUAL( fill_order_op.open_orderid, 12 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays.amount.value, 3 * ( alice_hbd.amount.value / 40 ) );
+    BOOST_REQUIRE_EQUAL( fill_order_op.open_pays.amount.value, 3 * ( alice_pxs.amount.value / 40 ) );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_owner, "dave" );
     BOOST_REQUIRE_EQUAL( fill_order_op.current_orderid, 13 );
-    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays.amount.value, 3 * ( alice_hbd.amount.value / 40 ) );
+    BOOST_REQUIRE_EQUAL( fill_order_op.current_pays.amount.value, 3 * ( alice_pxs.amount.value / 40 ) );
 
     reward = liquidity_idx.find( get_account_id( "alice" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "alice" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), alice_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), alice_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), alice_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), alice_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, alice_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "bob" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "bob" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), bob_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), bob_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), bob_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), bob_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, bob_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "sam" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "sam" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), sam_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), sam_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, sam_reward_last_update );*/
 
     reward = liquidity_idx.find( get_account_id( "dave" ) );
     BOOST_REQUIRE( reward == liquidity_idx.end() );
     /*BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "dave" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), dave_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), dave_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), dave_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), dave_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, dave_reward_last_update );*/
 
-    auto alice_balance = get_hive_balance( "alice" );
-    auto bob_balance = get_hive_balance( "bob" );
-    auto sam_balance = get_hive_balance( "sam" );
-    auto dave_balance = get_hive_balance( "dave" );
+    auto alice_balance = get_pixa_balance( "alice" );
+    auto bob_balance = get_pixa_balance( "bob" );
+    auto sam_balance = get_pixa_balance( "sam" );
+    auto dave_balance = get_pixa_balance( "dave" );
 
     BOOST_TEST_MESSAGE( "Generating Blocks to trigger liquidity rewards" );
 
@@ -2391,19 +2391,19 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
     generate_blocks( HIVE_LIQUIDITY_REWARD_BLOCKS - ( db->head_block_num() % HIVE_LIQUIDITY_REWARD_BLOCKS ) - 1 );
 
     BOOST_REQUIRE_EQUAL( db->head_block_num() % HIVE_LIQUIDITY_REWARD_BLOCKS, HIVE_LIQUIDITY_REWARD_BLOCKS - 1 );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), alice_balance );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), bob_balance );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "sam" ), sam_balance );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "dave" ), dave_balance );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), alice_balance );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), bob_balance );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "sam" ), sam_balance );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "dave" ), dave_balance );
 
     generate_block();
 
     //alice_balance += HIVE_MIN_LIQUIDITY_REWARD;
 
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), alice_balance );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), bob_balance );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "sam" ), sam_balance );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "dave" ), dave_balance );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), alice_balance );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), bob_balance );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "sam" ), sam_balance );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "dave" ), dave_balance );
 
     ops = get_last_operations( 1 );
 
@@ -2414,20 +2414,20 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
 
     //bob_balance += HIVE_MIN_LIQUIDITY_REWARD;
 
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), alice_balance );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), bob_balance );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "sam" ), sam_balance );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "dave" ), dave_balance );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), alice_balance );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), bob_balance );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "sam" ), sam_balance );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "dave" ), dave_balance );
 
     ops = get_last_operations( 1 );
 
     HIVE_REQUIRE_THROW( ops[0].get< liquidity_reward_operation>(), fc::exception );
     //BOOST_REQUIRE_EQUAL( ops[0].get< liquidity_reward_operation>().payout, HIVE_MIN_LIQUIDITY_REWARD );
 
-    alice_hive_volume = 0;
-    alice_hbd_volume = 0;
-    bob_hive_volume = 0;
-    bob_hbd_volume = 0;
+    alice_pixa_volume = 0;
+    alice_pxs_volume = 0;
+    bob_pixa_volume = 0;
+    bob_pxs_volume = 0;
 
     BOOST_TEST_MESSAGE( "Testing liquidity timeout" );
 
@@ -2447,30 +2447,30 @@ BOOST_AUTO_TEST_CASE( liquidity_rewards )
     reward = liquidity_idx.find( get_account_id( "sam" ) );
     /*BOOST_REQUIRE( reward == liquidity_idx.end() );
     BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "sam" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), sam_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), sam_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, sam_reward_last_update );*/
 
     generate_block();
 
     op.owner = "alice";
     op.orderid = 15;
-    op.amount_to_sell.symbol = HBD_SYMBOL;
-    op.min_to_receive.symbol = HIVE_SYMBOL;
+    op.amount_to_sell.symbol = PXS_SYMBOL;
+    op.min_to_receive.symbol = PIXA_SYMBOL;
     tx.operations.clear();
     tx.operations.push_back( op );
     tx.set_expiration( db->head_block_time() + HIVE_MAX_TIME_UNTIL_EXPIRATION );
     push_transaction( tx, alice_private_key );
 
-    sam_hbd_volume = HBD_asset( 1'000 ).amount.value;
-    sam_hive_volume = 0;
+    sam_pxs_volume = PXS_asset( 1'000 ).amount.value;
+    sam_pixa_volume = 0;
     sam_reward_last_update = db->head_block_time();
 
     reward = liquidity_idx.find( get_account_id( "sam" ) );
     /*BOOST_REQUIRE( reward == liquidity_idx.end() );
     BOOST_REQUIRE_EQUAL( reward->owner, get_account_id( "sam" ) );
-    BOOST_REQUIRE_EQUAL( reward->get_hbd_volume(), sam_hbd_volume );
-    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_hive_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_pxs_volume(), sam_pxs_volume );
+    BOOST_REQUIRE_EQUAL( reward->get_hive_volume(), sam_pixa_volume );
     BOOST_CHECK_EQUAL( reward->last_update, sam_reward_last_update );*/
   }
   FC_LOG_AND_RETHROW();
@@ -2482,7 +2482,7 @@ BOOST_AUTO_TEST_CASE( post_rate_limit )
   {
     ACTORS( DEFAULT_VESTING, (alice) );
 
-    vest( "alice", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
 
     comment_operation op;
     op.author = "alice";
@@ -2541,12 +2541,12 @@ BOOST_AUTO_TEST_CASE( comment_freeze )
   try
   {
     ACTORS( DEFAULT_VESTING, (alice)(bob)(sam)(dave) );
-    vest( "alice", HIVE_asset( 10'000 ) );
-    vest( "bob", HIVE_asset( 10'000 ) );
-    vest( "sam", HIVE_asset( 10'000 ) );
-    vest( "dave", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
+    vest( "bob", PIXA_asset( 10'000 ) );
+    vest( "sam", PIXA_asset( 10'000 ) );
+    vest( "dave", PIXA_asset( 10'000 ) );
 
-    HBD_price exchange_rate( 1000, 1250 );
+    PXS_price exchange_rate( 1000, 1250 );
     set_price_feed( exchange_rate );
 
     comment_operation comment;
@@ -2641,7 +2641,7 @@ BOOST_AUTO_TEST_CASE( comment_freeze )
   FC_LOG_AND_RETHROW()
 }
 
-BOOST_AUTO_TEST_CASE( hbd_stability )
+BOOST_AUTO_TEST_CASE( pxs_stability )
 {
   try
   {
@@ -2657,13 +2657,13 @@ BOOST_AUTO_TEST_CASE( hbd_stability )
 
     ACTORS( DEFAULT_VESTING, (alice)(bob)(sam) );
 
-    vest( "alice", HIVE_asset( 10'000 ) );
-    vest( "bob", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
+    vest( "bob", PIXA_asset( 10'000 ) );
 
-    HBD_price exchange_rate( 1000, 10000 );
+    PXS_price exchange_rate( 1000, 10000 );
     set_price_feed( exchange_rate );
 
-    BOOST_REQUIRE_EQUAL( dgpo.get_hbd_print_rate(), HIVE_100_PERCENT );
+    BOOST_REQUIRE_EQUAL( dgpo.get_pxs_print_rate(), HIVE_100_PERCENT );
 
     comment_operation comment;
     comment.author = "alice";
@@ -2694,19 +2694,19 @@ BOOST_AUTO_TEST_CASE( hbd_stability )
 
     BOOST_TEST_MESSAGE( "Changing sam and gpo to set up market cap conditions" );
 
-    int correction = ( dgpo.get_hbd_stop_percent() * dgpo.get_hbd_stop_percent() ) / ( HIVE_100_PERCENT - dgpo.get_hbd_stop_percent() ) + 1;
-    HBD_asset hbd_balance = ( ( dgpo.get_current_supply() * ( dgpo.get_hbd_stop_percent() + correction ) ) / HIVE_100_PERCENT ) * exchange_rate;
+    int correction = ( dgpo.get_pxs_stop_percent() * dgpo.get_pxs_stop_percent() ) / ( HIVE_100_PERCENT - dgpo.get_pxs_stop_percent() ) + 1;
+    PXS_asset pxs_balance = ( ( dgpo.get_current_supply() * ( dgpo.get_pxs_stop_percent() + correction ) ) / HIVE_100_PERCENT ) * exchange_rate;
     db_plugin->debug_update( [&]( database& db )
     {
-      temp_HBD_balance new_hbd;
+      temp_PXS_balance new_pxs;
       db.modify( dgpo, [&]( dynamic_global_property_object& gpo )
       {
-        new_hbd = gpo.issue_HBD( hbd_balance + db.get_treasury().get_hbd_balance() - gpo.get_current_hbd_supply(), exchange_rate, true );
+        new_pxs = gpo.issue_PXS( pxs_balance + db.get_treasury().get_pxs_balance() - gpo.get_current_pxs_supply(), exchange_rate, true );
       } );
 
       db.modify( db.get_account( "sam" ), [&]( account_object& a )
       {
-        a.access_hbd_balance().transfer_from( new_hbd );
+        a.access_pxs_balance().transfer_from( new_pxs );
       } );
     } );
 
@@ -2714,58 +2714,58 @@ BOOST_AUTO_TEST_CASE( hbd_stability )
 
     generate_block();
 
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "sam" ), hbd_balance - get_hbd_balance( HIVE_INIT_MINER_NAME ) ); // initial HBD balance is still on 'initminer'
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "sam" ), pxs_balance - get_pxs_balance( HIVE_INIT_MINER_NAME ) ); // initial PXS balance is still on 'initminer'
 
-    BOOST_TEST_MESSAGE( "Checking printing HBD has stopped" );
-    BOOST_REQUIRE_EQUAL( dgpo.get_hbd_print_rate(), 0 );
+    BOOST_TEST_MESSAGE( "Checking printing PXS has stopped" );
+    BOOST_REQUIRE_EQUAL( dgpo.get_pxs_print_rate(), 0 );
 
     auto& _alice = db->get_account( "alice" );
-    auto alice_hbd = _alice.get_hbd_balance() + _alice.get_hbd_rewards();
-    BOOST_REQUIRE_EQUAL( alice_hbd, HBD_asset( 0 ) );
-    auto alice_hive = _alice.get_hive_balance() + _alice.get_hive_rewards();
-    BOOST_REQUIRE_EQUAL( alice_hive, HIVE_asset( 0 ) );
+    auto alice_pxs = _alice.get_pxs_balance() + _alice.get_pxs_rewards();
+    BOOST_REQUIRE_EQUAL( alice_pxs, PXS_asset( 0 ) );
+    auto alice_pixa = _alice.get_pixa_balance() + _alice.get_pixa_rewards();
+    BOOST_REQUIRE_EQUAL( alice_pixa, PIXA_asset( 0 ) );
 
-    BOOST_TEST_MESSAGE( "Pay out comment and check rewards are paid as HIVE" );
+    BOOST_TEST_MESSAGE( "Pay out comment and check rewards are paid as PIXA" );
     generate_block();
 
     validate_database();
 
-    BOOST_REQUIRE_EQUAL( _alice.get_hbd_balance() + _alice.get_hbd_rewards(), alice_hbd );
-    BOOST_REQUIRE_GT( _alice.get_hive_balance() + _alice.get_hive_rewards(), alice_hive );
+    BOOST_REQUIRE_EQUAL( _alice.get_pxs_balance() + _alice.get_pxs_rewards(), alice_pxs );
+    BOOST_REQUIRE_GT( _alice.get_pixa_balance() + _alice.get_pixa_rewards(), alice_pixa );
 
-    BOOST_TEST_MESSAGE( "Letting percent market cap fall to hbd_start_percent to verify printing of HBD turns back on" );
+    BOOST_TEST_MESSAGE( "Letting percent market cap fall to pxs_start_percent to verify printing of PXS turns back on" );
 
-    // Get slightly above hbd_start_percent (about 10% of distance between start and stop)
-    uint16_t percent = ( dgpo.get_hbd_stop_percent() - dgpo.get_hbd_start_percent() ) / 10;
-    percent += dgpo.get_hbd_start_percent();
+    // Get slightly above pxs_start_percent (about 10% of distance between start and stop)
+    uint16_t percent = ( dgpo.get_pxs_stop_percent() - dgpo.get_pxs_start_percent() ) / 10;
+    percent += dgpo.get_pxs_start_percent();
     correction = ( percent * percent ) / ( HIVE_100_PERCENT - percent ) + 1;
-    hbd_balance = ( ( dgpo.get_current_supply() * ( dgpo.get_hbd_start_percent() + correction ) ) / HIVE_100_PERCENT ) * exchange_rate;
+    pxs_balance = ( ( dgpo.get_current_supply() * ( dgpo.get_pxs_start_percent() + correction ) ) / HIVE_100_PERCENT ) * exchange_rate;
     db_plugin->debug_update( [&]( database& db )
     {
-      temp_HBD_balance new_hbd;
+      temp_PXS_balance new_pxs;
       db.modify( dgpo, [&]( dynamic_global_property_object& gpo )
       {
-        new_hbd = gpo.issue_HBD( hbd_balance + db.get_treasury().get_hbd_balance() - gpo.get_current_hbd_supply(), exchange_rate, true );
+        new_pxs = gpo.issue_PXS( pxs_balance + db.get_treasury().get_pxs_balance() - gpo.get_current_pxs_supply(), exchange_rate, true );
       } );
 
       db.modify( db.get_account( "sam" ), [&]( account_object& a )
       {
-        a.access_hbd_balance().transfer_from( new_hbd );
+        a.access_pxs_balance().transfer_from( new_pxs );
       } );
     } );
 
     validate_database();
 
     generate_block();
-    BOOST_REQUIRE_LT( dgpo.get_hbd_print_rate(), HIVE_100_PERCENT );
+    BOOST_REQUIRE_LT( dgpo.get_pxs_print_rate(), HIVE_100_PERCENT );
 
-    auto last_print_rate = dgpo.get_hbd_print_rate();
+    auto last_print_rate = dgpo.get_pxs_print_rate();
 
-    // Keep producing blocks until printing HBD is back
-    while( db->calculate_HBD_percent() >= dgpo.get_hbd_start_percent() )
+    // Keep producing blocks until printing PXS is back
+    while( db->calculate_PXS_percent() >= dgpo.get_pxs_start_percent() )
     {
-      BOOST_REQUIRE_GE( dgpo.get_hbd_print_rate(), last_print_rate );
-      last_print_rate = dgpo.get_hbd_print_rate();
+      BOOST_REQUIRE_GE( dgpo.get_pxs_print_rate(), last_print_rate );
+      last_print_rate = dgpo.get_pxs_print_rate();
       generate_block();
       if( db->head_block_num() % 1000 == 0 )
         validate_database();
@@ -2773,20 +2773,20 @@ BOOST_AUTO_TEST_CASE( hbd_stability )
 
     validate_database();
 
-    BOOST_REQUIRE_EQUAL( dgpo.get_hbd_print_rate(), HIVE_100_PERCENT );
+    BOOST_REQUIRE_EQUAL( dgpo.get_pxs_print_rate(), HIVE_100_PERCENT );
   }
   FC_LOG_AND_RETHROW()
 }
 
-BOOST_AUTO_TEST_CASE( hbd_price_feed_limit )
+BOOST_AUTO_TEST_CASE( pxs_price_feed_limit )
 {
   try
   {
     ACTORS( DEFAULT_VESTING, (alice) );
     generate_block();
-    vest( "alice", HIVE_asset( 10'000 ) );
+    vest( "alice", PIXA_asset( 10'000 ) );
 
-    HBD_price exchange_rate( 1000, 1000 );
+    PXS_price exchange_rate( 1000, 1000 );
     set_price_feed( exchange_rate );
 
     comment_operation comment;
@@ -2810,17 +2810,17 @@ BOOST_AUTO_TEST_CASE( hbd_price_feed_limit )
 
     generate_blocks( db->find_comment_cashout( *db->get_comment( "alice", string( "test" ) ) )->get_cashout_time(), true );
 
-    BOOST_TEST_MESSAGE( "Setting HBD percent to greater than 10% market cap." );
+    BOOST_TEST_MESSAGE( "Setting PXS percent to greater than 10% market cap." );
 
     db->skip_price_feed_limit_check = false;
     const auto& gpo = db->get_dynamic_global_properties();
-    HBD_price new_exchange_rate( gpo.get_current_hbd_supply(), HIVE_100_PERCENT * gpo.get_current_supply() );
+    PXS_price new_exchange_rate( gpo.get_current_pxs_supply(), HIVE_100_PERCENT * gpo.get_current_supply() );
     set_price_feed( new_exchange_rate );
     set_price_feed( new_exchange_rate, true );
 
     auto recent_ops = get_last_operations( 2 );
     auto sys_warn_op = recent_ops.back().get< system_warning_operation >();
-    BOOST_REQUIRE_EQUAL( sys_warn_op.message.compare( 0, 27, "HIVE price corrected upward" ), 0 );
+    BOOST_REQUIRE_EQUAL( sys_warn_op.message.compare( 0, 27, "PIXA price corrected upward" ), 0 );
 
     const auto& feed = db->get_feed_history();
     BOOST_REQUIRE( feed.current_median_history > new_exchange_rate && feed.current_median_history < exchange_rate );
@@ -2842,10 +2842,10 @@ BOOST_AUTO_TEST_CASE( clear_null_account )
     ACTORS( DEFAULT_VESTING, (alice) );
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
 
-    issue_funds( "alice", HIVE_asset( 10'000 ) );
-    issue_funds( "alice", HBD_asset( 10'000 ) );
+    issue_funds( "alice", PIXA_asset( 10'000 ) );
+    issue_funds( "alice", PXS_asset( 10'000 ) );
 
     transfer_operation transfer1;
     transfer1.from = "alice";
@@ -2886,56 +2886,56 @@ BOOST_AUTO_TEST_CASE( clear_null_account )
 
     db_plugin->debug_update( [=]( database& db )
     {
-      temp_HIVE_balance new_hive, reward_as_hive;
-      temp_HBD_balance new_hbd;
+      temp_PIXA_balance new_pixa, reward_as_pixa;
+      temp_PXS_balance new_pxs;
       temp_VEST_balance reward_vests;
       db.modify( db.get_dynamic_global_properties(), [&]( dynamic_global_property_object& gpo )
       {
-        new_hive = gpo.issue_HIVE( HIVE_asset( 2'000 ) );
-        new_hbd = gpo.issue_HBD( HBD_asset( 1'000 ), db.get_hbd_price() );
+        new_pixa = gpo.issue_PIXA( PIXA_asset( 2'000 ) );
+        new_pxs = gpo.issue_PXS( PXS_asset( 1'000 ), db.get_pxs_price() );
         reward_vests = gpo.issue_VESTS( VEST_asset( 1'000'000 ), true );
-        reward_as_hive.transfer_from( new_hive, HIVE_asset( 1'000 ) );
-        gpo.access_pending_rewarded_vesting_hive() += reward_as_hive.as_asset();
+        reward_as_pixa.transfer_from( new_pixa, PIXA_asset( 1'000 ) );
+        gpo.access_pending_rewarded_vesting_pixa() += reward_as_pixa.as_asset();
       } );
 
       db.modify( db.get_account( HIVE_NULL_ACCOUNT ), [&]( account_object& a )
       {
-        a.access_hive_rewards().transfer_from( new_hive );
-        a.access_hbd_rewards().transfer_from( new_hbd );
+        a.access_pixa_rewards().transfer_from( new_pixa );
+        a.access_pxs_rewards().transfer_from( new_pxs );
         a.access_vest_rewards().transfer_from( reward_vests );
-        a.access_vest_rewards_as_hive().transfer_from( reward_as_hive );
+        a.access_vest_rewards_as_pixa().transfer_from( reward_as_pixa );
       } );
     } );
 
     validate_database();
 
-    BOOST_REQUIRE_EQUAL( get_hive_balance( HIVE_NULL_ACCOUNT ), HIVE_asset( 1'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( HIVE_NULL_ACCOUNT ), HBD_asset( 2'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( HIVE_NULL_ACCOUNT ), PIXA_asset( 1'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( HIVE_NULL_ACCOUNT ), PXS_asset( 2'000 ) );
     BOOST_REQUIRE_GT( get_vesting( HIVE_NULL_ACCOUNT ), VEST_asset( 0 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_savings( HIVE_NULL_ACCOUNT ), HIVE_asset( 4'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_savings( HIVE_NULL_ACCOUNT ), HBD_asset( 5'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_rewards( HIVE_NULL_ACCOUNT ), HBD_asset( 1'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_rewards( HIVE_NULL_ACCOUNT ), HIVE_asset( 1'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_savings( HIVE_NULL_ACCOUNT ), PIXA_asset( 4'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_savings( HIVE_NULL_ACCOUNT ), PXS_asset( 5'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_rewards( HIVE_NULL_ACCOUNT ), PXS_asset( 1'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_rewards( HIVE_NULL_ACCOUNT ), PIXA_asset( 1'000 ) );
     BOOST_REQUIRE_EQUAL( get_vest_rewards( HIVE_NULL_ACCOUNT ), VEST_asset( 1'000'000 ) );
-    BOOST_REQUIRE_EQUAL( get_vest_rewards_as_hive( HIVE_NULL_ACCOUNT ), HIVE_asset( 1'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 2'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "alice" ), HBD_asset( 3'000 ) );
+    BOOST_REQUIRE_EQUAL( get_vest_rewards_as_pixa( HIVE_NULL_ACCOUNT ), PIXA_asset( 1'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 2'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "alice" ), PXS_asset( 3'000 ) );
 
     BOOST_TEST_MESSAGE( "--- Generating block to clear balances" );
     generate_block();
     validate_database();
 
-    BOOST_REQUIRE_EQUAL( get_hive_balance( HIVE_NULL_ACCOUNT ), HIVE_asset( 0 ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( HIVE_NULL_ACCOUNT ), HBD_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( HIVE_NULL_ACCOUNT ), PIXA_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( HIVE_NULL_ACCOUNT ), PXS_asset( 0 ) );
     BOOST_REQUIRE_EQUAL( get_vesting( HIVE_NULL_ACCOUNT ), VEST_asset( 0 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_savings( HIVE_NULL_ACCOUNT ), HIVE_asset( 0 ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_savings( HIVE_NULL_ACCOUNT ), HBD_asset( 0 ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_rewards( HIVE_NULL_ACCOUNT ), HBD_asset( 0 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_rewards( HIVE_NULL_ACCOUNT ), HIVE_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_savings( HIVE_NULL_ACCOUNT ), PIXA_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_savings( HIVE_NULL_ACCOUNT ), PXS_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_rewards( HIVE_NULL_ACCOUNT ), PXS_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_rewards( HIVE_NULL_ACCOUNT ), PIXA_asset( 0 ) );
     BOOST_REQUIRE_EQUAL( get_vest_rewards( HIVE_NULL_ACCOUNT ), VEST_asset( 0 ) );
-    BOOST_REQUIRE_EQUAL( get_vest_rewards_as_hive( HIVE_NULL_ACCOUNT ), HIVE_asset( 0 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 2'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hbd_balance( "alice" ), HBD_asset( 3'000 ) );
+    BOOST_REQUIRE_EQUAL( get_vest_rewards_as_pixa( HIVE_NULL_ACCOUNT ), PIXA_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 2'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pxs_balance( "alice" ), PXS_asset( 3'000 ) );
   }
   FC_LOG_AND_RETHROW()
 }
@@ -2999,10 +2999,10 @@ BOOST_AUTO_TEST_CASE( account_subsidy_witness_limits )
   {
     BOOST_TEST_MESSAGE( "Testing: account_subsidy_witness_limits" );
 
-    ACTORS( HIVE_asset( 50'000'000 ), (alice)(bob) ); // a lot of extra RC for account token claims
+    ACTORS( PIXA_asset( 50'000'000 ), (alice)(bob) ); // a lot of extra RC for account token claims
     generate_block();
 
-    set_price_feed( HBD_price( 1000, 1000 ) );
+    set_price_feed( PXS_price( 1000, 1000 ) );
 
     claim_account_operation op;
     signed_transaction tx;
@@ -3117,10 +3117,10 @@ BOOST_AUTO_TEST_CASE( recurrent_transfer_expiration )
 
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).open_recurrent_transfers, 0 );
 
-    issue_funds( "alice", HIVE_asset( 100'000 ) );
-    issue_funds( "alice", HBD_asset( 100'000 ) );
+    issue_funds( "alice", PIXA_asset( 100'000 ) );
+    issue_funds( "alice", PXS_asset( 100'000 ) );
 
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 100'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 100'000 ) );
 
     recurrent_transfer_operation op;
     op.from = "alice";
@@ -3131,15 +3131,15 @@ BOOST_AUTO_TEST_CASE( recurrent_transfer_expiration )
     op.executions = 2;
     push_transaction(op, alice_private_key);
 
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 100'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 100'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 0 ) );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).open_recurrent_transfers, 1 );
     validate_database();
 
     generate_block();
     BOOST_TEST_MESSAGE( "--- test initial recurrent transfer execution" );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 95'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 5'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 95'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 5'000 ) );
     validate_database();
 
     auto blocks_until_expiration = (fc::hours(op.recurrence * op.executions) + fc::seconds(30)).to_seconds() / HIVE_BLOCK_INTERVAL;
@@ -3148,8 +3148,8 @@ BOOST_AUTO_TEST_CASE( recurrent_transfer_expiration )
 
     const auto* recurrent_transfer = db->find< recurrent_transfer_object, by_from_to_id >(boost::make_tuple( alice_id, bob_id) );
     BOOST_TEST_MESSAGE( "--- test recurrent transfer fully executed" );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 90'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 10'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 90'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 10'000 ) );
     BOOST_REQUIRE( recurrent_transfer == nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).open_recurrent_transfers, 0 );
 
@@ -3160,8 +3160,8 @@ BOOST_AUTO_TEST_CASE( recurrent_transfer_expiration )
     generate_blocks( blocks_until_next_execution );
 
     const auto* recurrent_transfer_post_expiration = db->find< recurrent_transfer_object, by_from_to_id >(boost::make_tuple( alice_id, bob_id) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 90'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 10'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 90'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 10'000 ) );
     BOOST_REQUIRE( recurrent_transfer_post_expiration == nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).open_recurrent_transfers, 0 );
 
@@ -3181,22 +3181,22 @@ BOOST_FIXTURE_TEST_CASE( recurrent_transfer_consecutive_failure_deletion, pruned
 
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).open_recurrent_transfers, 0 );
 
-    issue_funds( "alice", HIVE_asset( 5'000 ) );
-    issue_funds( "alice", HBD_asset( 100'000 ) );
+    issue_funds( "alice", PIXA_asset( 5'000 ) );
+    issue_funds( "alice", PXS_asset( 100'000 ) );
 
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 5'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 5'000 ) );
 
     recurrent_transfer( "alice", "bob", ASSET( "5.000 TESTS" ), "test", 24, 100, alice_private_key );
 
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 5'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 5'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 0 ) );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).open_recurrent_transfers, 1 );
     validate_database();
 
     generate_block();
     BOOST_TEST_MESSAGE( "--- test initial recurrent transfer execution" );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 0 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 5'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 5'000 ) );
     validate_database();
 
     auto blocks_until_failure = (fc::days(10) + fc::seconds(60) ).to_seconds() / HIVE_BLOCK_INTERVAL;
@@ -3205,21 +3205,21 @@ BOOST_FIXTURE_TEST_CASE( recurrent_transfer_consecutive_failure_deletion, pruned
 
     const auto* recurrent_transfer = db->find< recurrent_transfer_object, by_from_to_id >(boost::make_tuple( alice_id, bob_id) );
     BOOST_TEST_MESSAGE( "--- test recurrent transfer got deleted" );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 0 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 5'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 0 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 5'000 ) );
     BOOST_REQUIRE( recurrent_transfer == nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).open_recurrent_transfers, 0 );
 
     BOOST_TEST_MESSAGE( "Waiting another 24 hours to see if the recurrent transfer does not execute again past its deletion" );
 
-    issue_funds( "alice", HIVE_asset( 5'000 ) );
+    issue_funds( "alice", PIXA_asset( 5'000 ) );
     auto blocks_until_next_execution = fc::days(1).to_seconds() / HIVE_BLOCK_INTERVAL;
     ilog("generating ${blocks} blocks", ("blocks", blocks_until_next_execution));
     generate_blocks( blocks_until_next_execution );
 
     const auto* recurrent_transfer_post_deletion = db->find< recurrent_transfer_object, by_from_to_id >(boost::make_tuple( alice_id, bob_id) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "alice" ), HIVE_asset( 5'000 ) );
-    BOOST_REQUIRE_EQUAL( get_hive_balance( "bob" ), HIVE_asset( 5'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "alice" ), PIXA_asset( 5'000 ) );
+    BOOST_REQUIRE_EQUAL( get_pixa_balance( "bob" ), PIXA_asset( 5'000 ) );
     BOOST_REQUIRE( recurrent_transfer_post_deletion == nullptr );
     BOOST_REQUIRE_EQUAL( db->get_account( "alice" ).open_recurrent_transfers, 0 );
     validate_database();

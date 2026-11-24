@@ -2,11 +2,11 @@
 
 ## 1.  Description
 
-The operation is also called Staking. This operation converts Hive into Hive Power (also called Vesting Fund Shares  or VESTS) at the current exchange rate.
+The operation is also called Staking. This operation converts PIXA into Pixa Power (also called Vesting Fund Shares  or VESTS) at the current exchange rate.
 
 The conversion may be done between the same account or to another account.
 
-The more HP (Hive Power) the account has, the more:
+The more PXP (Pixa Power) the account has, the more:
 
 a. Governance voting power (for witnesses and proposals) has
 
@@ -26,7 +26,7 @@ The global parameters:
 | -------------- | ------------------------------------------------------------------ | ------------ |
 | from           | The account the funds are coming from                              |              |
 | to             | The account the funds are going to. If null, then the same as from |              |
-| amount         | Must be HIVE, amount >0                                            | 100.000 HIVE |
+| amount         | Must be PIXA, amount >0                                            | 100.000 PIXA |
 
 
 ## 3.  Authority
@@ -38,7 +38,7 @@ Active
 
 You need:
 
-\- your balance in HIVE is equal or higher than transfer amount.
+\- your balance in PIXA is equal or higher than transfer amount.
 
 \- enough Resource Credit (RC)  to make an operation.
 

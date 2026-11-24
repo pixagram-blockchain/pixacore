@@ -78,14 +78,14 @@ uint16_t database::get_nft_max_royalty()const
 bool database::is_nft_price_symbol( const asset_symbol_type& symbol )const
 {
   // offers, and therefore sales and royalties, are in PXS; the operation format also takes PIXA
-  return symbol == HBD_SYMBOL;
+  return symbol == PXS_SYMBOL;
 }
 
-HBD_asset database::get_nft_mint_fee( uint16_t editions )const
+PXS_asset database::get_nft_mint_fee( uint16_t editions )const
 {
   // 1.000 PXS per copy, so a mint pays for what it can put on the market. It does not depend on any
   // voted value: a signed mint is valid at the same price until it expires.
-  return HBD_asset( int64_t( editions ) * PIXA_NFT_MINT_FEE_PER_EDITION );
+  return PXS_asset( int64_t( editions ) * PIXA_NFT_MINT_FEE_PER_EDITION );
 }
 
 } } // hive::chain

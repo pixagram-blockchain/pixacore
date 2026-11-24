@@ -41,7 +41,7 @@ namespace hive { namespace protocol {
     /// The text stays in this operation; the state keeps its SHA-256 and its length.
     string            license;
     /// Mint fee in PXS: database::get_nft_mint_fee( editions ), 1.000 PXS per copy, exactly. It is burned.
-    asset             fee = asset( 0, HBD_SYMBOL );
+    asset             fee = asset( 0, PXS_SYMBOL );
     extensions_type   extensions;
 
     void validate() const;
@@ -60,7 +60,7 @@ namespace hive { namespace protocol {
     /// The copy, 1 to the number of copies; 0 for the reserve.
     uint16_t          edition = 1;
     /// Asking price. Consensus accepts PXS only (database::is_nft_price_symbol()).
-    asset             price = asset( 0, HBD_SYMBOL );
+    asset             price = asset( 0, PXS_SYMBOL );
     /// The offer cannot be taken at or after this time. The default never expires.
     time_point_sec    expiration = time_point_sec::maximum();
     extensions_type   extensions;
@@ -96,7 +96,7 @@ namespace hive { namespace protocol {
     string            permlink;
     /// The copy, 1 to the number of copies; 0 for the next copy of the reserve.
     uint16_t          edition = 1;
-    asset             price = asset( 0, HBD_SYMBOL );
+    asset             price = asset( 0, PXS_SYMBOL );
     extensions_type   extensions;
 
     void validate() const;

@@ -12,7 +12,7 @@ void create_proposal_operation::validate()const
   HIVE_PROTOCOL_NUMBER_ASSERT( end_date > start_date, "end date must be greater than start date", ("subject", end_date)(start_date) );
 
   validate_asset_not_negative(daily_pay, "Daily pay can't be negative value");
-  validate_asset_type(daily_pay, HBD_SYMBOL, "Daily pay should be expressed in HBD");
+  validate_asset_type(daily_pay, PXS_SYMBOL, "Daily pay should be expressed in PXS");
 
   validate_string_is_not_empty(subject, "subject is required");
   validate_string_max_size(subject, HIVE_PROPOSAL_SUBJECT_MAX_LENGTH, "Subject is too long");
@@ -27,7 +27,7 @@ void update_proposal_operation::validate()const
   validate_account_name( creator );
   HIVE_PROTOCOL_NUMBER_ASSERT( proposal_id >= 0, "The proposal id can't be negative", ("subject", proposal_id) );
   validate_asset_not_negative(daily_pay, "Daily pay can't be negative value");
-  validate_asset_type(daily_pay, HBD_SYMBOL, "Daily pay should be expressed in HBD");
+  validate_asset_type(daily_pay, PXS_SYMBOL, "Daily pay should be expressed in PXS");
 
   validate_string_is_not_empty( subject, "subject is required" );
   validate_string_max_size(subject, HIVE_PROPOSAL_SUBJECT_MAX_LENGTH, "Subject is too long");

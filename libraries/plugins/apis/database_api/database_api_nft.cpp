@@ -59,7 +59,7 @@ DEFINE_API_IMPL( database_api_impl, get_nft_params )
   result.max_editions = _db.get_nft_max_editions();
   result.max_royalty = _db.get_nft_max_royalty();
   result.max_license_length = PIXA_NFT_MAX_LICENSE_LENGTH;
-  for( const asset_symbol_type& symbol : { HBD_SYMBOL, HIVE_SYMBOL } )
+  for( const asset_symbol_type& symbol : { PXS_SYMBOL, PIXA_SYMBOL } )
     if( _db.is_nft_price_symbol( symbol ) )
       result.price_symbols.push_back( symbol );
 

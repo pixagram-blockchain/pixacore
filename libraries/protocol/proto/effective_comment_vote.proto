@@ -27,6 +27,6 @@ message effective_comment_vote {
   // @param {number} total_vote_weight - sum of all vote weights on the target comment in the moment of casting current vote
   required uint64 total_vote_weight = 6 [json_name = "total_vote_weight"];
 
-  // @param {asset} pending_payout - (HBD) estimated reward on target comment; supplemented by AH RocksDB plugin
+  // @param {asset} pending_payout - (PXS) estimated reward on target comment; supplemented by AH RocksDB plugin
   required asset  pending_payout = 7 [json_name = "pending_payout"];
 }

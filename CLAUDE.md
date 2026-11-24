@@ -268,6 +268,21 @@ cli_wallet --daemon --rpc-http-endpoint=127.0.0.1:8092 --rpc-http-allowip=127.0.
 
 ## Development Patterns
 
+### Currency names (Pixa)
+
+Pixa's coins are PIXA (Hive's HIVE) and PXS (Hive's HBD); staked PIXA is VESTS, shown as Pixa Power (PXP).
+The code uses Pixa's names: `PIXA_asset`, `PXS_asset`, `PIXA_SYMBOL`, `PXS_SYMBOL`, `HIVE_ASSET_NUM_PIXA`,
+`get_pxs_balance()`, and the JSON field names follow (`pxs_balance`, `percent_pxs`, `reward_pixa`, ...).
+`HIVE_` stays as the project prefix of macros and `hive::` as the namespace.
+
+- JSON input still accepts Hive's field names (`libraries/protocol/legacy_field_names.cpp`).
+- `database_api.list_hbd_conversion_requests` / `find_hbd_conversion_requests` and the cli_wallet commands
+  `convert_hbd`, `convert_hive_with_collateral`, `estimate_hive_collateral` remain as aliases.
+- `HBD_asset`, `HIVE_asset`, `legacy_hive_asset` and four `dynamic_global_property_object` getters keep
+  Hive's names as aliases for HAF; don't use them in new code.
+- The `witness_set_properties` keys `hbd_interest_rate` / `hbd_exchange_rate` are data inside signed
+  operations and must never be renamed.
+
 ### Consensus-Critical Changes (Hardfork Requirements)
 
 **CRITICAL**: Any change that affects transaction validity requires a hardfork. Without it, nodes running old code will behave differently from nodes with new code, causing network splits when affected transactions appear in blocks.
@@ -301,8 +316,8 @@ cli_wallet --daemon --rpc-http-endpoint=127.0.0.1:8092 --rpc-http-allowip=127.0.
 **Example - Safe change:**
 ```cpp
 // Moving SMT check from validate() to evaluator is safe IF:
-// - validate() had: FC_ASSERT( amount.symbol == HIVE_SYMBOL )
-// - evaluator would hit: FC_ASSERT in get_balance() for non-HIVE/HBD symbols
+// - validate() had: FC_ASSERT( amount.symbol == PIXA_SYMBOL )
+// - evaluator would hit: FC_ASSERT in get_balance() for non-PIXA/PXS symbols
 // Same transactions fail, just at different point - no hardfork needed
 ```
 

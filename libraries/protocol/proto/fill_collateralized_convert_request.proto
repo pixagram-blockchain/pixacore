@@ -5,8 +5,8 @@ import "asset.proto";
 package hive.protocol.buffers;
 
 /* Related to collateralized_convert_operation.
- * Generated during block processing after conversion delay passes and HIVE is finally converted to HBD.
- * Note: HBD is transferred immediately during execution of above operation, this vop is generated after actual
+ * Generated during block processing after conversion delay passes and PIXA is finally converted to PXS.
+ * Note: PXS is transferred immediately during execution of above operation, this vop is generated after actual
  * price of conversion becomes known.
  * @see collateralized_convert_immediate_conversion
  */
@@ -17,12 +17,12 @@ message fill_collateralized_convert_request {
   // @param {number} requestid - id of the request
   required uint32 requestid = 2;
 
-  // @param {asset} amount_in - (HIVE) source of conversion (part of collateral)
+  // @param {asset} amount_in - (PIXA) source of conversion (part of collateral)
   required asset  amount_in = 3 [json_name = "amount_in"];
 
-  // @param {asset} amount_out - (HBD) result of conversion (already transferred to owner when request was made)
+  // @param {asset} amount_out - (PXS) result of conversion (already transferred to owner when request was made)
   required asset  amount_out = 4 [json_name = "amount_out"];
 
-  // @param {asset} excess_collateral - (HIVE) unused part of collateral returned to owner
+  // @param {asset} excess_collateral - (PIXA) unused part of collateral returned to owner
   required asset  excess_collateral = 5 [json_name = "excess_collateral"];
 }

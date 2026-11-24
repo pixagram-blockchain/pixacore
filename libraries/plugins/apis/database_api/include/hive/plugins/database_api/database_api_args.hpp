@@ -351,22 +351,29 @@ struct find_vesting_delegation_expirations_args
 typedef list_vesting_delegation_expirations_return find_vesting_delegation_expirations_return;
 
 
-/* HBD Converstions */
+/* PXS Converstions */
 
-typedef list_object_args_type list_hbd_conversion_requests_args;
+typedef list_object_args_type list_pxs_conversion_requests_args;
 
-struct list_hbd_conversion_requests_return
+struct list_pxs_conversion_requests_return
 {
   vector< api_convert_request_object > requests;
 };
 
 
-struct find_hbd_conversion_requests_args
+struct find_pxs_conversion_requests_args
 {
   account_name_type account;
 };
 
-typedef list_hbd_conversion_requests_return find_hbd_conversion_requests_return;
+typedef list_pxs_conversion_requests_return find_pxs_conversion_requests_return;
+
+// Hive's names of the two methods above (list_hbd_conversion_requests, find_hbd_conversion_requests),
+// kept for clients written against them
+typedef list_pxs_conversion_requests_args list_hbd_conversion_requests_args;
+typedef list_pxs_conversion_requests_return list_hbd_conversion_requests_return;
+typedef find_pxs_conversion_requests_args find_hbd_conversion_requests_args;
+typedef find_pxs_conversion_requests_return find_hbd_conversion_requests_return;
 
 
 /* Collateralized Converstions */
@@ -809,10 +816,10 @@ FC_REFLECT( hive::plugins::database_api::list_vesting_delegation_expirations_ret
 FC_REFLECT( hive::plugins::database_api::find_vesting_delegation_expirations_args,
   (account) )
 
-FC_REFLECT( hive::plugins::database_api::list_hbd_conversion_requests_return,
+FC_REFLECT( hive::plugins::database_api::list_pxs_conversion_requests_return,
   (requests) )
 
-FC_REFLECT( hive::plugins::database_api::find_hbd_conversion_requests_args,
+FC_REFLECT( hive::plugins::database_api::find_pxs_conversion_requests_args,
   (account) )
 
 FC_REFLECT( hive::plugins::database_api::list_collateralized_conversion_requests_return,

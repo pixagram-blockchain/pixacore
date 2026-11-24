@@ -12,7 +12,7 @@ In order to update the proposal parameters, all parameters should be entered.
 | -------------- | -------------------------------------------------------------------------------------------------------------- | ------------ |
 | proposal\_id   | Proposal id                                                                                                             |         |
 | creator        | {creator} of the proposal (see operation: create\_proposal\_operation}                                                  |         |
-| daily\_pay     | Amount of HBDs to be paid daily to the {receiver} account.Updated value has to be lower or equal to the current amount. |         |
+| daily\_pay     | Amount of PXS to be paid daily to the {receiver} account.Updated value has to be lower or equal to the current amount. |         |
 | subject        | Proposal subject                                                                                                        |         |
 | permlink       | The identifier of the post created by {creator} or {receiver}.                                                          |         |
 | extensions     | The {end\_date} may be updated, but it can be only shortened.                                                           |         |

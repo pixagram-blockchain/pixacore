@@ -4,18 +4,18 @@ import "asset.proto";
 
 package hive.protocol.buffers;
 
-/* Related to any operation that modifies HBD liquid or savings balance (including block processing).
- * Generated when operation modified HBD balance and account received interest payment.
+/* Related to any operation that modifies PXS liquid or savings balance (including block processing).
+ * Generated when operation modified PXS balance and account received interest payment.
  * Interest is stored in related balance (liquid when liquid was modified, savings when savings was modified).
  * Note: since HF25 interest is not calculated nor paid on liquid balance.
  */
 message interest {
-  // @param {string} owner - user that had his HBD balance modified (receiver of interest)
+  // @param {string} owner - user that had his PXS balance modified (receiver of interest)
   required string owner = 1;
 
-  // @param {asset} interest - (HBD) amount of interest paid
+  // @param {asset} interest - (PXS) amount of interest paid
   required asset  interest = 2;
 
-  // @param {bool} is_saved_into_hbd_balance - true when liquid balance was modified (not happening after HF25)
-  required bool   is_saved_into_hbd_balance = 3 [json_name = "is_saved_into_hbd_balance"];
+  // @param {bool} is_saved_into_pxs_balance - true when liquid balance was modified (not happening after HF25)
+  required bool   is_saved_into_pxs_balance = 3 [json_name = "is_saved_into_pxs_balance"];
 }

@@ -68,15 +68,15 @@ struct list_my_accounts_json_account
   protocol::account_name_type name;
   protocol::asset             balance;
   protocol::asset             vesting_shares;
-  protocol::asset             hbd_balance;
+  protocol::asset             pxs_balance;
 };
 struct list_my_accounts_json_return
 {
   vector<list_my_accounts_json_account> accounts;
 
-  protocol::asset total_hive;
+  protocol::asset total_pixa;
   protocol::asset total_vest;
-  protocol::asset total_hbd;
+  protocol::asset total_pxs;
 };
 typedef variant                                   list_my_accounts_args;
 typedef vector<database_api::api_account_object>  list_my_accounts_return;
@@ -121,9 +121,9 @@ typedef vector< database_api::api_collateralized_convert_request_object > get_co
 /* get_order_book */
 struct get_order_book_json_order
 {
-  protocol::asset   hive;
-  protocol::asset   hbd;
-  protocol::asset   sum_hbd;
+  protocol::asset   pixa;
+  protocol::asset   pxs;
+  protocol::asset   sum_pxs;
   double            price = 0;
 };
 struct get_order_book_json_return
@@ -223,13 +223,13 @@ FC_REFLECT( hive::plugins::wallet_bridge_api::broadcast_transaction_synchronous_
 
 FC_REFLECT( hive::plugins::wallet_bridge_api::find_withdraw_vesting_json_route, (from)(to)(percent)(auto_vest))
 
-FC_REFLECT( hive::plugins::wallet_bridge_api::list_my_accounts_json_account, (name)(balance)(vesting_shares)(hbd_balance))
-FC_REFLECT( hive::plugins::wallet_bridge_api::list_my_accounts_json_return, (accounts)(total_hive)(total_vest)(total_hbd))
+FC_REFLECT( hive::plugins::wallet_bridge_api::list_my_accounts_json_account, (name)(balance)(vesting_shares)(pxs_balance))
+FC_REFLECT( hive::plugins::wallet_bridge_api::list_my_accounts_json_return, (accounts)(total_pixa)(total_vest)(total_pxs))
 
 FC_REFLECT( hive::plugins::wallet_bridge_api::get_account_history_json_op, (pos)(block)(id)(op))
 
 FC_REFLECT( hive::plugins::wallet_bridge_api::get_open_orders_json_order, (id)(price)(quantity)(type))
 FC_REFLECT( hive::plugins::wallet_bridge_api::get_open_orders_json_return, (orders))
 
-FC_REFLECT( hive::plugins::wallet_bridge_api::get_order_book_json_order, (hive)(hbd)(sum_hbd)(price))
+FC_REFLECT( hive::plugins::wallet_bridge_api::get_order_book_json_order, (pixa)(pxs)(sum_pxs)(price))
 FC_REFLECT( hive::plugins::wallet_bridge_api::get_order_book_json_return, (bids)(asks)(bid_total)(ask_total))

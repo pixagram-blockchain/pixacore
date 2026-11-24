@@ -7,6 +7,7 @@
 #include <hive/protocol/hive_virtual_operations.hpp>
 #include <hive/protocol/dhf_operations.hpp>
 #include <hive/protocol/nft_operations.hpp>
+#include <hive/protocol/legacy_field_names.hpp>
 
 namespace hive { namespace protocol {
 
@@ -152,6 +153,14 @@ namespace fc
   {
     bool operator()( const fc::variant& v, operation& s ) const
     {
+      // JSON that names the PXS and PIXA fields as Hive does (percent_hbd, reward_hive, ...) is read
+      // with Pixa's names; nothing is left to rename when fc comes back here with the renamed copy
+      fc::variant renamed;
+      if( hive::protocol::rename_legacy_field_names( v, renamed ) )
+      {
+        fc::from_variant( renamed, s );
+        return true;
+      }
       return extended_serialization_functor< operation >().serialize( v, s );
     }
   };

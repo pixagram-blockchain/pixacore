@@ -58,23 +58,23 @@ const limit_order_object* database::find_limit_order( const account_name_type& n
 void database::remove_escrow( const escrow_object& escrow, bool emit_rejected_vop )
 {
   // Extract all funds via temp balances
-  temp_HIVE_balance hive_ret;
-  temp_HBD_balance hbd_ret;
+  temp_PIXA_balance pixa_ret;
+  temp_PXS_balance pxs_ret;
   temp_balance fee_ret( escrow.get_fee().symbol );
   modify( escrow, [&]( escrow_object& esc )
   {
-    esc.access_hive_balance().transfer_to( hive_ret );
-    esc.access_hbd_balance().transfer_to( hbd_ret );
+    esc.access_pixa_balance().transfer_to( pixa_ret );
+    esc.access_pxs_balance().transfer_to( pxs_ret );
     esc.access_fee().transfer_to( fee_ret );
   } );
 
   auto vop = escrow_rejected_operation( escrow.get_from(), escrow.get_to(), escrow.get_agent(),
-    escrow.get_escrow_id(), hbd_ret.as_asset(), hive_ret.as_asset(), fee_ret.as_asset() );
+    escrow.get_escrow_id(), pxs_ret.as_asset(), pixa_ret.as_asset(), fee_ret.as_asset() );
 
   // Return funds to originator
   const auto& from_account = get_account( escrow.get_from() );
-  adjust_balance( from_account, hive_ret, hive_ret.as_asset() );
-  adjust_balance( from_account, hbd_ret, hbd_ret.as_asset() );
+  adjust_balance( from_account, pixa_ret, pixa_ret.as_asset() );
+  adjust_balance( from_account, pxs_ret, pxs_ret.as_asset() );
   adjust_balance( from_account, fee_ret, fee_ret.as_asset() );
 
   if( emit_rejected_vop )
@@ -115,21 +115,21 @@ void database::remove_pending_escrows( const account_object& account, const acco
   }
 }
 
-void database::get_escrow_totals( HIVE_asset& total_hive, HBD_asset& total_hbd, uint64_t& escrow_count ) const
+void database::get_escrow_totals( PIXA_asset& total_pixa, PXS_asset& total_pxs, uint64_t& escrow_count ) const
 {
   const auto& escrow_idx = get_index< escrow_index >().indices().get< by_id >();
 
   for( auto itr = escrow_idx.begin(); itr != escrow_idx.end(); ++itr )
   {
-    total_hive += itr->get_hive_balance();
-    total_hbd += itr->get_hbd_balance();
+    total_pixa += itr->get_pixa_balance();
+    total_pxs += itr->get_pxs_balance();
 
-    if( itr->get_fee().symbol == HIVE_SYMBOL )
-      total_hive += HIVE_asset( itr->get_fee() );
+    if( itr->get_fee().symbol == PIXA_SYMBOL )
+      total_pixa += PIXA_asset( itr->get_fee() );
     else
     {
-      FC_ASSERT( itr->get_fee().symbol == HBD_SYMBOL, "found escrow pending fee that is not HBD or HIVE" );
-      total_hbd += HBD_asset( itr->get_fee() );
+      FC_ASSERT( itr->get_fee().symbol == PXS_SYMBOL, "found escrow pending fee that is not PXS or PIXA" );
+      total_pxs += PXS_asset( itr->get_fee() );
     }
     ++escrow_count;
   }
@@ -227,18 +227,18 @@ void database::remove_pending_savings_withdraws( const account_object& account, 
   }
 }
 
-void database::get_savings_withdraw_totals( HIVE_asset& total_hive, HBD_asset& total_hbd, uint64_t& withdrawal_count ) const
+void database::get_savings_withdraw_totals( PIXA_asset& total_pixa, PXS_asset& total_pxs, uint64_t& withdrawal_count ) const
 {
   const auto& savings_withdraw_idx = get_index< savings_withdraw_index >().indices().get< by_id >();
 
   for( auto itr = savings_withdraw_idx.begin(); itr != savings_withdraw_idx.end(); ++itr )
   {
-    if( itr->get_withdraw_amount().symbol == HIVE_SYMBOL )
-      total_hive += HIVE_asset( itr->get_withdraw_amount() );
+    if( itr->get_withdraw_amount().symbol == PIXA_SYMBOL )
+      total_pixa += PIXA_asset( itr->get_withdraw_amount() );
     else
     {
-      FC_ASSERT( itr->get_withdraw_amount().symbol == HBD_SYMBOL, "found savings withdraw that is not HBD or HIVE" );
-      total_hbd += HBD_asset( itr->get_withdraw_amount() );
+      FC_ASSERT( itr->get_withdraw_amount().symbol == PXS_SYMBOL, "found savings withdraw that is not PXS or PIXA" );
+      total_pxs += PXS_asset( itr->get_withdraw_amount() );
     }
     ++withdrawal_count;
   }
@@ -327,7 +327,7 @@ int database::match( const limit_order_object& new_order, const limit_order_obje
       ( (age >= HIVE_MIN_LIQUIDITY_REWARD_PERIOD_SEC && !has_hardfork( HIVE_HARDFORK_0_10__149)) ||
       (age >= HIVE_MIN_LIQUIDITY_REWARD_PERIOD_SEC_HF10 && has_hardfork( HIVE_HARDFORK_0_10__149) ) ) )
   {
-    if( old_order_receives.symbol == HIVE_SYMBOL )
+    if( old_order_receives.symbol == PIXA_SYMBOL )
     {
       adjust_liquidity_reward( get_account( old_order.get_seller() ), old_order_receives, false );
       adjust_liquidity_reward( get_account( new_order.get_seller() ), -old_order_receives, false );
@@ -434,19 +434,19 @@ void database::clear_expired_orders()
   }
 }
 
-void database::get_limit_order_totals( HIVE_asset& total_hive, HBD_asset& total_hbd, uint64_t& order_count ) const
+void database::get_limit_order_totals( PIXA_asset& total_pixa, PXS_asset& total_pxs, uint64_t& order_count ) const
 {
   const auto& limit_order_idx = get_index< limit_order_index >().indices();
 
   for( auto itr = limit_order_idx.begin(); itr != limit_order_idx.end(); ++itr )
   {
-    if( itr->amount_for_sale().symbol == HIVE_SYMBOL )
+    if( itr->amount_for_sale().symbol == PIXA_SYMBOL )
     {
-      total_hive += HIVE_asset( itr->amount_for_sale() );
+      total_pixa += PIXA_asset( itr->amount_for_sale() );
     }
-    else if ( itr->amount_for_sale().symbol == HBD_SYMBOL )
+    else if ( itr->amount_for_sale().symbol == PXS_SYMBOL )
     {
-      total_hbd += HBD_asset( itr->amount_for_sale() );
+      total_pxs += PXS_asset( itr->amount_for_sale() );
     }
     ++order_count;
   }

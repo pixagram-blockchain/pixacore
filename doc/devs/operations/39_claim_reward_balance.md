@@ -2,7 +2,7 @@
 
 ## 1. Description
 
-An operation claim\_reward\_balance\_operation is used to transfer previously collected author and/or curation rewards from sub balance for the reward to regular balances. Rewards expressed in Hive and HBD are transferred to liquid balances, rewards in HP increase vesting balance. When claimed, HP rewards are immediately active towards governance voting power (compare with transfer\_to\_vesting\_operation)
+An operation claim\_reward\_balance\_operation is used to transfer previously collected author and/or curation rewards from sub balance for the reward to regular balances. Rewards expressed in PIXA and PXS are transferred to liquid balances, rewards in PXP increase vesting balance. When claimed, PXP rewards are immediately active towards governance voting power (compare with transfer\_to\_vesting\_operation)
 
 
 ## 2. Parameters
@@ -10,9 +10,9 @@ An operation claim\_reward\_balance\_operation is used to transfer previously co
 | Parameter name | Description | Example |                                                                                                                              
 | -------------- | ------------------------------------------------------------- | ------- |
 | account        | Account name                                                  |         |
-| reward\_hive   | The amount of Hive reward to be transferred to liquid balance |         |
-| reward\_hbd    | The amount of HBD reward to be transferred to liquid balance  |         |
-| reward\_vests  | The amount of HP reward to be transferred to vesting balance  |         |
+| reward\_pixa   | The amount of PIXA reward to be transferred to liquid balance |         |
+| reward\_pxs    | The amount of PXS reward to be transferred to liquid balance  |         |
+| reward\_vests  | The amount of PXP reward to be transferred to vesting balance  |         |
 
 
 ## 3. Authority
@@ -33,6 +33,6 @@ You need:
 
 After the operation:
 
-\- the reward is transferred to the user balance – the balance is increased by the transferred amount ( in HIVE, HBD or HP).
+\- the reward is transferred to the user balance – the balance is increased by the transferred amount ( in PIXA, PXS or PXP).
 
 \- RC cost is paid by { account }.

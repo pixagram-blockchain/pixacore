@@ -157,8 +157,8 @@ struct hf32_database_fixture : hardfork_database_fixture
   }
 };
 
-const asset pxs( int64_t satoshis ) { return asset( satoshis, HBD_SYMBOL ); }
-const asset pixa( int64_t satoshis ) { return asset( satoshis, HIVE_SYMBOL ); }
+const asset pxs( int64_t satoshis ) { return asset( satoshis, PXS_SYMBOL ); }
+const asset pixa( int64_t satoshis ) { return asset( satoshis, PIXA_SYMBOL ); }
 const fc::time_point_sec never = fc::time_point_sec::maximum();
 // a license as long as the format allows: 72 KiB of UTF-8, multi-byte characters included
 const std::string longest_license()
@@ -175,8 +175,8 @@ BOOST_FIXTURE_TEST_SUITE( hf32_tests, hf32_database_fixture )
 
 BOOST_AUTO_TEST_CASE( nothing_changes_before_the_hardfork )
 { try {
-  ACTORS( HIVE_asset( 1'000'000 ), (alice) );
-  fund( "alice", HBD_asset( 100'000 ) );
+  ACTORS( PIXA_asset( 1'000'000 ), (alice) );
+  fund( "alice", PXS_asset( 100'000 ) );
   post_comment( "alice", "art", "title", "body", "pixelart", alice_post_key );
   generate_block();
 
@@ -195,8 +195,8 @@ BOOST_AUTO_TEST_CASE( nothing_changes_before_the_hardfork )
 
 BOOST_AUTO_TEST_CASE( mint_rules )
 { try {
-  ACTORS( HIVE_asset( 1'000'000 ), (alice)(bob) );
-  fund( "alice", HBD_asset( 100'000 ) );
+  ACTORS( PIXA_asset( 1'000'000 ), (alice)(bob) );
+  fund( "alice", PXS_asset( 100'000 ) );
   post_comment( "alice", "art", "title", "body", "pixelart", alice_post_key );
   post_comment_to_comment( "bob", "reply", "title", "body", "alice", "art", bob_post_key );
   generate_block();
@@ -223,12 +223,12 @@ BOOST_AUTO_TEST_CASE( mint_rules )
 
   BOOST_TEST_MESSAGE( "--- minting burns the fee and creates the NFT; its copy gets no object yet" );
   const std::string license = "Terms of use\nThe holder may display this artwork.\n";
-  const HBD_asset fee = db->get_nft_mint_fee( 1 );
-  BOOST_REQUIRE( fee == HBD_asset( 1'000 ) ); // 1.000 PXS
-  const HBD_asset alice_before = get_hbd_balance( "alice" );
+  const PXS_asset fee = db->get_nft_mint_fee( 1 );
+  BOOST_REQUIRE( fee == PXS_asset( 1'000 ) ); // 1.000 PXS
+  const PXS_asset alice_before = get_pxs_balance( "alice" );
   push_transaction( mint( "alice", "art", 1000, license ), alice_private_key );
-  BOOST_REQUIRE( get_hbd_balance( "alice" ) == alice_before - fee );
-  BOOST_REQUIRE( get_hbd_balance( HIVE_NULL_ACCOUNT ) == fee );
+  BOOST_REQUIRE( get_pxs_balance( "alice" ) == alice_before - fee );
+  BOOST_REQUIRE( get_pxs_balance( HIVE_NULL_ACCOUNT ) == fee );
 
   const nft_object* nft = db->find_nft( account_name_type( "alice" ), "art" );
   BOOST_REQUIRE( nft != nullptr );
@@ -242,7 +242,7 @@ BOOST_AUTO_TEST_CASE( mint_rules )
   BOOST_REQUIRE_EQUAL( copy_objects(), 0u );
 
   generate_block(); // the null account is cleared at the end of the block: the fee is burned
-  BOOST_REQUIRE( get_hbd_balance( HIVE_NULL_ACCOUNT ) == HBD_asset( 0 ) );
+  BOOST_REQUIRE( get_pxs_balance( HIVE_NULL_ACCOUNT ) == PXS_asset( 0 ) );
 
   BOOST_TEST_MESSAGE( "--- a post is minted once" );
   HIVE_REQUIRE_ASSERT( push_transaction( mint( "alice", "art" ), alice_private_key ),
@@ -270,8 +270,8 @@ BOOST_AUTO_TEST_CASE( mint_rules )
 
 BOOST_AUTO_TEST_CASE( mint_fee_per_copy )
 { try {
-  ACTORS( HIVE_asset( 1'000'000 ), (alice) );
-  issue_funds( "alice", HBD_asset( 10'100'000 ) ); // 10,100 PXS
+  ACTORS( PIXA_asset( 1'000'000 ), (alice) );
+  issue_funds( "alice", PXS_asset( 10'100'000 ) ); // 10,100 PXS
   post_comment( "alice", "first", "title", "body", "pixelart", alice_post_key );
   generate_blocks( db->head_block_time() + HIVE_MIN_ROOT_COMMENT_INTERVAL + fc::seconds( HIVE_BLOCK_INTERVAL ) );
   post_comment( "alice", "second", "title", "body", "pixelart", alice_post_key );
@@ -279,10 +279,10 @@ BOOST_AUTO_TEST_CASE( mint_fee_per_copy )
   activate();
 
   BOOST_TEST_MESSAGE( "--- 1.000 PXS per copy, whatever the account creation fee" );
-  BOOST_REQUIRE( db->get_nft_mint_fee( 5 ) == HBD_asset( 5'000 ) );
-  BOOST_REQUIRE( db->get_nft_mint_fee( PIXA_NFT_MAX_EDITIONS ) == HBD_asset( 10'000'000 ) );
-  set_account_creation_fee( HIVE_asset( 35'000 ) );
-  BOOST_REQUIRE( db->get_nft_mint_fee( 5 ) == HBD_asset( 5'000 ) );
+  BOOST_REQUIRE( db->get_nft_mint_fee( 5 ) == PXS_asset( 5'000 ) );
+  BOOST_REQUIRE( db->get_nft_mint_fee( PIXA_NFT_MAX_EDITIONS ) == PXS_asset( 10'000'000 ) );
+  set_account_creation_fee( PIXA_asset( 35'000 ) );
+  BOOST_REQUIRE( db->get_nft_mint_fee( 5 ) == PXS_asset( 5'000 ) );
 
   BOOST_TEST_MESSAGE( "--- the fee has to be exactly the fee for that many copies" );
   {
@@ -296,16 +296,16 @@ BOOST_AUTO_TEST_CASE( mint_fee_per_copy )
   }
 
   BOOST_TEST_MESSAGE( "--- 10,000 copies: 10,000 PXS, burned, and still no copy object" );
-  const HBD_asset before = get_hbd_balance( "alice" );
+  const PXS_asset before = get_pxs_balance( "alice" );
   push_transaction( mint( "alice", "first", 0, "PIXA_LICENSE/1.0", PIXA_NFT_MAX_EDITIONS ), alice_private_key );
-  BOOST_REQUIRE( get_hbd_balance( "alice" ) == before - HBD_asset( 10'000'000 ) );
-  BOOST_REQUIRE( get_hbd_balance( HIVE_NULL_ACCOUNT ) == HBD_asset( 10'000'000 ) );
+  BOOST_REQUIRE( get_pxs_balance( "alice" ) == before - PXS_asset( 10'000'000 ) );
+  BOOST_REQUIRE( get_pxs_balance( HIVE_NULL_ACCOUNT ) == PXS_asset( 10'000'000 ) );
   BOOST_REQUIRE_EQUAL( copy_objects(), 0u );
   generate_block();
-  BOOST_REQUIRE( get_hbd_balance( HIVE_NULL_ACCOUNT ) == HBD_asset( 0 ) );
+  BOOST_REQUIRE( get_pxs_balance( HIVE_NULL_ACCOUNT ) == PXS_asset( 0 ) );
 
   BOOST_TEST_MESSAGE( "--- without the PXS for the fee nothing is minted" );
-  BOOST_REQUIRE( get_hbd_balance( "alice" ) < db->get_nft_mint_fee( 101 ) );
+  BOOST_REQUIRE( get_pxs_balance( "alice" ) < db->get_nft_mint_fee( 101 ) );
   HIVE_REQUIRE_THROW( push_transaction( mint( "alice", "second", 0, "PIXA_LICENSE/1.0", 101 ), alice_private_key ),
     fc::assert_exception );
   BOOST_REQUIRE( db->find_nft( account_name_type( "alice" ), "second" ) == nullptr );
@@ -314,10 +314,10 @@ BOOST_AUTO_TEST_CASE( mint_fee_per_copy )
 
 BOOST_AUTO_TEST_CASE( list_buy_and_royalty )
 { try {
-  ACTORS( HIVE_asset( 1'000'000 ), (alice)(bob)(carol) );
-  fund( "alice", HBD_asset( 100'000 ) );
-  fund( "bob", HBD_asset( 100'000 ) );
-  fund( "carol", HBD_asset( 100'000 ) );
+  ACTORS( PIXA_asset( 1'000'000 ), (alice)(bob)(carol) );
+  fund( "alice", PXS_asset( 100'000 ) );
+  fund( "bob", PXS_asset( 100'000 ) );
+  fund( "carol", PXS_asset( 100'000 ) );
   post_comment( "alice", "art", "title", "body", "pixelart", alice_post_key );
   generate_block();
   activate();
@@ -356,11 +356,11 @@ BOOST_AUTO_TEST_CASE( list_buy_and_royalty )
 
   BOOST_TEST_MESSAGE( "--- first sale, by the creator: no royalty" );
   {
-    const HBD_asset alice_before = get_hbd_balance( "alice" );
-    const HBD_asset bob_before = get_hbd_balance( "bob" );
+    const PXS_asset alice_before = get_pxs_balance( "alice" );
+    const PXS_asset bob_before = get_pxs_balance( "bob" );
     push_transaction( buy( "bob", "alice", "art", pxs( 50'000 ) ), bob_private_key );
-    BOOST_REQUIRE( get_hbd_balance( "bob" ) == bob_before - HBD_asset( 50'000 ) );
-    BOOST_REQUIRE( get_hbd_balance( "alice" ) == alice_before + HBD_asset( 50'000 ) );
+    BOOST_REQUIRE( get_pxs_balance( "bob" ) == bob_before - PXS_asset( 50'000 ) );
+    BOOST_REQUIRE( get_pxs_balance( "alice" ) == alice_before + PXS_asset( 50'000 ) );
     BOOST_REQUIRE( edition( "alice", "art" ).get_owner() == bob_id );
     BOOST_REQUIRE( !edition( "alice", "art" ).has_offer() );
 
@@ -378,15 +378,15 @@ BOOST_AUTO_TEST_CASE( list_buy_and_royalty )
     push_transaction( list( "bob", "alice", "art", pxs( 80'000 ) ), bob_private_key );
     push_transaction( list( "bob", "alice", "art", pxs( 75'000 ) ), bob_private_key ); // a new offer replaces the old one
     generate_block();
-    const HBD_asset alice_before = get_hbd_balance( "alice" );
-    const HBD_asset bob_before = get_hbd_balance( "bob" );
-    const HBD_asset carol_before = get_hbd_balance( "carol" );
+    const PXS_asset alice_before = get_pxs_balance( "alice" );
+    const PXS_asset bob_before = get_pxs_balance( "bob" );
+    const PXS_asset carol_before = get_pxs_balance( "carol" );
     HIVE_REQUIRE_ASSERT( push_transaction( buy( "carol", "alice", "art", pxs( 80'000 ) ), carol_private_key ),
       "a.price == copy->get_price() && \"nft_buy_price\"" );
     push_transaction( buy( "carol", "alice", "art", pxs( 75'000 ) ), carol_private_key );
-    BOOST_REQUIRE( get_hbd_balance( "carol" ) == carol_before - HBD_asset( 75'000 ) );
-    BOOST_REQUIRE( get_hbd_balance( "alice" ) == alice_before + HBD_asset( 7'500 ) );
-    BOOST_REQUIRE( get_hbd_balance( "bob" ) == bob_before + HBD_asset( 67'500 ) );
+    BOOST_REQUIRE( get_pxs_balance( "carol" ) == carol_before - PXS_asset( 75'000 ) );
+    BOOST_REQUIRE( get_pxs_balance( "alice" ) == alice_before + PXS_asset( 7'500 ) );
+    BOOST_REQUIRE( get_pxs_balance( "bob" ) == bob_before + PXS_asset( 67'500 ) );
     BOOST_REQUIRE( edition( "alice", "art" ).get_owner() == carol_id );
 
     const auto sold = last_operation< nft_sold_operation >();
@@ -403,11 +403,11 @@ BOOST_AUTO_TEST_CASE( list_buy_and_royalty )
   {
     push_transaction( list( "carol", "alice", "art", pxs( 9 ) ), carol_private_key ); // 0.009 PXS, 10% = 0.0009
     generate_block();
-    const HBD_asset alice_before = get_hbd_balance( "alice" );
-    const HBD_asset carol_before = get_hbd_balance( "carol" );
+    const PXS_asset alice_before = get_pxs_balance( "alice" );
+    const PXS_asset carol_before = get_pxs_balance( "carol" );
     push_transaction( buy( "bob", "alice", "art", pxs( 9 ) ), bob_private_key );
-    BOOST_REQUIRE( get_hbd_balance( "alice" ) == alice_before );
-    BOOST_REQUIRE( get_hbd_balance( "carol" ) == carol_before + HBD_asset( 9 ) );
+    BOOST_REQUIRE( get_pxs_balance( "alice" ) == alice_before );
+    BOOST_REQUIRE( get_pxs_balance( "carol" ) == carol_before + PXS_asset( 9 ) );
     BOOST_REQUIRE( !last_operation< nft_royalty_operation >().valid() );
   }
 
@@ -424,9 +424,9 @@ BOOST_AUTO_TEST_CASE( list_buy_and_royalty )
 
 BOOST_AUTO_TEST_CASE( offer_expiration_and_unlist )
 { try {
-  ACTORS( HIVE_asset( 1'000'000 ), (alice)(bob) );
-  fund( "alice", HBD_asset( 100'000 ) );
-  fund( "bob", HBD_asset( 100'000 ) );
+  ACTORS( PIXA_asset( 1'000'000 ), (alice)(bob) );
+  fund( "alice", PXS_asset( 100'000 ) );
+  fund( "bob", PXS_asset( 100'000 ) );
   post_comment( "alice", "art", "title", "body", "pixelart", alice_post_key );
   generate_block();
   activate();
@@ -464,10 +464,10 @@ BOOST_AUTO_TEST_CASE( offer_expiration_and_unlist )
 
 BOOST_AUTO_TEST_CASE( ten_thousand_copies )
 { try {
-  ACTORS( HIVE_asset( 1'000'000 ), (alice)(bob)(carol) );
-  issue_funds( "alice", HBD_asset( 10'100'000 ) );
-  fund( "bob", HBD_asset( 100'000 ) );
-  fund( "carol", HBD_asset( 100'000 ) );
+  ACTORS( PIXA_asset( 1'000'000 ), (alice)(bob)(carol) );
+  issue_funds( "alice", PXS_asset( 10'100'000 ) );
+  fund( "bob", PXS_asset( 100'000 ) );
+  fund( "carol", PXS_asset( 100'000 ) );
   post_comment( "alice", "series", "title", "body", "pixelart", alice_post_key );
   generate_block();
   activate();
@@ -515,9 +515,9 @@ BOOST_AUTO_TEST_CASE( ten_thousand_copies )
 
 BOOST_AUTO_TEST_CASE( transfer_rules )
 { try {
-  ACTORS( HIVE_asset( 1'000'000 ), (alice)(bob)(carol) );
-  fund( "alice", HBD_asset( 100'000 ) );
-  fund( "carol", HBD_asset( 100'000 ) );
+  ACTORS( PIXA_asset( 1'000'000 ), (alice)(bob)(carol) );
+  fund( "alice", PXS_asset( 100'000 ) );
+  fund( "carol", PXS_asset( 100'000 ) );
   post_comment( "alice", "art", "title", "body", "pixelart", alice_post_key );
   generate_block();
   activate();
@@ -535,11 +535,11 @@ BOOST_AUTO_TEST_CASE( transfer_rules )
     "edition >= 1 && edition <= nft.get_editions() && \"nft_edition_exists\"" );
 
   BOOST_TEST_MESSAGE( "--- a gift: no payment, so no royalty, and the offer ends" );
-  const HBD_asset alice_before = get_hbd_balance( "alice" );
+  const PXS_asset alice_before = get_pxs_balance( "alice" );
   push_transaction( give( "alice", "alice", "art", "bob" ), alice_private_key );
   BOOST_REQUIRE( edition( "alice", "art" ).get_owner() == bob_id );
   BOOST_REQUIRE( !edition( "alice", "art" ).has_offer() ); // the offer of the previous owner ended
-  BOOST_REQUIRE( get_hbd_balance( "alice" ) == alice_before ); // a gift pays nobody
+  BOOST_REQUIRE( get_pxs_balance( "alice" ) == alice_before ); // a gift pays nobody
   HIVE_REQUIRE_ASSERT( push_transaction( buy( "carol", "alice", "art", pxs( 5'000 ) ), carol_private_key ),
     "copy != nullptr && copy->is_listed( _now ) && \"nft_buy_listed\"" );
   generate_block();
@@ -570,10 +570,10 @@ BOOST_AUTO_TEST_CASE( transfer_rules )
 
 BOOST_AUTO_TEST_CASE( reserve_offer )
 { try {
-  ACTORS( HIVE_asset( 1'000'000 ), (alice)(bob)(carol) );
-  fund( "alice", HBD_asset( 100'000 ) );
-  fund( "bob", HBD_asset( 100'000 ) );
-  fund( "carol", HBD_asset( 100'000 ) );
+  ACTORS( PIXA_asset( 1'000'000 ), (alice)(bob)(carol) );
+  fund( "alice", PXS_asset( 100'000 ) );
+  fund( "bob", PXS_asset( 100'000 ) );
+  fund( "carol", PXS_asset( 100'000 ) );
   post_comment( "alice", "art", "title", "body", "pixelart", alice_post_key );
   generate_block();
   activate();
@@ -619,11 +619,11 @@ BOOST_AUTO_TEST_CASE( reserve_offer )
 
   BOOST_TEST_MESSAGE( "--- each buyer gets the lowest-numbered copy of the reserve; the creator gets the whole price" );
   {
-    const HBD_asset alice_before = get_hbd_balance( "alice" );
-    const HBD_asset bob_before = get_hbd_balance( "bob" );
+    const PXS_asset alice_before = get_pxs_balance( "alice" );
+    const PXS_asset bob_before = get_pxs_balance( "bob" );
     push_transaction( buy( "bob", "alice", "art", pxs( 5'000 ), 0 ), bob_private_key );
-    BOOST_REQUIRE( get_hbd_balance( "bob" ) == bob_before - HBD_asset( 5'000 ) );
-    BOOST_REQUIRE( get_hbd_balance( "alice" ) == alice_before + HBD_asset( 5'000 ) ); // no royalty to herself
+    BOOST_REQUIRE( get_pxs_balance( "bob" ) == bob_before - PXS_asset( 5'000 ) );
+    BOOST_REQUIRE( get_pxs_balance( "alice" ) == alice_before + PXS_asset( 5'000 ) ); // no royalty to herself
     BOOST_REQUIRE( edition( "alice", "art", 1 ).get_owner() == bob_id );
     BOOST_REQUIRE( edition( "alice", "art", 1 ).has_left_creator() );
     BOOST_REQUIRE( edition( "alice", "art", 1 ).get_acquired() == db->head_block_time() );
@@ -702,19 +702,19 @@ BOOST_AUTO_TEST_CASE( reserve_offer )
   push_transaction( list( "bob", "alice", "art", pxs( 20'000 ), never, 4 ), bob_private_key );
   generate_block();
   {
-    const HBD_asset alice_before = get_hbd_balance( "alice" );
+    const PXS_asset alice_before = get_pxs_balance( "alice" );
     push_transaction( buy( "carol", "alice", "art", pxs( 20'000 ), 4 ), carol_private_key );
-    BOOST_REQUIRE( get_hbd_balance( "alice" ) == alice_before + HBD_asset( 2'000 ) );
+    BOOST_REQUIRE( get_pxs_balance( "alice" ) == alice_before + PXS_asset( 2'000 ) );
   }
   validate_database();
 } FC_LOG_AND_RETHROW() }
 
 BOOST_AUTO_TEST_CASE( voting_bar )
 { try {
-  ACTORS( HIVE_asset( 1'000'000 ), (alice)(bob)(carol)(dave)(eve) );
-  vest( "alice", HIVE_asset( 1'000'000 ) );
-  vest( "bob", HIVE_asset( 1'000'000 ) );
-  vest( "eve", HIVE_asset( 1'000'000 ) );
+  ACTORS( PIXA_asset( 1'000'000 ), (alice)(bob)(carol)(dave)(eve) );
+  vest( "alice", PIXA_asset( 1'000'000 ) );
+  vest( "bob", PIXA_asset( 1'000'000 ) );
+  vest( "eve", PIXA_asset( 1'000'000 ) );
   post_comment( "carol", "one", "title", "body", "pixelart", carol_post_key );
   post_comment( "dave", "two", "title", "body", "pixelart", dave_post_key );
   post_comment( "eve", "three", "title", "body", "pixelart", eve_post_key );
@@ -889,7 +889,7 @@ BOOST_AUTO_TEST_CASE( wire_format )
   action.permlink = "art";
   action.royalty = 1000;
   action.license = "PIXA_LICENSE/1.0";
-  action.fee = asset( 1'000, HBD_SYMBOL );
+  action.fee = asset( 1'000, PXS_SYMBOL );
   nft_operation minted;
   minted.account = "alice";
   minted.action = action;
@@ -902,7 +902,7 @@ BOOST_AUTO_TEST_CASE( wire_format )
   fc::raw::unpack_from_vector( packed, unpacked );
   BOOST_REQUIRE( unpacked.which() == operation::tag< nft_operation >::value );
   BOOST_REQUIRE_EQUAL( unpacked.get< nft_operation >().account, "alice" );
-  BOOST_REQUIRE( unpacked.get< nft_operation >().action.get< nft_mint >().fee == asset( 1'000, HBD_SYMBOL ) );
+  BOOST_REQUIRE( unpacked.get< nft_operation >().action.get< nft_mint >().fee == asset( 1'000, PXS_SYMBOL ) );
   BOOST_REQUIRE( fc::raw::pack_to_vector( unpacked ) == packed );
 
   BOOST_TEST_MESSAGE( "--- JSON: {type, value} at both levels, as indexers read it" );
@@ -919,7 +919,7 @@ BOOST_AUTO_TEST_CASE( wire_format )
   operation_validate( op );
   {
     nft_operation bad = minted;
-    bad.action.get< nft_mint >().fee = asset( 1'000, HIVE_SYMBOL ); // the fee is paid in PXS
+    bad.action.get< nft_mint >().fee = asset( 1'000, PIXA_SYMBOL ); // the fee is paid in PXS
     HIVE_REQUIRE_THROW( bad.validate(), fc::assert_exception );
     bad = minted;
     bad.action.get< nft_mint >().editions = 0;
@@ -937,13 +937,13 @@ BOOST_AUTO_TEST_CASE( wire_format )
     nft_list offer;
     offer.author = "alice";
     offer.permlink = "art";
-    offer.price = asset( 0, HBD_SYMBOL ); // an offer needs a price
+    offer.price = asset( 0, PXS_SYMBOL ); // an offer needs a price
     bad.action = offer;
     HIVE_REQUIRE_THROW( bad.validate(), fc::assert_exception );
     offer.price = asset( 1'000'000, VESTS_SYMBOL );
     bad.action = offer;
     HIVE_REQUIRE_THROW( bad.validate(), fc::assert_exception );
-    offer.price = asset( 1'000, HIVE_SYMBOL ); // the format takes PIXA; consensus takes PXS only (list_buy_and_royalty)
+    offer.price = asset( 1'000, PIXA_SYMBOL ); // the format takes PIXA; consensus takes PXS only (list_buy_and_royalty)
     bad.action = offer;
     bad.validate();
     offer.edition = 0; // 0 is the reserve: it can be offered, withdrawn and bought
@@ -965,7 +965,7 @@ BOOST_AUTO_TEST_CASE( wire_format )
     purchase.author = "alice";
     purchase.permlink = "art";
     purchase.edition = 0;
-    purchase.price = asset( 1'000, HBD_SYMBOL );
+    purchase.price = asset( 1'000, PXS_SYMBOL );
     bad.account = "bob";
     bad.action = purchase;
     bad.validate();
