@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( plugin_object_checksum )
   BOOST_CHECK_EQUAL( get_decoded_type_checksum<hive::plugins::metadata::account_metadata_object>(dtds), "55cadd90e77ed413f6536756f6708632a53a818e" );
   BOOST_CHECK_EQUAL( get_decoded_type_checksum<hive::plugins::transaction_status::transaction_status_object>(dtds), "cb9ceb3c9d94912d0e5326d6ebfcd6110bd9c953" );
 
-  BOOST_CHECK_EQUAL( get_decoded_type_checksum<hive::plugins::market_history::bucket_object>(dtds), "fc8f56ad056d2594e97aac6e7e618007a1bfecfb" );
+  BOOST_CHECK_EQUAL( get_decoded_type_checksum<hive::plugins::market_history::bucket_object>(dtds), "1fa2f68455c6f3f177a93da0ffe79850d922a8ca" );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
