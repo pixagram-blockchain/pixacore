@@ -12,6 +12,7 @@
 #include <hive/chain/detail/state/witness_objects_multiindex.hpp>
 #include <hive/chain/rc/resource_count.hpp>
 #include <hive/chain/rc/resource_sizes.hpp>
+#include <hive/plugins/account_history_rocksdb/account_history_rocksdb_objects_multiindex.hpp>
 #include <hive/protocol/forward_impacted.hpp>
 
 #include <fc/crypto/sha256.hpp>
@@ -146,13 +147,19 @@ struct hf32_database_fixture : hardfork_database_fixture
     return db->get_index< nft_edition_index, by_id >().size();
   }
 
-  // the most recent operation of given type among the last few applied ones
+  // the most recent operation of given type in the head block. The history plugin records the
+  // operations of a transaction when its block is applied, not when the transaction is pushed, so
+  // generate the block first.
   template< typename Op >
   fc::optional< Op > last_operation()
   {
-    for( const operation& op : get_last_operations( 6 ) )
+    const auto& ops = db->get_index< hive::plugins::account_history_rocksdb::volatile_operation_index, by_id >();
+    for( auto it = ops.rbegin(); it != ops.rend() && it->block == db->head_block_num(); ++it )
+    {
+      operation op = fc::raw::unpack_from_buffer< operation >( it->serialized_op );
       if( op.which() == operation::tag< Op >::value )
         return op.get< Op >();
+    }
     return fc::optional< Op >();
   }
 };
@@ -364,6 +371,7 @@ BOOST_AUTO_TEST_CASE( list_buy_and_royalty )
     BOOST_REQUIRE( edition( "alice", "art" ).get_owner() == bob_id );
     BOOST_REQUIRE( !edition( "alice", "art" ).has_offer() );
 
+    generate_block();
     const auto sold = last_operation< nft_sold_operation >();
     BOOST_REQUIRE( sold.valid() );
     BOOST_REQUIRE_EQUAL( sold->seller, "alice" );
@@ -371,7 +379,6 @@ BOOST_AUTO_TEST_CASE( list_buy_and_royalty )
     BOOST_REQUIRE( sold->price == pxs( 50'000 ) && sold->royalty == pxs( 0 ) );
     BOOST_REQUIRE( !last_operation< nft_royalty_operation >().valid() );
   }
-  generate_block();
 
   BOOST_TEST_MESSAGE( "--- resale: the creator is paid the royalty fixed at mint" );
   {
@@ -389,6 +396,7 @@ BOOST_AUTO_TEST_CASE( list_buy_and_royalty )
     BOOST_REQUIRE( get_pxs_balance( "bob" ) == bob_before + PXS_asset( 67'500 ) );
     BOOST_REQUIRE( edition( "alice", "art" ).get_owner() == carol_id );
 
+    generate_block();
     const auto sold = last_operation< nft_sold_operation >();
     const auto royalty = last_operation< nft_royalty_operation >();
     BOOST_REQUIRE( sold.valid() && royalty.valid() );
@@ -397,7 +405,6 @@ BOOST_AUTO_TEST_CASE( list_buy_and_royalty )
     BOOST_REQUIRE_EQUAL( royalty->seller, "bob" );
     BOOST_REQUIRE( royalty->royalty == pxs( 7'500 ) );
   }
-  generate_block();
 
   BOOST_TEST_MESSAGE( "--- the royalty is rounded down; a sale too small for one pays none" );
   {
@@ -408,6 +415,8 @@ BOOST_AUTO_TEST_CASE( list_buy_and_royalty )
     push_transaction( buy( "bob", "alice", "art", pxs( 9 ) ), bob_private_key );
     BOOST_REQUIRE( get_pxs_balance( "alice" ) == alice_before );
     BOOST_REQUIRE( get_pxs_balance( "carol" ) == carol_before + PXS_asset( 9 ) );
+    generate_block();
+    BOOST_REQUIRE( last_operation< nft_sold_operation >().valid() );
     BOOST_REQUIRE( !last_operation< nft_royalty_operation >().valid() );
   }
 
@@ -629,6 +638,7 @@ BOOST_AUTO_TEST_CASE( reserve_offer )
     BOOST_REQUIRE( edition( "alice", "art", 1 ).get_acquired() == db->head_block_time() );
     BOOST_REQUIRE_EQUAL( nft.get_reserve(), 3 );
 
+    generate_block();
     const auto sold = last_operation< nft_sold_operation >();
     BOOST_REQUIRE( sold.valid() );
     BOOST_REQUIRE_EQUAL( sold->seller, "alice" );
@@ -712,6 +722,7 @@ BOOST_AUTO_TEST_CASE( reserve_offer )
 BOOST_AUTO_TEST_CASE( voting_bar )
 { try {
   ACTORS( PIXA_asset( 1'000'000 ), (alice)(bob)(carol)(dave)(eve) );
+  generate_block(); // the same vesting transfers as ACTORS made would be duplicate transactions in its block
   vest( "alice", PIXA_asset( 1'000'000 ) );
   vest( "bob", PIXA_asset( 1'000'000 ) );
   vest( "eve", PIXA_asset( 1'000'000 ) );
